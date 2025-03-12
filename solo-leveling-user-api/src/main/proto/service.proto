@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package com.sleepkqq.sololeveling.user.api;
+
+import "validate/validate.proto"; // Импорт PGV
+
+option java_multiple_files = true;
+option java_package = "com.sleepkqq.sololeveling.user.api";
+option java_outer_classname = "UserProto";
+
+service UserService {
+  rpc getUserInfo (GetUserInfoRequest) returns (GetUserInfoResponse);
+  rpc SaveUser (SaveUserRequest) returns (SaveUserResponse);
+}
+
+// Валидация для GetUserInfoRequest
+message GetUserInfoRequest {
+  int64 id = 1 [(validate.rules).int64.gt = 0]; // id должен быть больше 0
+}
+
+enum UserRole {
+  USER = 0;
+  ADMIN = 1;
+}
+
+// Валидация для UserInfo
+message UserInfo {
+  int64 id = 1 [(validate.rules).int64.gt = 0]; // id должен быть больше 0
+  string username = 2 [(validate.rules).string = {
+    min_len: 1, // username не должен быть пустым
+    max_len: 50 // username не должен быть длиннее 50 символов
+  }];
+  string firstName = 3 [(validate.rules).string = {
+    min_len: 1, // firstName не должен быть пустым
+    max_len: 50 // firstName не должен быть длиннее 50 символов
+  }];
+  string lastName = 4 [(validate.rules).string = {
+    min_len: 1, // lastName не должен быть пустым
+    max_len: 50 // lastName не должен быть длиннее 50 символов
+  }];
+  string photoUrl = 5 [(validate.rules).string.uri = true]; // photoUrl должен быть валидным URL
+  string locale = 6 [(validate.rules).string = {
+    pattern: "^[a-z]{2}(-[A-Z]{2})?$" // locale должен соответствовать формату (например, "en" или "en-US")
+  }];
+  UserRole role = 7 [(validate.rules).enum = {
+    defined_only: true // role должен быть одним из определённых значений (USER или ADMIN)
+  }];
+}
+
+// Валидация для GetUserInfoResponse
+message GetUserInfoResponse {
+  UserInfo userInfo = 1 [(validate.rules).message.required = true]; // userInfo обязателен
+  bool success = 2;
+}
+
+// Валидация для SaveUserRequest
+message SaveUserRequest {
+  UserInfo userInfo = 1 [(validate.rules).message.required = true]; // userInfo обязателен
+}
+
+// Валидация для SaveUserResponse
+message SaveUserResponse {
+  bool success = 1;
+}
