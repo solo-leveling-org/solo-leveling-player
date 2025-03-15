@@ -1,15 +1,14 @@
 package com.sleepkqq.sololeveling.user.service.api;
 
-import static java.util.Objects.requireNonNull;
 
-import com.sleepkqq.sololeveling.user.api.GetUserInfoRequest;
-import com.sleepkqq.sololeveling.user.api.GetUserInfoResponse;
-import com.sleepkqq.sololeveling.user.api.SaveUserRequest;
-import com.sleepkqq.sololeveling.user.api.SaveUserResponse;
-import com.sleepkqq.sololeveling.user.api.UserInfo;
-import com.sleepkqq.sololeveling.user.api.UserServiceGrpc.UserServiceImplBase;
+import com.sleepkqq.sololeveling.proto.user.GetUserInfoRequest;
+import com.sleepkqq.sololeveling.proto.user.GetUserInfoResponse;
+import com.sleepkqq.sololeveling.proto.user.SaveUserRequest;
+import com.sleepkqq.sololeveling.proto.user.SaveUserResponse;
+import com.sleepkqq.sololeveling.proto.user.UserInfo;
+import com.sleepkqq.sololeveling.proto.user.UserServiceGrpc.UserServiceImplBase;
+import com.sleepkqq.sololeveling.user.service.mapper.DtoMapper;
 import com.sleepkqq.sololeveling.user.service.model.User;
-import com.sleepkqq.sololeveling.user.service.model.UserRole;
 import com.sleepkqq.sololeveling.user.service.service.UserService;
 import io.grpc.stub.StreamObserver;
 import java.time.LocalDateTime;
@@ -24,6 +23,7 @@ import net.devh.boot.grpc.server.service.GrpcService;
 public class UserApi extends UserServiceImplBase {
 
   private final UserService userService;
+  private final DtoMapper dtoMapper;
 
   @Override
   public void getUserInfo(
@@ -41,7 +41,7 @@ public class UserApi extends UserServiceImplBase {
               .setLastName(user.getLastName())
               .setPhotoUrl(user.getPhotoUrl())
               .setLocale(user.getLocale().toLanguageTag())
-              .setRole(user.getRole().toApi())
+              .addAllRole(dtoMapper.mapCollection(user.getRoles(), dtoMapper::map))
               .build()
           );
     } catch (Exception e) {
@@ -65,7 +65,7 @@ public class UserApi extends UserServiceImplBase {
           .lastName(userInfo.getLastName())
           .photoUrl(userInfo.getPhotoUrl())
           .locale(Locale.forLanguageTag(userInfo.getLocale()))
-          .role(UserRole.fromApi(userInfo.getRole()))
+          .roles(dtoMapper.mapCollection(userInfo.getRoleList(), dtoMapper::map))
           .lastLoginAt(LocalDateTime.now())
           .build());
     } catch (Exception e) {

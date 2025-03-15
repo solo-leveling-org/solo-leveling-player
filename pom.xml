@@ -15,9 +15,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>solo-leveling-user-api</module>
 		<module>solo-leveling-user-service</module>
-		<module>solo-leveling-user-kafka</module>
 		<module>solo-leveling-user-dto</module>
 	</modules>
 

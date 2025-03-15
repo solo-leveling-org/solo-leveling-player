@@ -50,15 +50,16 @@
       <groupId>com.sleepkqq</groupId>
       <artifactId>solo-leveling-user-dto</artifactId>
       <version>1.0.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.sleepkqq</groupId>
-      <artifactId>solo-leveling-user-api</artifactId>
+      <artifactId>solo-leveling-proto</artifactId>
       <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.sleepkqq</groupId>
-      <artifactId>solo-leveling-user-kafka</artifactId>
+      <artifactId>solo-leveling-avro</artifactId>
       <version>1.0.0</version>
     </dependency>
 

@@ -24,11 +24,11 @@ public final class UserData implements UserDetails {
 
   private final Locale locale;
 
-  private final UserRole role;
+  private final Set<UserRole> roles;
 
   @Override
   public Collection<UserRole> getAuthorities() {
-    return Set.of(role);
+    return roles;
   }
 
   @Override
@@ -47,7 +47,7 @@ public final class UserData implements UserDetails {
             .filter("ru"::equalsIgnoreCase)
             .map(Locale::forLanguageTag)
             .orElse(Locale.ENGLISH),
-        UserRole.USER
+        Set.of(UserRole.USER)
     );
   }
 }
