@@ -16,7 +16,6 @@
 
 	<modules>
 		<module>solo-leveling-user-service</module>
-		<module>solo-leveling-user-dto</module>
 	</modules>
 
 	<properties>
@@ -47,5 +46,4 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-
 </project>

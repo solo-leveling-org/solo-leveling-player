@@ -17,3 +17,6 @@ spring:
     open-in-view: false
     properties:
       hibernate.transaction.jta.platform: none
+grpc:
+  server:
+    port: 9091

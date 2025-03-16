@@ -3,16 +3,14 @@ package com.sleepkqq.sololeveling.user.service.api;
 
 import com.sleepkqq.sololeveling.proto.user.GetUserInfoRequest;
 import com.sleepkqq.sololeveling.proto.user.GetUserInfoResponse;
+import com.sleepkqq.sololeveling.proto.user.GetUserTasksRequest;
+import com.sleepkqq.sololeveling.proto.user.GetUserTasksResponse;
 import com.sleepkqq.sololeveling.proto.user.SaveUserRequest;
 import com.sleepkqq.sololeveling.proto.user.SaveUserResponse;
-import com.sleepkqq.sololeveling.proto.user.UserInfo;
 import com.sleepkqq.sololeveling.proto.user.UserServiceGrpc.UserServiceImplBase;
 import com.sleepkqq.sololeveling.user.service.mapper.DtoMapper;
-import com.sleepkqq.sololeveling.user.service.model.User;
 import com.sleepkqq.sololeveling.user.service.service.UserService;
 import io.grpc.stub.StreamObserver;
-import java.time.LocalDateTime;
-import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -30,20 +28,10 @@ public class UserApi extends UserServiceImplBase {
       GetUserInfoRequest request,
       StreamObserver<GetUserInfoResponse> responseObserver
   ) {
-    var response = GetUserInfoResponse.newBuilder();
+    var response = GetUserInfoResponse.newBuilder().setSuccess(true);
     try {
-      var user = userService.getById(request.getId());
-      response.setSuccess(true)
-          .setUserInfo(UserInfo.newBuilder()
-              .setId(user.getId())
-              .setUsername(user.getUsername())
-              .setFirstName(user.getFirstName())
-              .setLastName(user.getLastName())
-              .setPhotoUrl(user.getPhotoUrl())
-              .setLocale(user.getLocale().toLanguageTag())
-              .addAllRole(dtoMapper.mapCollection(user.getRoles(), dtoMapper::map))
-              .build()
-          );
+      var user = userService.get(request.getId());
+      response.setUserInfo(dtoMapper.map(user));
     } catch (Exception e) {
       log.error("getUserInfo error", e);
       response.setSuccess(false);
@@ -58,18 +46,25 @@ public class UserApi extends UserServiceImplBase {
     var userInfo = request.getUserInfo();
     var response = SaveUserResponse.newBuilder().setSuccess(true);
     try {
-      userService.save(User.builder()
-          .id(userInfo.getId())
-          .username(userInfo.getUsername())
-          .firstName(userInfo.getFirstName())
-          .lastName(userInfo.getLastName())
-          .photoUrl(userInfo.getPhotoUrl())
-          .locale(Locale.forLanguageTag(userInfo.getLocale()))
-          .roles(dtoMapper.mapCollection(userInfo.getRoleList(), dtoMapper::map))
-          .lastLoginAt(LocalDateTime.now())
-          .build());
+      userService.createOrUpdate(dtoMapper.map(userInfo));
     } catch (Exception e) {
       log.error("saveUser error", e);
+      response.setSuccess(false);
+    }
+
+    responseObserver.onNext(response.build());
+    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void getUserTasks(GetUserTasksRequest request,
+      StreamObserver<GetUserTasksResponse> responseObserver) {
+    var response = GetUserTasksResponse.newBuilder().setSuccess(true);
+    try {
+      var userTasks = userService.getUserTasks(request.getId());
+      response.setUserTasks(dtoMapper.map(userTasks));
+    } catch (Exception e) {
+      log.error("getUserTasks error", e);
       response.setSuccess(false);
     }
 
