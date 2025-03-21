@@ -1,6 +1,8 @@
 package com.sleepkqq.sololeveling.user.service.kafka;
 
-import com.sleepkqq.sololeveling.avro.task.GetNewTasksEvent;
+import static com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics.GENERATE_TASKS_TOPIC;
+
+import com.sleepkqq.sololeveling.avro.task.GenerateTasksEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -11,12 +13,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class GenerateTasksProducer {
 
-  private static final String TOPIC = "get-tasks";
+  private final KafkaTemplate<String, GenerateTasksEvent> kafkaTemplate;
 
-  private final KafkaTemplate<String, GetNewTasksEvent> kafkaTemplate;
-
-  public void getNewTasks(GetNewTasksEvent event) {
-    kafkaTemplate.send(TOPIC, event);
-    log.info("<< Get new tasks event sent | transactionId={}", event.getTransactionId());
+  public void send(GenerateTasksEvent event) {
+    kafkaTemplate.send(GENERATE_TASKS_TOPIC, event);
+    log.info("<< Generate tasks event sent | transactionId={}", event.getTransactionId());
   }
 }

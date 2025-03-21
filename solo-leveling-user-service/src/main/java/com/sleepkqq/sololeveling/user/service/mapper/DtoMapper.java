@@ -1,9 +1,13 @@
 package com.sleepkqq.sololeveling.user.service.mapper;
 
+import com.google.protobuf.Timestamp;
 import com.sleepkqq.sololeveling.proto.user.UserInfo;
 import com.sleepkqq.sololeveling.user.service.model.User;
-import com.sleepkqq.sololeveling.user.service.model.UserTasks;
+import com.sleepkqq.sololeveling.user.service.model.PlayerTask;
+import com.sleepkqq.sololeveling.user.service.model.Player;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -44,23 +48,19 @@ public class DtoMapper {
         .build();
   }
 
-  public UserTasks map(com.sleepkqq.sololeveling.proto.user.UserTasks userTasks) {
-    return UserTasks.builder()
+  public Player map(com.sleepkqq.sololeveling.proto.user.UserTasks userTasks) {
+    return Player.builder()
         .id(userTasks.getId())
-        .currentTasks(mapCollection(userTasks.getCurrentTasksList(), this::map))
-        .completedTasks(mapCollection(userTasks.getCompletedTasksList(), this::map))
-        .skippedTasks(mapCollection(userTasks.getSkippedTasksList(), this::map))
+        .taskTopics(userTasks.getTaskTopicList())
         .maxTasks(userTasks.getMaxTasks())
         .build();
   }
 
-  public com.sleepkqq.sololeveling.proto.user.UserTasks map(UserTasks userTasks) {
+  public com.sleepkqq.sololeveling.proto.user.UserTasks map(Player player) {
     return com.sleepkqq.sololeveling.proto.user.UserTasks.newBuilder()
-        .setId(userTasks.getId())
-        .addAllCurrentTasks(mapCollection(userTasks.getCurrentTasks(), this::map))
-        .addAllCompletedTasks(mapCollection(userTasks.getCompletedTasks(), this::map))
-        .addAllSkippedTasks(mapCollection(userTasks.getSkippedTasks(), this::map))
-        .setMaxTasks(userTasks.getMaxTasks())
+        .setId(player.getId())
+        .addAllTaskTopic(player.getTaskTopics())
+        .setMaxTasks(player.getMaxTasks())
         .build();
   }
 
@@ -70,5 +70,36 @@ public class DtoMapper {
 
   public String map(UUID uuid) {
     return uuid.toString();
+  }
+
+  public PlayerTask map(com.sleepkqq.sololeveling.proto.user.UserTaskInfo userTaskInfo) {
+    return PlayerTask.builder()
+        .id(map(userTaskInfo.getId()))
+        .status(userTaskInfo.getStatus())
+        .createdAt(map(userTaskInfo.getCreatedAt()))
+        .closedAt(map(userTaskInfo.getClosedAt()))
+        .build();
+  }
+
+  public com.sleepkqq.sololeveling.proto.user.UserTaskInfo map(PlayerTask playerTask) {
+    return com.sleepkqq.sololeveling.proto.user.UserTaskInfo.newBuilder()
+        .setId(map(playerTask.getId()))
+        .setStatus(playerTask.getStatus())
+        .setCreatedAt(map(playerTask.getCreatedAt()))
+        .setClosedAt(map(playerTask.getClosedAt()))
+        .build();
+  }
+
+  public LocalDateTime map(Timestamp timestamp) {
+    var instant = Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos());
+    return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+  }
+
+  public Timestamp map(LocalDateTime localDateTime) {
+    var instant = localDateTime.toInstant(ZoneOffset.UTC);
+    return Timestamp.newBuilder()
+        .setSeconds(instant.getEpochSecond())
+        .setNanos(instant.getNano())
+        .build();
   }
 }

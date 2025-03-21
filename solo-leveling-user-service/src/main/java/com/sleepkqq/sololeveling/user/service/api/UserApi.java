@@ -1,6 +1,8 @@
 package com.sleepkqq.sololeveling.user.service.api;
 
 
+import com.sleepkqq.sololeveling.proto.user.GetCurrentTasksRequest;
+import com.sleepkqq.sololeveling.proto.user.GetCurrentTasksResponse;
 import com.sleepkqq.sololeveling.proto.user.GetUserInfoRequest;
 import com.sleepkqq.sololeveling.proto.user.GetUserInfoResponse;
 import com.sleepkqq.sololeveling.proto.user.GetUserTasksRequest;
@@ -57,14 +59,34 @@ public class UserApi extends UserServiceImplBase {
   }
 
   @Override
-  public void getUserTasks(GetUserTasksRequest request,
-      StreamObserver<GetUserTasksResponse> responseObserver) {
+  public void getUserTasks(
+      GetUserTasksRequest request,
+      StreamObserver<GetUserTasksResponse> responseObserver
+  ) {
     var response = GetUserTasksResponse.newBuilder().setSuccess(true);
     try {
       var userTasks = userService.getUserTasks(request.getId());
       response.setUserTasks(dtoMapper.map(userTasks));
     } catch (Exception e) {
       log.error("getUserTasks error", e);
+      response.setSuccess(false);
+    }
+
+    responseObserver.onNext(response.build());
+    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void getCurrentTasks(
+      GetCurrentTasksRequest request,
+      StreamObserver<GetCurrentTasksResponse> responseObserver
+  ) {
+    var response = GetCurrentTasksResponse.newBuilder().setSuccess(true);
+    try {
+      var currentUserTasks = userService.getCurrentTasks(request.getId());
+      response.addAllCurrentTask(dtoMapper.mapCollection(currentUserTasks, dtoMapper::map));
+    } catch (Exception e) {
+      log.error("getCurrentUserTasks error", e);
       response.setSuccess(false);
     }
 

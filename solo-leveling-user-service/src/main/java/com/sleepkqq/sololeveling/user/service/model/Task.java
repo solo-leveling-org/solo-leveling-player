@@ -1,24 +1,23 @@
 package com.sleepkqq.sololeveling.user.service.model;
 
-import com.sleepkqq.sololeveling.proto.user.UserRole;
-import com.sleepkqq.sololeveling.user.service.listener.UserListener;
-import jakarta.persistence.CascadeType;
+import com.sleepkqq.sololeveling.proto.player.TaskRarity;
+import com.sleepkqq.sololeveling.proto.player.TaskTopic;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,25 +32,30 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "users")
-@EntityListeners(UserListener.class)
-public class User {
+@Table(name = "tasks")
+public class Task {
 
   @Id
-  private Long id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
   @Version
   private int version;
 
-  private String username;
+  private String title;
 
-  private String firstName;
+  private String description;
 
-  private String lastName;
+  private int experience;
 
-  private String photoUrl;
+  @Enumerated(EnumType.STRING)
+  private TaskRarity rarity;
 
-  private Locale locale;
+  private int agility;
+
+  private int strength;
+
+  private int intelligence;
 
   @CreationTimestamp
   @Column(updatable = false)
@@ -60,14 +64,9 @@ public class User {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
-  private LocalDateTime lastLoginAt;
-
-  @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
-  @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+  @ElementCollection(targetClass = TaskTopic.class, fetch = FetchType.EAGER)
+  @CollectionTable(name = "task_topics", joinColumns = @JoinColumn(name = "task_id"))
   @Enumerated(EnumType.STRING)
-  @Column(name = "role")
-  private List<UserRole> roles;
-
-  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private Player player;
+  @Column(name = "topic")
+  private List<TaskTopic> topics;
 }
