@@ -10,12 +10,12 @@
 	</parent>
 
 	<groupId>com.sleepkqq</groupId>
-	<artifactId>solo-leveling-user</artifactId>
+	<artifactId>solo-leveling-player</artifactId>
 	<version>1.0.0</version>
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>solo-leveling-user-service</module>
+		<module>solo-leveling-player-service</module>
 	</modules>
 
 	<properties>
