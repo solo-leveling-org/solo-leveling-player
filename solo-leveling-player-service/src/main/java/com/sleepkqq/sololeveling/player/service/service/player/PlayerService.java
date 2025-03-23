@@ -1,14 +1,15 @@
-package com.sleepkqq.sololeveling.player.service.service;
+package com.sleepkqq.sololeveling.player.service.service.player;
 
-import static com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus.IN_PROGRESS;
-import static com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus.PENDING_COMPLETION;
-import static com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus.PREPARING;
+import static com.sleepkqq.sololeveling.player.service.model.player.enums.PlayerTaskStatus.IN_PROGRESS;
+import static com.sleepkqq.sololeveling.player.service.model.player.enums.PlayerTaskStatus.PENDING_COMPLETION;
+import static com.sleepkqq.sololeveling.player.service.model.player.enums.PlayerTaskStatus.PREPARING;
 import static java.lang.String.format;
 
-import com.sleepkqq.sololeveling.player.service.model.Player;
-import com.sleepkqq.sololeveling.player.service.model.PlayerTask;
-import com.sleepkqq.sololeveling.player.service.repository.PlayerRepository;
-import com.sleepkqq.sololeveling.player.service.repository.PlayerTaskRepository;
+import com.sleepkqq.sololeveling.player.service.exception.ModelNotFoundException;
+import com.sleepkqq.sololeveling.player.service.model.player.Player;
+import com.sleepkqq.sololeveling.player.service.model.player.PlayerTask;
+import com.sleepkqq.sololeveling.player.service.repository.player.PlayerRepository;
+import com.sleepkqq.sololeveling.player.service.repository.player.PlayerTaskRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -24,7 +25,11 @@ public class PlayerService {
   private final PlayerTaskRepository playerTaskRepository;
 
   public Player get(long id) {
-    return find(id).orElseThrow(() -> new IllegalArgumentException("Player not found id=" + id));
+    return find(id).orElseThrow(() -> new ModelNotFoundException(Player.class, id));
+  }
+
+  public Player save(Player player) {
+    return playerRepository.save(player);
   }
 
   public Optional<Player> find(long id) {

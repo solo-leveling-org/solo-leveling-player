@@ -1,5 +1,4 @@
-package com.sleepkqq.sololeveling.player.service.api;
-
+package com.sleepkqq.sololeveling.player.service.api.user;
 
 import com.sleepkqq.sololeveling.proto.user.AuthUserRequest;
 import com.sleepkqq.sololeveling.proto.user.AuthUserResponse;
@@ -7,7 +6,7 @@ import com.sleepkqq.sololeveling.proto.user.GetUserInfoRequest;
 import com.sleepkqq.sololeveling.proto.user.GetUserInfoResponse;
 import com.sleepkqq.sololeveling.proto.user.UserServiceGrpc.UserServiceImplBase;
 import com.sleepkqq.sololeveling.player.service.mapper.DtoMapper;
-import com.sleepkqq.sololeveling.player.service.service.UserService;
+import com.sleepkqq.sololeveling.player.service.service.user.UserService;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +45,7 @@ public class UserApi extends UserServiceImplBase {
     try {
       userService.createOrUpdate(dtoMapper.map(userInfo));
     } catch (Exception e) {
-      log.error("saveUser error", e);
+      log.error("authUser error", e);
       response.setSuccess(false);
     }
 

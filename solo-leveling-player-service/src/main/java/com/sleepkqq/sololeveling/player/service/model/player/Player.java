@@ -1,5 +1,7 @@
-package com.sleepkqq.sololeveling.player.service.model;
+package com.sleepkqq.sololeveling.player.service.model.player;
 
+import com.sleepkqq.sololeveling.player.service.model.Model;
+import com.sleepkqq.sololeveling.player.service.model.user.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,15 +30,18 @@ import org.hibernate.annotations.UpdateTimestamp;
 @NoArgsConstructor
 @Entity
 @Table(name = "players")
-public class Player {
+public class Player implements Model<Long> {
 
   @Id
   private Long id;
 
+  private int maxTasks;
+
+  @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+  private Level level;
+
   @Version
   private int version;
-
-  private int maxTasks;
 
   @CreationTimestamp
   @Column(updatable = false)
@@ -44,9 +49,6 @@ public class Player {
 
   @UpdateTimestamp
   private LocalDateTime updatedAt;
-
-  @OneToOne(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
-  private Level level;
 
   @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<PlayerTask> tasks;
@@ -58,13 +60,4 @@ public class Player {
   @MapsId
   @JoinColumn(name = "id")
   private User user;
-
-  public static Player init(User user) {
-    return Player.builder()
-        .user(user)
-        .tasks(List.of())
-        .taskTopics(List.of())
-        .maxTasks(5)
-        .build();
-  }
 }

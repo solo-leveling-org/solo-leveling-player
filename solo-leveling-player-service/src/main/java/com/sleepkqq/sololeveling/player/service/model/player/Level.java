@@ -1,19 +1,15 @@
-package com.sleepkqq.sololeveling.player.service.model;
+package com.sleepkqq.sololeveling.player.service.model.player;
 
-import com.sleepkqq.sololeveling.proto.player.Assessment;
-import com.sleepkqq.sololeveling.proto.player.TaskTopic;
-import jakarta.persistence.CascadeType;
+import com.sleepkqq.sololeveling.player.service.model.Model;
+import com.sleepkqq.sololeveling.player.service.model.player.enums.Assessment;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -31,30 +27,25 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(
-    name = "player_task_topics",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            columnNames = {"player_id", "task_topic"}
-        )
-    }
-)
-public class PlayerTaskTopic {
+@Table(name = "levels")
+public class Level implements Model<UUID> {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @Version
-  private int version;
+  private int level;
 
-  private TaskTopic taskTopic;
+  private int totalExperience;
+
+  private int currentExperience;
+
+  private int experienceToNextLevel;
 
   private Assessment assessment;
 
-  private int completedTasksCount;
-
-  private int skippedTasksCount;
+  @Version
+  private int version;
 
   @CreationTimestamp
   @Column(updatable = false)
@@ -63,10 +54,11 @@ public class PlayerTaskTopic {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
-  @OneToOne(mappedBy = "playerTaskTopic", cascade = CascadeType.ALL, orphanRemoval = true)
-  private Level level;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "player_id", nullable = false)
+  @OneToOne
+  @JoinColumn(name = "player_id")
   private Player player;
+
+  @OneToOne
+  @JoinColumn(name = "player_task_topic_id")
+  private PlayerTaskTopic playerTaskTopic;
 }

@@ -1,13 +1,13 @@
-package com.sleepkqq.sololeveling.player.service.model;
+package com.sleepkqq.sololeveling.player.service.model.user;
 
-import com.sleepkqq.sololeveling.proto.user.UserRole;
-import com.sleepkqq.sololeveling.player.service.listener.UserListener;
+import com.sleepkqq.sololeveling.player.service.model.Model;
+import com.sleepkqq.sololeveling.player.service.model.player.Player;
+import com.sleepkqq.sololeveling.player.service.model.user.enums.UserRole;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -32,14 +32,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
-@EntityListeners(UserListener.class)
-public class User {
+public class User implements Model<Long> {
 
   @Id
   private Long id;
-
-  @Version
-  private int version;
 
   private String username;
 
@@ -51,6 +47,14 @@ public class User {
 
   private Locale locale;
 
+  @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
+  @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+  @Column(name = "role")
+  private List<UserRole> roles;
+
+  @Version
+  private int version;
+
   @CreationTimestamp
   @Column(updatable = false)
   private LocalDateTime createdAt;
@@ -59,11 +63,6 @@ public class User {
   private LocalDateTime updatedAt;
 
   private LocalDateTime lastLoginAt;
-
-  @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
-  @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-  @Column(name = "role")
-  private List<UserRole> roles;
 
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private Player player;

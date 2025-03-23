@@ -1,7 +1,7 @@
-package com.sleepkqq.sololeveling.player.service.repository;
+package com.sleepkqq.sololeveling.player.service.repository.player;
 
-import com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus;
-import com.sleepkqq.sololeveling.player.service.model.PlayerTask;
+import com.sleepkqq.sololeveling.player.service.model.player.PlayerTask;
+import com.sleepkqq.sololeveling.player.service.model.player.enums.PlayerTaskStatus;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;

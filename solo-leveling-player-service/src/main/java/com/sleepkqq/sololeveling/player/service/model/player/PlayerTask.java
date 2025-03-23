@@ -1,13 +1,15 @@
-package com.sleepkqq.sololeveling.player.service.model;
+package com.sleepkqq.sololeveling.player.service.model.player;
 
-import static com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus.COMPLETED;
-import static com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus.IN_PROGRESS;
-import static com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus.PENDING_COMPLETION;
-import static com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus.PREPARING;
-import static com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus.SKIPPED;
+import static com.sleepkqq.sololeveling.player.service.model.player.enums.PlayerTaskStatus.COMPLETED;
+import static com.sleepkqq.sololeveling.player.service.model.player.enums.PlayerTaskStatus.IN_PROGRESS;
+import static com.sleepkqq.sololeveling.player.service.model.player.enums.PlayerTaskStatus.PENDING_COMPLETION;
+import static com.sleepkqq.sololeveling.player.service.model.player.enums.PlayerTaskStatus.PREPARING;
+import static com.sleepkqq.sololeveling.player.service.model.player.enums.PlayerTaskStatus.SKIPPED;
 import static java.lang.String.format;
 
-import com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus;
+import com.sleepkqq.sololeveling.player.service.model.Model;
+import com.sleepkqq.sololeveling.player.service.model.player.enums.PlayerTaskStatus;
+import com.sleepkqq.sololeveling.player.service.model.task.Task;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -41,16 +43,24 @@ import org.hibernate.annotations.UpdateTimestamp;
         @UniqueConstraint(columnNames = {"player_id", "task_id"})
     }
 )
-public class PlayerTask {
+public class PlayerTask implements Model<UUID> {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  private PlayerTaskStatus status;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "player_id", nullable = false)
+  private Player player;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "task_id", nullable = false)
+  private Task task;
+
   @Version
   private int version;
-
-  private PlayerTaskStatus status;
 
   @CreationTimestamp
   @Column(updatable = false)
@@ -60,14 +70,6 @@ public class PlayerTask {
   private LocalDateTime updatedAt;
 
   private LocalDateTime closedAt;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "player_id", nullable = false)
-  private Player player;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "task_id", nullable = false)
-  private Task task;
 
   public void inProgress() {
     if (!PREPARING.equals(status)) {

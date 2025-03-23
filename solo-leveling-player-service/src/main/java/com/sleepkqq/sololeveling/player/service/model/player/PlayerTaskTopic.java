@@ -1,22 +1,21 @@
-package com.sleepkqq.sololeveling.player.service.model;
+package com.sleepkqq.sololeveling.player.service.model.player;
 
-import com.sleepkqq.sololeveling.proto.player.TaskRarity;
-import com.sleepkqq.sololeveling.proto.player.TaskTopic;
+import com.sleepkqq.sololeveling.player.service.model.Model;
+import com.sleepkqq.sololeveling.player.service.model.task.enums.TaskTopic;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,29 +31,31 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tasks")
-public class Task {
+@Table(
+    name = "player_task_topics",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            columnNames = {"player_id", "task_topic"}
+        )
+    }
+)
+public class PlayerTaskTopic implements Model<UUID> {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  private TaskTopic taskTopic;
+
+  @OneToOne(mappedBy = "playerTaskTopic", cascade = CascadeType.ALL, orphanRemoval = true)
+  private Level level;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "player_id", nullable = false)
+  private Player player;
+
   @Version
   private int version;
-
-  private String title;
-
-  private String description;
-
-  private int experience;
-
-  private TaskRarity rarity;
-
-  private int agility;
-
-  private int strength;
-
-  private int intelligence;
 
   @CreationTimestamp
   @Column(updatable = false)
@@ -62,12 +63,4 @@ public class Task {
 
   @UpdateTimestamp
   private LocalDateTime updatedAt;
-
-  @ElementCollection(targetClass = TaskTopic.class, fetch = FetchType.EAGER)
-  @CollectionTable(name = "task_topics", joinColumns = @JoinColumn(name = "task_id"))
-  @Column(name = "topic")
-  private List<TaskTopic> topics;
-
-  @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<PlayerTask> tasks;
 }
