@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.service.task;
 
 import static com.sleepkqq.sololeveling.player.service.model.task.enums.TaskRarity.COMMON;
+import static java.util.Objects.requireNonNull;
 
 import com.sleepkqq.sololeveling.player.service.model.player.PlayerTaskTopic;
 import com.sleepkqq.sololeveling.player.service.model.task.enums.TaskRarity;
@@ -32,7 +33,7 @@ public class DefineTaskRarityService {
 
   public TaskRarity define(Set<PlayerTaskTopic> topics) {
     var avgLevel = StreamEx.of(topics)
-        .mapToInt(t -> t.getLevel().getLevel())
+        .mapToInt(t -> requireNonNull(t.level(), "level").level())
         .average()
         .orElseThrow(() -> new IllegalArgumentException("Incorrect topics size=" + topics.size()));
 

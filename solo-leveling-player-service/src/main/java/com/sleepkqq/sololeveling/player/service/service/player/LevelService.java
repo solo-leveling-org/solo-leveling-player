@@ -4,13 +4,13 @@ import static com.sleepkqq.sololeveling.player.service.model.player.enums.Assess
 
 import com.sleepkqq.sololeveling.player.service.exception.ModelNotFoundException;
 import com.sleepkqq.sololeveling.player.service.model.player.Level;
-import com.sleepkqq.sololeveling.player.service.model.player.Player;
-import com.sleepkqq.sololeveling.player.service.model.player.PlayerTaskTopic;
+import com.sleepkqq.sololeveling.player.service.model.player.LevelDraft;
 import com.sleepkqq.sololeveling.player.service.repository.player.LevelRepository;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,43 +22,35 @@ public class LevelService {
   private final LevelRepository levelRepository;
   private final CountExperienceService countExperienceService;
 
+  @Transactional
   public Level get(UUID id) {
     return find(id).orElseThrow(() -> new ModelNotFoundException(Level.class, id));
   }
 
+  @Transactional
   public Optional<Level> find(UUID id) {
     return levelRepository.findById(id);
   }
 
-  public Level initializePlayerLevel(Player player) {
-    var level = initializeBaseLevel()
-        .experienceToNextLevel(
-            countExperienceService.countPlayerExperienceToNextLevel(BASE_FIRST_LEVEL)
-        )
-        .player(player)
-        .build();
-
-    level.setPlayer(player);
-    return level;
+  public void initializePlayerLevel(LevelDraft draft) {
+    initializeBaseLevel(draft);
+    draft.setExperienceToNextLevel(
+        countExperienceService.countPlayerExperienceToNextLevel(BASE_FIRST_LEVEL)
+    );
   }
 
-  public Level initializeTopicLevel(PlayerTaskTopic topic) {
-    var level = initializeBaseLevel()
-        .experienceToNextLevel(
-            countExperienceService.countTopicExperienceToNextLevel(BASE_FIRST_LEVEL)
-        )
-        .playerTaskTopic(topic)
-        .build();
-
-    topic.setLevel(level);
-    return level;
+  public void initializeTopicLevel(LevelDraft draft) {
+    initializeBaseLevel(draft);
+    draft.setExperienceToNextLevel(
+        countExperienceService.countTopicExperienceToNextLevel(BASE_FIRST_LEVEL)
+    );
   }
 
-  private Level.LevelBuilder initializeBaseLevel() {
-    return Level.builder()
-        .level(BASE_FIRST_LEVEL)
-        .totalExperience(BASE_BEGIN_EXPERIENCE)
-        .currentExperience(BASE_BEGIN_EXPERIENCE)
-        .assessment(E);
+  private void initializeBaseLevel(LevelDraft draft) {
+    draft.setId(UUID.randomUUID());
+    draft.setLevel(BASE_FIRST_LEVEL);
+    draft.setTotalExperience(BASE_BEGIN_EXPERIENCE);
+    draft.setCurrentExperience(BASE_BEGIN_EXPERIENCE);
+    draft.setAssessment(E);
   }
 }

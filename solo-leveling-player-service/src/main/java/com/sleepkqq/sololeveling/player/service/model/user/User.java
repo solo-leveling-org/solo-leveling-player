@@ -3,67 +3,53 @@ package com.sleepkqq.sololeveling.player.service.model.user;
 import com.sleepkqq.sololeveling.player.service.model.Model;
 import com.sleepkqq.sololeveling.player.service.model.player.Player;
 import com.sleepkqq.sololeveling.player.service.model.user.enums.UserRole;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.babyfish.jimmer.sql.Column;
+import org.babyfish.jimmer.sql.Entity;
+import org.babyfish.jimmer.sql.Id;
+import org.babyfish.jimmer.sql.OneToOne;
+import org.babyfish.jimmer.sql.Serialized;
+import org.babyfish.jimmer.sql.Table;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-@Setter
-@Getter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class User implements Model<Long> {
+public interface User extends Model {
 
   @Id
-  private Long id;
+  long id();
 
-  private String username;
+  @NotNull
+  @Column(name = "username")
+  String username();
 
-  private String firstName;
+  @NotNull
+  @Column(name = "first_name")
+  String firstName();
 
-  private String lastName;
+  @NotNull
+  @Column(name = "last_name")
+  String lastName();
 
-  private String photoUrl;
+  @NotNull
+  @Column(name = "photo_url")
+  String photoUrl();
 
-  private Locale locale;
+  @NotNull
+  @Column(name = "locale")
+  String locale();
 
-  @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
-  @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-  @Column(name = "role")
-  private List<UserRole> roles;
+  @NotNull
+  @Column(name = "last_login_at")
+  LocalDateTime lastLoginAt();
 
-  @Version
-  private int version;
+  @Serialized
+  @Column(name = "roles")
+  List<UserRole> roles();
 
-  @CreationTimestamp
-  @Column(updatable = false)
-  private LocalDateTime createdAt;
-
-  @UpdateTimestamp
-  private LocalDateTime updatedAt;
-
-  private LocalDateTime lastLoginAt;
-
-  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private Player player;
+  @Nullable
+  @OneToOne(mappedBy = "user")
+  Player player();
 }

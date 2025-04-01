@@ -2,18 +2,29 @@ package com.sleepkqq.sololeveling.player.service.model.task.enums;
 
 import java.util.Map;
 import java.util.Set;
+import org.babyfish.jimmer.sql.EnumItem;
 
 public enum TaskTopic {
-  PHYSICAL_ACTIVITY, // 0
-  MENTAL_HEALTH, // 1
-  EDUCATION, // 2
-  CREATIVITY, // 3
-  SOCIAL_SKILLS, // 4
-  HEALTHY_EATING, // 5
-  PRODUCTIVITY, // 6
-  EXPERIMENTS, // 7
-  ECOLOGY, // 8
-  TEAMWORK; // 9
+  @EnumItem(ordinal = 0)
+  PHYSICAL_ACTIVITY,
+  @EnumItem(ordinal = 1)
+  MENTAL_HEALTH,
+  @EnumItem(ordinal = 2)
+  EDUCATION,
+  @EnumItem(ordinal = 3)
+  CREATIVITY,
+  @EnumItem(ordinal = 4)
+  SOCIAL_SKILLS,
+  @EnumItem(ordinal = 5)
+  HEALTHY_EATING,
+  @EnumItem(ordinal = 6)
+  PRODUCTIVITY,
+  @EnumItem(ordinal = 7)
+  EXPERIMENTS,
+  @EnumItem(ordinal = 8)
+  ECOLOGY,
+  @EnumItem(ordinal = 9)
+  TEAMWORK;
 
   private static final Map<TaskTopic, Set<TaskTopic>> COMPATIBLE_TOPICS = Map.of(
       PHYSICAL_ACTIVITY, Set.of(MENTAL_HEALTH, HEALTHY_EATING, ECOLOGY),

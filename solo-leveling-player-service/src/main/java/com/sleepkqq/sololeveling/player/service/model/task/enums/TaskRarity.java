@@ -1,9 +1,16 @@
 package com.sleepkqq.sololeveling.player.service.model.task.enums;
 
+import org.babyfish.jimmer.sql.EnumItem;
+
 public enum TaskRarity {
-  COMMON, // 0
-  UNCOMMON, // 1
-  RARE, // 2
-  EPIC, // 3
-  LEGENDARY // 4
+  @EnumItem(ordinal = 0)
+  COMMON,
+  @EnumItem(ordinal = 1)
+  UNCOMMON,
+  @EnumItem(ordinal = 2)
+  RARE,
+  @EnumItem(ordinal = 3)
+  EPIC,
+  @EnumItem(ordinal = 4)
+  LEGENDARY
 }

@@ -1,11 +1,11 @@
 package com.sleepkqq.sololeveling.player.service.api.user;
 
+import com.sleepkqq.sololeveling.player.service.mapper.ProtoMapper;
 import com.sleepkqq.sololeveling.proto.user.AuthUserRequest;
 import com.sleepkqq.sololeveling.proto.user.AuthUserResponse;
 import com.sleepkqq.sololeveling.proto.user.GetUserInfoRequest;
 import com.sleepkqq.sololeveling.proto.user.GetUserInfoResponse;
 import com.sleepkqq.sololeveling.proto.user.UserServiceGrpc.UserServiceImplBase;
-import com.sleepkqq.sololeveling.player.service.mapper.DtoMapper;
 import com.sleepkqq.sololeveling.player.service.service.user.UserService;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import net.devh.boot.grpc.server.service.GrpcService;
 public class UserApi extends UserServiceImplBase {
 
   private final UserService userService;
-  private final DtoMapper dtoMapper;
+  private final ProtoMapper protoMapper;
 
   @Override
   public void getUserInfo(
@@ -28,7 +28,7 @@ public class UserApi extends UserServiceImplBase {
     var response = GetUserInfoResponse.newBuilder().setSuccess(true);
     try {
       var user = userService.get(request.getUserId());
-      response.setUserInfo(dtoMapper.map(user));
+      response.setUserInfo(protoMapper.map(user));
     } catch (Exception e) {
       log.error("getUserInfo error", e);
       response.setSuccess(false);
@@ -43,7 +43,7 @@ public class UserApi extends UserServiceImplBase {
     var userInfo = request.getUserInfo();
     var response = AuthUserResponse.newBuilder().setSuccess(true);
     try {
-      userService.createOrUpdate(dtoMapper.map(userInfo));
+      userService.upsert(protoMapper.map(userInfo));
     } catch (Exception e) {
       log.error("authUser error", e);
       response.setSuccess(false);

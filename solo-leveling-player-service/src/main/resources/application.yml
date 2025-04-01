@@ -1,7 +1,6 @@
 spring:
   application:
-    name:
-      solo-leveling-player-service
+    name: solo-leveling-player-service
   kafka:
     bootstrap-servers: ${SERVER_HOST}:9092
     properties:
@@ -11,12 +10,16 @@ spring:
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    open-in-view: false
-    properties:
-      hibernate.transaction.jta.platform: none
+    hikari:
+      maximum-pool-size: 10
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/changelog-master.yml
+    default-schema: public
+jimmer:
+  default-enum-strategy: ORDINAL
+  show-sql: false
+  dialect: org.babyfish.jimmer.sql.dialect.PostgresDialect
 grpc:
   server:
     port: 9091

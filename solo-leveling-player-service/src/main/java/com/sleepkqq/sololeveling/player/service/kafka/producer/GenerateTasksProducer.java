@@ -6,20 +6,18 @@ import static java.lang.String.format;
 
 import com.sleepkqq.sololeveling.avro.task.GenerateTask;
 import com.sleepkqq.sololeveling.avro.task.GenerateTasksEvent;
-import com.sleepkqq.sololeveling.player.service.mapper.DtoMapper;
-import com.sleepkqq.sololeveling.player.service.model.player.Player;
-import com.sleepkqq.sololeveling.player.service.model.player.PlayerTask;
+import com.sleepkqq.sololeveling.player.service.mapper.AvroMapper;
+import com.sleepkqq.sololeveling.player.service.model.Immutables;
 import com.sleepkqq.sololeveling.player.service.model.player.PlayerTaskTopic;
-import com.sleepkqq.sololeveling.player.service.model.task.Task;
 import com.sleepkqq.sololeveling.player.service.model.task.enums.TaskTopic;
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerService;
+import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService;
 import com.sleepkqq.sololeveling.player.service.service.task.DefineTaskRarityService;
 import com.sleepkqq.sololeveling.player.service.service.task.DefineTaskTopicService;
 import com.sleepkqq.sololeveling.player.service.service.task.TaskService;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import one.util.streamex.StreamEx;
@@ -36,65 +34,59 @@ public class GenerateTasksProducer {
   private final DefineTaskTopicService defineTaskTopicService;
   private final DefineTaskRarityService defineTaskRarityService;
   private final PlayerService playerService;
+  private final PlayerTaskService playerTaskService;
   private final TaskService taskService;
-  private final DtoMapper dtoMapper;
+  private final AvroMapper avroMapper;
 
   @Transactional
   public void send(long playerId) {
     var player = playerService.get(playerId);
-    var tasksCount = player.getMaxTasks() - playerService.getCurrentTasks(player.getId()).size();
+    var tasksCount = player.maxTasks() - playerTaskService.getCurrentTasksCount(playerId);
     if (tasksCount < 1 || tasksCount > 5) {
       throw new IllegalArgumentException(format(
-          "Incorrect current tasks count=%d, playerId=%d", tasksCount, player.getId()
+          "Incorrect current tasks count=%d, playerId=%d", tasksCount, playerId
       ));
     }
 
-    var taskTopicsMap = StreamEx.of(player.getTaskTopics())
-        .toMap(PlayerTaskTopic::getTaskTopic, t -> t);
+    var taskTopicsMap = StreamEx.of(player.taskTopics())
+        .toMap(PlayerTaskTopic::taskTopic, Function.identity());
 
-    var taskIds = new ArrayList<UUID>();
-
+    var generateTasks = StreamEx.generate(UUID::randomUUID)
+        .limit(tasksCount)
+        .peek(taskId -> createEmptyPlayerTask(playerId, taskId))
+        .map(taskId -> generateTask(taskTopicsMap, taskId))
+        .toList();
     var event = GenerateTasksEvent.newBuilder()
         .setTransactionId(UUID.randomUUID().toString())
-        .setPlayerId(player.getId())
-        .setInputs(StreamEx.generate(() -> generateTask(taskTopicsMap, taskIds))
-            .limit(tasksCount)
-            .toList()
-        )
+        .setPlayerId(playerId)
+        .setInputs(generateTasks)
         .build();
-
-    StreamEx.of(taskIds)
-        .map(this::saveEmptyTask)
-        .forEach(t -> saveEmptyPlayerTask(player, t));
 
     kafkaTemplate.send(GENERATE_TASKS_TOPIC, event);
     log.info("<< Generate tasks event sent | transactionId={}", event.getTransactionId());
   }
 
-  private GenerateTask generateTask(
-      Map<TaskTopic, PlayerTaskTopic> taskTopicsMap,
-      List<UUID> taskIds
-  ) {
-    var taskId = UUID.randomUUID();
-    taskIds.add(taskId);
+  private GenerateTask generateTask(Map<TaskTopic, PlayerTaskTopic> taskTopicsMap, UUID taskId) {
     var topics = defineTaskTopicService.define(taskTopicsMap.keySet());
-
     return new GenerateTask(
         taskId.toString(),
-        dtoMapper.mapToAvro(defineTaskRarityService.define(
+        avroMapper.map(defineTaskRarityService.define(
             StreamEx.of(topics).map(taskTopicsMap::get).toSet()
         )),
-        dtoMapper.mapCollection(topics, dtoMapper::mapToAvro)
+        avroMapper.mapCollection(topics, avroMapper::map)
     );
   }
 
-  private Task saveEmptyTask(UUID taskId) {
-    return taskService.save(Task.builder().id(taskId).build());
-  }
-
-  private PlayerTask saveEmptyPlayerTask(Player player, Task task) {
-    return playerService.saveTask(
-        PlayerTask.builder().task(task).player(player).status(PREPARING).build()
+  private void createEmptyPlayerTask(long playerId, UUID taskId) {
+    taskService.create(
+        Immutables.createTask(t -> {
+          t.setId(taskId);
+          t.addIntoPlayerTasks(p -> {
+            p.setId(UUID.randomUUID());
+            p.setStatus(PREPARING);
+            p.setPlayerId(playerId);
+          });
+        })
     );
   }
 }

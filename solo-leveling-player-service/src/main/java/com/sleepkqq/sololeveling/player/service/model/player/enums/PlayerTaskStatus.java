@@ -1,9 +1,16 @@
 package com.sleepkqq.sololeveling.player.service.model.player.enums;
 
+import org.babyfish.jimmer.sql.EnumItem;
+
 public enum PlayerTaskStatus {
-  PREPARING, // 0
-  IN_PROGRESS, // 1
-  PENDING_COMPLETION, // 2
-  COMPLETED, // 3
-  SKIPPED // 4
+  @EnumItem(ordinal = 0)
+  PREPARING,
+  @EnumItem(ordinal = 1)
+  IN_PROGRESS,
+  @EnumItem(ordinal = 2)
+  PENDING_COMPLETION,
+  @EnumItem(ordinal = 3)
+  COMPLETED,
+  @EnumItem(ordinal = 4)
+  SKIPPED
 }

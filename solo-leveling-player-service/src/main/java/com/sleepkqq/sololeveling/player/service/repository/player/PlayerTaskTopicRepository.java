@@ -2,8 +2,10 @@ package com.sleepkqq.sololeveling.player.service.repository.player;
 
 import com.sleepkqq.sololeveling.player.service.model.player.PlayerTaskTopic;
 import java.util.UUID;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.babyfish.jimmer.spring.repository.JRepository;
+import org.springframework.stereotype.Repository;
 
-public interface PlayerTaskTopicRepository extends JpaRepository<PlayerTaskTopic, UUID> {
+@Repository
+public interface PlayerTaskTopicRepository extends JRepository<PlayerTaskTopic, UUID> {
 
 }

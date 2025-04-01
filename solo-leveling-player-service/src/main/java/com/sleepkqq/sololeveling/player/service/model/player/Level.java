@@ -2,63 +2,49 @@ package com.sleepkqq.sololeveling.player.service.model.player;
 
 import com.sleepkqq.sololeveling.player.service.model.Model;
 import com.sleepkqq.sololeveling.player.service.model.player.enums.Assessment;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
-import java.time.LocalDateTime;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.babyfish.jimmer.sql.Column;
+import org.babyfish.jimmer.sql.Entity;
+import org.babyfish.jimmer.sql.GeneratedValue;
+import org.babyfish.jimmer.sql.Id;
+import org.babyfish.jimmer.sql.JoinColumn;
+import org.babyfish.jimmer.sql.OneToOne;
+import org.babyfish.jimmer.sql.Table;
+import org.babyfish.jimmer.sql.meta.UUIDIdGenerator;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-@Setter
-@Getter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "levels")
-public class Level implements Model<UUID> {
+public interface Level extends Model {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
+  @GeneratedValue(generatorType = UUIDIdGenerator.class)
+  UUID id();
 
-  private int level;
+  @Column(name = "level")
+  int level();
 
-  private int totalExperience;
+  @Column(name = "total_experience")
+  int totalExperience();
 
-  private int currentExperience;
+  @Column(name = "current_experience")
+  int currentExperience();
 
-  private int experienceToNextLevel;
+  @Column(name = "experience_to_next_level")
+  int experienceToNextLevel();
 
-  private Assessment assessment;
+  @NotNull
+  @Column(name = "assessment")
+  Assessment assessment();
 
-  @Version
-  private int version;
-
-  @CreationTimestamp
-  @Column(updatable = false)
-  private LocalDateTime createdAt;
-
-  @UpdateTimestamp
-  private LocalDateTime updatedAt;
-
+  @Nullable
   @OneToOne
   @JoinColumn(name = "player_id")
-  private Player player;
+  Player player();
 
+  @Nullable
   @OneToOne
   @JoinColumn(name = "player_task_topic_id")
-  private PlayerTaskTopic playerTaskTopic;
+  PlayerTaskTopic playerTaskTopic();
 }

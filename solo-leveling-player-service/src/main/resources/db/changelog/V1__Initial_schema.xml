@@ -1,0 +1,193 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+  <!-- ChangeSet 1: Создание базовых таблиц без внешних ключей -->
+  <changeSet author="sleepkqq" id="1">
+    <!-- Users table -->
+    <createTable tableName="users">
+      <column name="id" type="bigint">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="username" type="varchar(255)"/>
+      <column name="first_name" type="varchar(255)"/>
+      <column name="last_name" type="varchar(255)"/>
+      <column name="photo_url" type="varchar(255)"/>
+      <column name="locale" type="varchar(255)"/>
+      <column name="roles" type="JSONB">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="integer" defaultValue="0"/>
+      <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="last_login_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+    </createTable>
+
+    <!-- Players table -->
+    <createTable tableName="players">
+      <column name="id" type="bigint">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="max_tasks" type="integer"/>
+      <column name="version" type="integer" defaultValue="0"/>
+      <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_id" type="bigint"/>
+    </createTable>
+
+    <!-- Player task topics table -->
+    <createTable tableName="player_task_topics">
+      <column name="id" type="uuid">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="task_topic" type="integer"/>
+      <column name="player_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="integer" defaultValue="0"/>
+      <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <!-- Tasks table -->
+    <createTable tableName="tasks">
+      <column name="id" type="uuid">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="title" type="varchar(255)"/>
+      <column name="description" type="text"/>
+      <column name="experience" type="integer"/>
+      <column name="rarity" type="integer"/>
+      <column name="agility" type="integer"/>
+      <column name="strength" type="integer"/>
+      <column name="intelligence" type="integer"/>
+      <column name="topics" type="JSONB"/>
+      <column name="version" type="integer" defaultValue="0"/>
+      <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <!-- Levels table -->
+    <createTable tableName="levels">
+      <column name="id" type="uuid">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="level" type="integer"/>
+      <column name="total_experience" type="integer"/>
+      <column name="current_experience" type="integer"/>
+      <column name="experience_to_next_level" type="integer"/>
+      <column name="assessment" type="integer"/>
+      <column name="version" type="integer" defaultValue="0"/>
+      <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="player_id" type="bigint"/>
+      <column name="player_task_topic_id" type="uuid"/>
+    </createTable>
+
+    <!-- Player tasks table -->
+    <createTable tableName="player_task">
+      <column name="id" type="uuid">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="status" type="integer"/>
+      <column name="player_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="task_id" type="uuid">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="integer" defaultValue="0"/>
+      <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="closed_at" type="timestamp"/>
+    </createTable>
+  </changeSet>
+
+  <!-- ChangeSet 2: Добавление внешних ключей -->
+  <changeSet author="sleepkqq" id="2">
+
+    <!-- Players FK -->
+    <addForeignKeyConstraint
+      baseTableName="players"
+      baseColumnNames="user_id"
+      constraintName="fk_player_user"
+      referencedTableName="users"
+      referencedColumnNames="id"/>
+
+    <!-- Player task topics FK -->
+    <addForeignKeyConstraint
+      baseTableName="player_task_topics"
+      baseColumnNames="player_id"
+      constraintName="fk_player_task_topic_player"
+      referencedTableName="players"
+      referencedColumnNames="id"/>
+
+    <!-- Levels FKs -->
+    <addForeignKeyConstraint
+      baseTableName="levels"
+      baseColumnNames="player_id"
+      constraintName="fk_level_player"
+      referencedTableName="players"
+      referencedColumnNames="id"/>
+
+    <addForeignKeyConstraint
+      baseTableName="levels"
+      baseColumnNames="player_task_topic_id"
+      constraintName="fk_level_player_task_topic"
+      referencedTableName="player_task_topics"
+      referencedColumnNames="id"/>
+
+    <!-- Player tasks FKs -->
+    <addForeignKeyConstraint
+      baseTableName="player_task"
+      baseColumnNames="player_id"
+      constraintName="fk_player_task_player"
+      referencedTableName="players"
+      referencedColumnNames="id"/>
+
+    <addForeignKeyConstraint
+      baseTableName="player_task"
+      baseColumnNames="task_id"
+      constraintName="fk_player_task_task"
+      referencedTableName="tasks"
+      referencedColumnNames="id"/>
+  </changeSet>
+
+  <!-- ChangeSet 3: Уникальные ограничения -->
+  <changeSet author="sleepkqq" id="3">
+    <addUniqueConstraint
+      tableName="player_task"
+      columnNames="player_id, task_id"
+      constraintName="uc_player_task_player_task"/>
+
+    <addUniqueConstraint
+      tableName="player_task_topics"
+      columnNames="player_id, task_topic"
+      constraintName="uc_player_task_topics_player_topic"/>
+  </changeSet>
+</databaseChangeLog>

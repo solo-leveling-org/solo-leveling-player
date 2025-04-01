@@ -1,0 +1,37 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+  <changeSet author="sleepkqq" id="2">
+    <!-- Index for player_task unique constraint -->
+    <createIndex tableName="player_task" indexName="idx_player_task_player_task" unique="true">
+      <column name="player_id"/>
+      <column name="task_id"/>
+    </createIndex>
+
+    <!-- Index for player_task_topics unique constraint -->
+    <createIndex tableName="player_task_topics" indexName="idx_player_task_topics_player_topic" unique="true">
+      <column name="player_id"/>
+      <column name="task_topic"/>
+    </createIndex>
+
+    <!-- Index for foreign keys to improve join performance -->
+    <createIndex tableName="levels" indexName="idx_levels_player_id">
+      <column name="player_id"/>
+    </createIndex>
+
+    <createIndex tableName="levels" indexName="idx_levels_player_task_topic_id">
+      <column name="player_task_topic_id"/>
+    </createIndex>
+
+    <createIndex tableName="player_task" indexName="idx_player_task_player_id">
+      <column name="player_id"/>
+    </createIndex>
+
+    <createIndex tableName="player_task" indexName="idx_player_task_task_id">
+      <column name="task_id"/>
+    </createIndex>
+
+    <createIndex tableName="player_task_topics" indexName="idx_player_task_topics_player_id">
+      <column name="player_id"/>
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>
