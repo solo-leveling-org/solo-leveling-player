@@ -16,10 +16,13 @@ public class EnumOrdinalMapper {
     var mapper = new ObjectMapper();
     var module = new SimpleModule();
 
-    module.addSerializer(enumType, new JsonSerializer<Enum<?>>() {
+    module.addSerializer(enumType, new JsonSerializer<Enum<E>>() {
       @Override
-      public void serialize(Enum<?> value, JsonGenerator gen, SerializerProvider provider)
-          throws IOException {
+      public void serialize(
+          Enum<E> value,
+          JsonGenerator gen,
+          SerializerProvider provider
+      ) throws IOException {
         gen.writeNumber(value.ordinal());
       }
     });
