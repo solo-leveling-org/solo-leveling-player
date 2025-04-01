@@ -13,10 +13,6 @@
   <artifactId>solo-leveling-player-service</artifactId>
   <version>1.0.0</version>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
   <dependencies>
     <!-- spring boot -->
     <dependency>
@@ -51,12 +47,6 @@
     <!-- solo leveling -->
     <dependency>
       <groupId>com.sleepkqq</groupId>
-      <artifactId>solo-leveling-user-dto</artifactId>
-      <version>1.0.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.sleepkqq</groupId>
       <artifactId>solo-leveling-proto</artifactId>
       <version>1.0.0</version>
     </dependency>
@@ -75,31 +65,6 @@
       <groupId>one.util</groupId>
       <artifactId>streamex</artifactId>
       <version>${streamex.version}</version>
-    </dependency>
-
-    <!-- avro -->
-    <dependency>
-      <groupId>io.confluent</groupId>
-      <artifactId>kafka-avro-serializer</artifactId>
-      <version>${confluent-kafka.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro</artifactId>
-      <version>${avro.version}</version>
-    </dependency>
-
-    <!-- mapstruct -->
-    <dependency>
-      <groupId>org.mapstruct</groupId>
-      <artifactId>mapstruct</artifactId>
-      <version>${mapstruct.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mapstruct</groupId>
-      <artifactId>mapstruct-processor</artifactId>
-      <version>${mapstruct.version}</version>
-      <scope>provided</scope>
     </dependency>
 
     <!-- tests -->
