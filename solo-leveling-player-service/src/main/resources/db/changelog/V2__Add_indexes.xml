@@ -2,7 +2,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
   <changeSet author="sleepkqq" id="2">
     <!-- Index for player_task unique constraint -->
-    <createIndex tableName="player_task" indexName="idx_player_task_player_task" unique="true">
+    <createIndex tableName="player_tasks" indexName="idx_player_task_player_task" unique="true">
       <column name="player_id"/>
       <column name="task_id"/>
     </createIndex>
@@ -22,11 +22,11 @@
       <column name="player_task_topic_id"/>
     </createIndex>
 
-    <createIndex tableName="player_task" indexName="idx_player_task_player_id">
+    <createIndex tableName="player_tasks" indexName="idx_player_task_player_id">
       <column name="player_id"/>
     </createIndex>
 
-    <createIndex tableName="player_task" indexName="idx_player_task_task_id">
+    <createIndex tableName="player_tasks" indexName="idx_player_task_task_id">
       <column name="task_id"/>
     </createIndex>
 

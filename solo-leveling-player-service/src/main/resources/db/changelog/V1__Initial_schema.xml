@@ -106,7 +106,7 @@
     </createTable>
 
     <!-- Player tasks table -->
-    <createTable tableName="player_task">
+    <createTable tableName="player_tasks">
       <column name="id" type="uuid">
         <constraints primaryKey="true" nullable="false"/>
       </column>
@@ -164,14 +164,14 @@
 
     <!-- Player tasks FKs -->
     <addForeignKeyConstraint
-      baseTableName="player_task"
+      baseTableName="player_tasks"
       baseColumnNames="player_id"
       constraintName="fk_player_task_player"
       referencedTableName="players"
       referencedColumnNames="id"/>
 
     <addForeignKeyConstraint
-      baseTableName="player_task"
+      baseTableName="player_tasks"
       baseColumnNames="task_id"
       constraintName="fk_player_task_task"
       referencedTableName="tasks"
@@ -181,7 +181,7 @@
   <!-- ChangeSet 3: Уникальные ограничения -->
   <changeSet author="sleepkqq" id="3">
     <addUniqueConstraint
-      tableName="player_task"
+      tableName="player_tasks"
       columnNames="player_id, task_id"
       constraintName="uc_player_task_player_task"/>
 

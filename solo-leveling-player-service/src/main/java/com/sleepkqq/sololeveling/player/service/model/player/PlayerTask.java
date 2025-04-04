@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Entity
-@Table(name = "player_task")
+@Table(name = "player_tasks")
 public interface PlayerTask extends Model {
 
   @Id

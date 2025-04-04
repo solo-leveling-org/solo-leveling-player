@@ -9,13 +9,12 @@ import com.sleepkqq.sololeveling.avro.task.GenerateTasksEvent;
 import com.sleepkqq.sololeveling.player.service.mapper.AvroMapper;
 import com.sleepkqq.sololeveling.player.service.model.Immutables;
 import com.sleepkqq.sololeveling.player.service.model.player.PlayerTaskTopic;
-import com.sleepkqq.sololeveling.player.service.model.task.enums.TaskTopic;
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerService;
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService;
 import com.sleepkqq.sololeveling.player.service.service.task.DefineTaskRarityService;
 import com.sleepkqq.sololeveling.player.service.service.task.DefineTaskTopicService;
 import com.sleepkqq.sololeveling.player.service.service.task.TaskService;
-import java.util.Map;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
@@ -48,13 +47,10 @@ public class GenerateTasksProducer {
       ));
     }
 
-    var taskTopicsMap = StreamEx.of(player.taskTopics())
-        .toMap(PlayerTaskTopic::taskTopic, Function.identity());
-
     var generateTasks = StreamEx.generate(UUID::randomUUID)
         .limit(tasksCount)
         .peek(taskId -> createEmptyPlayerTask(playerId, taskId))
-        .map(taskId -> generateTask(taskTopicsMap, taskId))
+        .map(taskId -> generateTask(player.taskTopics(), taskId))
         .toList();
     var event = GenerateTasksEvent.newBuilder()
         .setTransactionId(UUID.randomUUID().toString())
@@ -66,7 +62,9 @@ public class GenerateTasksProducer {
     log.info("<< Generate tasks event sent | transactionId={}", event.getTransactionId());
   }
 
-  private GenerateTask generateTask(Map<TaskTopic, PlayerTaskTopic> taskTopicsMap, UUID taskId) {
+  private GenerateTask generateTask(Collection<PlayerTaskTopic> playerTaskTopics, UUID taskId) {
+    var taskTopicsMap = StreamEx.of(playerTaskTopics)
+        .toMap(PlayerTaskTopic::taskTopic, Function.identity());
     var topics = defineTaskTopicService.define(taskTopicsMap.keySet());
     return new GenerateTask(
         taskId.toString(),
