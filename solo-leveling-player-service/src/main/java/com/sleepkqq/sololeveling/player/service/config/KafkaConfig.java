@@ -1,8 +1,9 @@
 package com.sleepkqq.sololeveling.player.service.config;
 
-import static com.sleepkqq.sololeveling.avro.constants.KafkaGroupIds.TASK_GROUP_ID;
+import static com.sleepkqq.sololeveling.avro.constants.KafkaGroupIds.PLAYER_GROUP_ID;
 
 import com.sleepkqq.sololeveling.avro.config.DefaultKafkaConfig;
+import com.sleepkqq.sololeveling.avro.notification.SendNotificationEvent;
 import com.sleepkqq.sololeveling.avro.task.GenerateTasksEvent;
 import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +40,7 @@ public class KafkaConfig extends DefaultKafkaConfig {
 
   @Bean
   public ConsumerFactory<String, SaveTasksEvent> consumerFactorySaveTasksEvent() {
-    return createConsumerFactory(TASK_GROUP_ID);
+    return createConsumerFactory(PLAYER_GROUP_ID);
   }
 
   @Bean
@@ -48,5 +49,17 @@ public class KafkaConfig extends DefaultKafkaConfig {
       ConsumerFactory<String, SaveTasksEvent> consumerFactory
   ) {
     return createKafkaListenerContainerFactory(consumerFactory);
+  }
+
+  @Bean
+  public ProducerFactory<String, SendNotificationEvent> producerFactorySendNotificationEvent() {
+    return createProducerFactory();
+  }
+
+  @Bean
+  public KafkaTemplate<String, SendNotificationEvent> kafkaTemplateSendNotificationEvent(
+      ProducerFactory<String, SendNotificationEvent> producerFactory
+  ) {
+    return createKafkaTemplate(producerFactory);
   }
 }

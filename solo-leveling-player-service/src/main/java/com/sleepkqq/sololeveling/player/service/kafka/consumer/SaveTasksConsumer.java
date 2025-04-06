@@ -1,10 +1,14 @@
 package com.sleepkqq.sololeveling.player.service.kafka.consumer;
 
-import static com.sleepkqq.sololeveling.avro.constants.KafkaGroupIds.TASK_GROUP_ID;
+import static com.sleepkqq.sololeveling.avro.constants.KafkaGroupIds.PLAYER_GROUP_ID;
 import static com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics.SAVE_TASKS_TOPIC;
+import static com.sleepkqq.sololeveling.avro.notification.NotificationPriority.LOW;
 import static com.sleepkqq.sololeveling.player.service.model.player.enums.PlayerTaskStatus.IN_PROGRESS;
 
+import com.sleepkqq.sololeveling.avro.notification.Notification;
+import com.sleepkqq.sololeveling.avro.notification.SendNotificationEvent;
 import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent;
+import com.sleepkqq.sololeveling.player.service.kafka.producer.SendNotificationProducer;
 import com.sleepkqq.sololeveling.player.service.mapper.AvroMapper;
 import com.sleepkqq.sololeveling.player.service.model.Immutables;
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService;
@@ -24,11 +28,12 @@ public class SaveTasksConsumer {
 
   private final TaskService taskService;
   private final PlayerTaskService playerTaskService;
+  private final SendNotificationProducer sendNotificationProducer;
   private final AvroMapper avroMapper;
 
   @KafkaListener(
       topics = SAVE_TASKS_TOPIC,
-      groupId = TASK_GROUP_ID,
+      groupId = PLAYER_GROUP_ID,
       containerFactory = "kafkaListenerContainerFactorySaveTasksEvent"
   )
   @Transactional
@@ -49,5 +54,12 @@ public class SaveTasksConsumer {
         });
 
     log.info("<< Tasks successfully saved | transactionId={}", event.getTransactionId());
+    var sendNotificationEvent = new SendNotificationEvent(
+        event.getTransactionId(),
+        event.getPlayerId(),
+        LOW,
+        new Notification()
+    );
+    sendNotificationProducer.send(sendNotificationEvent);
   }
 }

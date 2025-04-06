@@ -41,7 +41,7 @@ public class GenerateTasksProducer {
   public void send(long playerId) {
     var player = playerService.get(playerId);
     var tasksCount = player.maxTasks() - playerTaskService.getCurrentTasksCount(playerId);
-    if (tasksCount < 1 || tasksCount > 5) {
+    if (tasksCount < 1 || tasksCount > player.maxTasks()) {
       throw new IllegalArgumentException(format(
           "Incorrect current tasks count=%d, playerId=%d", tasksCount, playerId
       ));
