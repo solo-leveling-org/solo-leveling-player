@@ -58,7 +58,7 @@ public class SaveTasksConsumer {
         event.getTransactionId(),
         event.getPlayerId(),
         LOW,
-        new Notification()
+        new Notification("Your tasks have been successfully generated!")
     );
     sendNotificationProducer.send(sendNotificationEvent);
   }
