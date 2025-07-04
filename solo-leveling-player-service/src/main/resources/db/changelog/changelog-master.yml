@@ -1,5 +1,0 @@
-databaseChangeLog:
-  - include:
-      file: db/changelog/V1__Initial_schema.xml
-  - include:
-      file: db/changelog/V2__Add_indexes.xml
