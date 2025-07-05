@@ -26,7 +26,7 @@ class DefineTaskRarityService {
 		private const val LEGENDARY_WEIGHT_MULTIPLIER = 0.1
 	}
 
-	fun define(topics: Set<PlayerTaskTopic>): TaskRarity {
+	fun define(topics: List<PlayerTaskTopic>): TaskRarity {
 		require(topics.isNotEmpty()) { "topics size must be > 0" }
 		val avgLevel = topics.map {
 			val level = it.level

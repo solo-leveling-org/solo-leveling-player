@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
 	id("buildsrc.convention.kotlin-jvm")
 	id("io.spring.dependency-management") version "1.1.4"
@@ -24,4 +26,8 @@ kotlin {
 	sourceSets.main {
 		kotlin.srcDir("build/generated/ksp/main/kotlin")
 	}
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.compilerOptions {
+	freeCompilerArgs.set(listOf("-Xannotation-default-target=param-property"))
 }

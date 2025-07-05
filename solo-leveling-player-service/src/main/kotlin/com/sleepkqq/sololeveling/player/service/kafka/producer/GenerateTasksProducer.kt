@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.UUID
 
 @Service
 class GenerateTasksProducer(
@@ -58,9 +58,9 @@ class GenerateTasksProducer(
 	private fun generateTask(playerTaskTopics: List<PlayerTaskTopic>, taskId: UUID): GenerateTask {
 		val taskTopicsMap = playerTaskTopics.associateBy { it.taskTopic }
 		val topics = defineTaskTopicService.define(taskTopicsMap.keys)
-		val mappedTopics = topics.map(taskTopicsMap::getValue).toSet()
+		val mappedTopics = topics.map(taskTopicsMap::getValue)
 		return GenerateTask(
-			taskId.toString(),
+			avroMapper.map(taskId),
 			avroMapper.map(defineTaskRarityService.define(mappedTopics)),
 			topics.map(avroMapper::map)
 		)

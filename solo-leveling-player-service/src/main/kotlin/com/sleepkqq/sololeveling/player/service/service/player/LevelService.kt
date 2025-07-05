@@ -19,7 +19,6 @@ class LevelService(
 		private const val BASE_BEGIN_EXPERIENCE = 0
 
 		private val BASE_LEVEL = Level {
-			id = UUID.randomUUID()
 			level = BASE_FIRST_LEVEL
 			totalExperience = BASE_BEGIN_EXPERIENCE
 			currentExperience = BASE_BEGIN_EXPERIENCE
@@ -35,11 +34,13 @@ class LevelService(
 	fun find(id: UUID): Level? = levelRepository.findNullable(id)
 
 	fun initializePlayerLevel(): Level = Level(BASE_LEVEL) {
+		id = UUID.randomUUID()
 		experienceToNextLevel =
 			countExperienceService.countPlayerExperienceToNextLevel(BASE_FIRST_LEVEL)
 	}
 
 	fun initializeTopicLevel(): Level = Level(BASE_LEVEL) {
+		id = UUID.randomUUID()
 		experienceToNextLevel =
 			countExperienceService.countTopicExperienceToNextLevel(BASE_FIRST_LEVEL)
 	}

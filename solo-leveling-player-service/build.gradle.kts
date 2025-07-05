@@ -16,7 +16,13 @@ dependencies {
 
 	// GRPC
 	implementation(platform("org.springframework.grpc:spring-grpc-dependencies:0.10.0-SNAPSHOT"))
-	implementation("org.springframework.grpc:spring-grpc-server-web-spring-boot-starter")
+	implementation("org.springframework.grpc:spring-grpc-spring-boot-starter")
+	implementation("io.grpc:grpc-netty-shaded")
+	modules {
+		module("io.grpc:grpc-netty") {
+			replacedBy("io.grpc:grpc-netty-shaded", "Use Netty shaded instead of regular Netty")
+		}
+	}
 
 	// Project modules
 	implementation(project(":solo-leveling-player-model"))

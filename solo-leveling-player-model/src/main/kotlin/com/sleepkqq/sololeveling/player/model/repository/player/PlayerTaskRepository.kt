@@ -16,7 +16,7 @@ import org.babyfish.jimmer.sql.kt.ast.expression.valueIn
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @Repository
 interface PlayerTaskRepository : KRepository<PlayerTask, UUID> {

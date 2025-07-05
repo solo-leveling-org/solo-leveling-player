@@ -38,11 +38,11 @@ class SaveTasksConsumer(
 		log.info(">> Start saving tasks | transactionId={}", event.transactionId)
 		val now = LocalDateTime.now()
 		event.tasks
-			.map { t ->
-				val task = avroMapper.map(t)
+			.map {
+				val task = avroMapper.map(it)
 				val currentVersion = taskService.getVersion(task.id)
 				taskService.update(
-					Task {
+					Task(task) {
 						version = currentVersion
 					},
 					now

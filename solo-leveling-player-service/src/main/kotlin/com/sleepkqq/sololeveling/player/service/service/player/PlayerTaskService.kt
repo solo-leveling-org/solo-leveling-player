@@ -48,13 +48,8 @@ class PlayerTaskService(
 	}
 
 	@Transactional
-	fun setStatus(id: UUID, status: PlayerTaskStatus, now: LocalDateTime) {
+	fun setStatus(id: UUID, status: PlayerTaskStatus, now: LocalDateTime = LocalDateTime.now()) {
 		playerTaskRepository.setStatus(id, status, now)
-	}
-
-	@Transactional
-	fun setStatus(id: UUID, status: PlayerTaskStatus) {
-		setStatus(id, status, LocalDateTime.now())
 	}
 
 	@Transactional(readOnly = true)
