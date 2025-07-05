@@ -27,7 +27,7 @@ dependencies {
 	// Project modules
 	implementation(project(":solo-leveling-player-model"))
 	implementation("com.sleepkqq:solo-leveling-proto:2.1.0")
-	implementation("com.sleepkqq:solo-leveling-avro:2.0.1")
+	implementation("com.sleepkqq:solo-leveling-avro:2.0.2")
 
 	// Tests
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

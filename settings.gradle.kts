@@ -3,6 +3,8 @@ rootProject.name = "solo-leveling-player"
 include(":solo-leveling-player-service")
 include(":solo-leveling-player-model")
 
+val env = System.getenv()
+
 dependencyResolutionManagement {
 	@Suppress("UnstableApiUsage")
 	repositories {
@@ -12,15 +14,15 @@ dependencyResolutionManagement {
 		maven {
 			url = uri("https://maven.pkg.github.com/solo-leveling-org/solo-leveling-proto")
 			credentials {
-				username = System.getenv("GITHUB_USER")
-				password = System.getenv("GITHUB_PASSWORD")
+				username = env["GITHUB_USER"]
+				password = env["GITHUB_TOKEN"]
 			}
 		}
 		maven {
 			url = uri("https://maven.pkg.github.com/solo-leveling-org/solo-leveling-avro")
 			credentials {
-				username = System.getenv("GITHUB_USER")
-				password = System.getenv("GITHUB_PASSWORD")
+				username = env["GITHUB_USER"]
+				password = env["GITHUB_TOKEN"]
 			}
 		}
 		maven { url = uri("https://repo.spring.io/milestone") }

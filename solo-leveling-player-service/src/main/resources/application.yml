@@ -12,3 +12,9 @@ spring:
       port: 9091
 server:
   port: 8085
+logging:
+  level:
+    org.apache.kafka.clients.consumer.ConsumerConfig: WARN
+    org.apache.kafka.clients.producer.ProducerConfig: WARN
+    io.confluent.kafka.serializers.KafkaAvroDeserializerConfig: WARN
+    io.confluent.kafka.serializers.KafkaAvroSerializerConfig: WARN
