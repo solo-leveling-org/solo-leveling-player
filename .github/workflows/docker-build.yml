@@ -19,9 +19,22 @@ jobs:
           java-version: '24'
           distribution: 'temurin'
 
-      - name: Build Docker image
+      - name: Create gradle.properties
         env:
           GITHUB_USER: ${{ secrets.GITHUB_USER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          cat <<EOL > gradle.properties
+          org.gradle.caching=true
+          org.gradle.configuration-cache=true
+          github.user=${GITHUB_USER}
+          github.token=${GITHUB_TOKEN}
+          EOL
+
+      - name: Build Docker image
+        run: |
           docker build -t solo-leveling-player .
+
+      - name: Remove gradle.properties
+        run: |
+          rm -f gradle.properties
