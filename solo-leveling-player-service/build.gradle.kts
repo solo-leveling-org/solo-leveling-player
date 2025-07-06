@@ -13,6 +13,8 @@ dependencies {
 	// Spring Boot
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.springframework.kafka:spring-kafka")
+	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
 
 	// GRPC
 	implementation(platform("org.springframework.grpc:spring-grpc-dependencies:0.10.0-SNAPSHOT"))

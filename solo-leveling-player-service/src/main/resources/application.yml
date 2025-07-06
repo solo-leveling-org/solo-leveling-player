@@ -1,20 +1,20 @@
 spring:
   application:
-    name: solo-leveling-player-service
+    name: solo-leveling-player
   kafka:
-    bootstrap-servers: ${SERVER_HOST}:9092
+    bootstrap-servers: localhost:9092
     properties:
-      schema.registry.url: http://${SERVER_HOST}:8081
+      schema.registry.url: http://localhost:8081
   profiles:
     include: jimmer
-  grpc:
-    server:
-      port: 9091
-server:
-  port: 8085
 logging:
   level:
     org.apache.kafka.clients.consumer.ConsumerConfig: WARN
     org.apache.kafka.clients.producer.ProducerConfig: WARN
     io.confluent.kafka.serializers.KafkaAvroDeserializerConfig: WARN
     io.confluent.kafka.serializers.KafkaAvroSerializerConfig: WARN
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

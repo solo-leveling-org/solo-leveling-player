@@ -49,6 +49,41 @@ jobs:
             ${{ secrets.DOCKERHUB_USER }}/solo-leveling-player:latest
             ${{ secrets.DOCKERHUB_USER }}/solo-leveling-player:${{ github.sha }}
 
-      - name: Remove gradle.properties
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Set environment variables for deployment
+        run: |
+          echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> $GITHUB_ENV
+          echo "GIT_COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
+          echo "DOCKERHUB_USER=${{ secrets.DOCKERHUB_USER }}" >> $GITHUB_ENV
+
+      - name: Install gettext for envsubst
+        run: |
+          sudo apt-get update && sudo apt-get install -y gettext-base
+
+      - name: Generate final deployment.yml with env vars
+        run: |
+          envsubst < k8s/deployment.yml > k8s/deployment-rendered.yml
+          cat k8s/deployment-rendered.yml
+
+      - name: Setup kubeconfig
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+        run: |
+          mkdir -p ~/.kube
+          echo "$KUBECONFIG" > ~/.kube/config
+
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f k8s/deployment-rendered.yml
+          kubectl apply -f k8s/service.yml
+
+      - name: Wait for deployment rollout
+        run: |
+          kubectl rollout status deployment/solo-leveling-player --timeout=60s
+
+      - name: Clean up temporary files (security)
         run: |
           rm -f gradle.properties
+          rm -f k8s/deployment-rendered.yml
