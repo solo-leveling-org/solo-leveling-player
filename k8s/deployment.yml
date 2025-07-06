@@ -17,6 +17,7 @@ spec:
       containers:
         - name: app
           image: $DOCKERHUB_USER/solo-leveling-player:$GIT_COMMIT_SHA
+          args: ["--spring.profiles.active=dev"]
           ports:
             - containerPort: 8080
               name: http
@@ -26,9 +27,9 @@ spec:
             - name: SERVER_HOST
               value: "${SERVER_HOST}"
             - name: POSTGRES_USER
-              value: "${SERVER_HOST}"
+              value: "${POSTGRES_USER}"
             - name: POSTGRES_PASSWORD
-              value: "${SERVER_HOST}"
+              value: "${POSTGRES_PASSWORD}"
           livenessProbe:
             httpGet:
               path: /actuator/health
