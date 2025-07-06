@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
-  meta
-name: solo-leveling-player
+meta:
+  name: solo-leveling-player
 spec:
   selector:
     app: solo-leveling-player
