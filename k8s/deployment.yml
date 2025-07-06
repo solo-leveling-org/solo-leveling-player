@@ -25,6 +25,10 @@ spec:
           env:
             - name: SERVER_HOST
               value: "${SERVER_HOST}"
+            - name: POSTGRES_USER
+              value: "${SERVER_HOST}"
+            - name: POSTGRES_PASSWORD
+              value: "${SERVER_HOST}"
           livenessProbe:
             httpGet:
               path: /actuator/health
