@@ -13,12 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '24'
-          distribution: 'temurin'
-
       - name: Create gradle.properties
         env:
           GITHUB_USER: ${{ secrets.GITHUB_USER }}
