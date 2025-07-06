@@ -36,4 +36,5 @@ EXPOSE 8080 9090
 CMD ["java", \
     "--enable-native-access=ALL-UNNAMED", \
     "--add-opens", "java.base/java.lang=ALL-UNNAMED", \
+    "--spring.profiles.active=dev", \
     "-jar", "solo-leveling-player.jar"]

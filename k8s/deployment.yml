@@ -17,7 +17,6 @@ spec:
       containers:
         - name: app
           image: $DOCKERHUB_USER/solo-leveling-player:$GIT_COMMIT_SHA
-          args: ["-Dspring.profiles.active=dev"]
           ports:
             - containerPort: 8080
               name: http
