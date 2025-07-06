@@ -1,4 +1,4 @@
-name: Build Docker Image with Gradle
+name: Build, Push and Deploy to Kubernetes
 
 on:
   workflow_dispatch:
