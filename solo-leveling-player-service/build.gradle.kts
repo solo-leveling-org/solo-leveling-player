@@ -5,7 +5,6 @@ plugins {
 	kotlin("plugin.spring") version "2.2.0"
 	kotlin("jvm")
 	alias(libs.plugins.kotlinPluginSerialization)
-	application
 }
 
 dependencies {
@@ -33,8 +32,4 @@ dependencies {
 
 	// Tests
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
-
-application {
-	mainClass = "com.sleepkqq.sololeveling.player.service.Application"
 }

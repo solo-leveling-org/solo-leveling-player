@@ -4,10 +4,14 @@ import org.babyfish.jimmer.spring.repository.EnableJimmerRepositories
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 
-@EnableJimmerRepositories(value = ["com.sleepkqq.sololeveling.player.model.repository"])
+@EnableJimmerRepositories("com.sleepkqq.sololeveling.player.model.repository")
 @SpringBootApplication(scanBasePackages = ["com.sleepkqq.sololeveling.player"])
-class Application
+class Application {
 
-fun main(args: Array<String>) {
-	SpringApplication.run(Application::class.java, *args)
+	companion object {
+		@JvmStatic
+		fun main(args: Array<String>) {
+			SpringApplication.run(Application::class.java, *args)
+		}
+	}
 }
