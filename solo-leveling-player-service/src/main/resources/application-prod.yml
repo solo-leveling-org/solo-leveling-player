@@ -5,3 +5,5 @@ spring:
     bootstrap-servers: ${SERVER_HOST}:9092
     properties:
       schema.registry.url: http://${SERVER_HOST}:8081
+server:
+  port: 8080

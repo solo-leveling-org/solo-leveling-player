@@ -3,10 +3,11 @@ package com.sleepkqq.sololeveling.player.service
 import org.babyfish.jimmer.spring.repository.EnableJimmerRepositories
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 
 @EnableJimmerRepositories("com.sleepkqq.sololeveling.player.model.repository")
 @SpringBootApplication(scanBasePackages = ["com.sleepkqq.sololeveling.player"])
-class Application {
+class Application : SpringBootServletInitializer() {
 
 	companion object {
 		@JvmStatic
