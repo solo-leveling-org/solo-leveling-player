@@ -6,13 +6,11 @@ import com.sleepkqq.sololeveling.player.model.entity.player.playerTaskTopicId
 import org.babyfish.jimmer.spring.repository.KRepository
 import org.babyfish.jimmer.sql.kt.ast.expression.eq
 import org.springframework.stereotype.Repository
-import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.UUID
 
 @Repository
 interface LevelRepository : KRepository<Level, UUID> {
 
-	@Transactional
 	fun findByPlayerId(playerId: Long): Level? =
 		sql.createQuery(Level::class) {
 			where(table.playerId eq playerId)
@@ -20,7 +18,6 @@ interface LevelRepository : KRepository<Level, UUID> {
 		}
 			.fetchFirstOrNull()
 
-	@Transactional
 	fun findByPlayerTaskTopicId(topicId: UUID): Level? =
 		sql.createQuery(Level::class) {
 			where(table.playerTaskTopicId eq topicId)

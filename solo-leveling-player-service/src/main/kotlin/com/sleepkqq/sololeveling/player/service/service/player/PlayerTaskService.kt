@@ -24,18 +24,15 @@ class PlayerTaskService(
 	}
 
 	@Transactional(readOnly = true)
-	fun getTaskId(playerId: Long, taskId: UUID): UUID =
-		playerTaskRepository.findIdByPlayerIdAndTaskId(playerId, taskId)
-			?: throw IllegalArgumentException(
-				String.format("PlayerTask not found playerId=%d taskId=%s", playerId, taskId)
-			)
+	fun findPlayerTasksId(playerId: Long, tasksId: Collection<UUID>): List<UUID> =
+		playerTaskRepository.findIdByPlayerIdAndTasksIdIn(playerId, tasksId)
 
 	@Transactional
 	fun insert(playerTask: PlayerTask): PlayerTask =
 		playerTaskRepository.save(playerTask, SaveMode.INSERT_ONLY)
 
 	@Transactional
-	fun update(playerTask: PlayerTask, now: LocalDateTime): PlayerTask {
+	fun update(playerTask: PlayerTask, now: LocalDateTime = LocalDateTime.now()): PlayerTask {
 		return playerTaskRepository.save(
 			PlayerTask(playerTask) { updatedAt = now },
 			SaveMode.UPDATE_ONLY
@@ -43,13 +40,12 @@ class PlayerTaskService(
 	}
 
 	@Transactional
-	fun update(playerTask: PlayerTask): PlayerTask {
-		return update(playerTask, LocalDateTime.now())
-	}
-
-	@Transactional
-	fun setStatus(id: UUID, status: PlayerTaskStatus, now: LocalDateTime = LocalDateTime.now()) {
-		playerTaskRepository.setStatus(id, status, now)
+	fun setStatus(
+		ids: Collection<UUID>,
+		status: PlayerTaskStatus,
+		now: LocalDateTime = LocalDateTime.now()
+	) {
+		playerTaskRepository.setStatus(ids, status, now)
 	}
 
 	@Transactional(readOnly = true)

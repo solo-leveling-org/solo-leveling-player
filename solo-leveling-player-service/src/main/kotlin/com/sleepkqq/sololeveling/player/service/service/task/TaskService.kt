@@ -21,9 +21,8 @@ class TaskService(
 	@Transactional(readOnly = true)
 	fun find(id: UUID): Task? = taskRepository.findNullable(id)
 
-	@Transactional(readOnly = true)
-	fun getVersion(id: UUID): Int = taskRepository.findVersionById(id)
-		?: throw ModelNotFoundException(Task::class, id)
+	@Transactional
+	fun updateTasks(tasks: Collection<Task>) = taskRepository.updateTasks(tasks)
 
 	@Transactional
 	fun insert(task: Task): Task =

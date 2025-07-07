@@ -14,14 +14,12 @@ import org.babyfish.jimmer.sql.kt.ast.expression.eq
 import org.babyfish.jimmer.sql.kt.ast.expression.plus
 import org.babyfish.jimmer.sql.kt.ast.expression.valueIn
 import org.springframework.stereotype.Repository
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.UUID
 
 @Repository
 interface PlayerTaskRepository : KRepository<PlayerTask, UUID> {
 
-	@Transactional
 	fun findByPlayerIdAndStatusIn(
 		playerId: Long,
 		statuses: Collection<PlayerTaskStatus>
@@ -41,7 +39,6 @@ interface PlayerTaskRepository : KRepository<PlayerTask, UUID> {
 	}
 		.execute()
 
-	@Transactional
 	fun countByPlayerIdAndStatusIn(
 		playerId: Long,
 		statuses: Collection<PlayerTaskStatus>
@@ -54,21 +51,19 @@ interface PlayerTaskRepository : KRepository<PlayerTask, UUID> {
 	}
 		.fetchOne()
 
-	@Transactional
-	fun findIdByPlayerIdAndTaskId(playerId: Long, taskId: UUID): UUID? =
+	fun findIdByPlayerIdAndTasksIdIn(playerId: Long, tasksId: Collection<UUID>): List<UUID> =
 		sql.createQuery(PlayerTask::class) {
 			where(
 				table.playerId eq playerId,
-				table.taskId eq taskId
+				table.taskId valueIn tasksId
 			)
 			select(table.id)
 		}
-			.fetchFirstOrNull()
+			.execute()
 
-	@Transactional
-	fun setStatus(id: UUID, status: PlayerTaskStatus, now: LocalDateTime) =
+	fun setStatus(ids: Collection<UUID>, status: PlayerTaskStatus, now: LocalDateTime) =
 		sql.createUpdate(PlayerTask::class) {
-			where(table.id eq id)
+			where(table.id valueIn ids)
 			set(table.status, status)
 			set(table.version, table.version.plus(1))
 			set(table.updatedAt, now)

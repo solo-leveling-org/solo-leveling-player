@@ -110,7 +110,7 @@ class PlayerApi(
 	) {
 		try {
 			val playerTaskId = protoMapper.map(request.playerTaskId)
-			playerTaskService.setStatus(playerTaskId, PlayerTaskStatus.PENDING_COMPLETION)
+			playerTaskService.setStatus(setOf(playerTaskId), PlayerTaskStatus.PENDING_COMPLETION)
 			val response = Empty.newBuilder().build()
 
 			responseObserver.onNext(response)
@@ -127,7 +127,7 @@ class PlayerApi(
 	) {
 		try {
 			val playerTaskId = protoMapper.map(request.playerTaskId)
-			playerTaskService.setStatus(playerTaskId, PlayerTaskStatus.SKIPPED)
+			playerTaskService.setStatus(setOf(playerTaskId), PlayerTaskStatus.SKIPPED)
 			val response = Empty.newBuilder().build()
 
 			responseObserver.onNext(response)

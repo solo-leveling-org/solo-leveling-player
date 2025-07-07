@@ -37,21 +37,17 @@ class SaveTasksConsumer(
 	fun listen(event: SaveTasksEvent) {
 		log.info(">> Start saving tasks | transactionId={}", event.transactionId)
 		val now = LocalDateTime.now()
-		event.tasks
-			.map {
-				val task = avroMapper.map(it)
-				val currentVersion = taskService.getVersion(task.id)
-				taskService.update(
-					Task(task) {
-						version = currentVersion
-					},
-					now
-				)
-			}
-			.forEach {
-				val playerTaskId = playerTaskService.getTaskId(event.playerId, it.id)
-				playerTaskService.setStatus(playerTaskId, PlayerTaskStatus.IN_PROGRESS, now)
-			}
+		val tasks = event.tasks.map {
+			Task(avroMapper.map(it)) { updatedAt = now }
+		}
+
+		taskService.updateTasks(tasks)
+
+		val playerTasksId = playerTaskService.findPlayerTasksId(
+			event.playerId,
+			tasks.map { it.id }
+		)
+		playerTaskService.setStatus(playerTasksId, PlayerTaskStatus.IN_PROGRESS, now)
 
 		log.info("<< Tasks successfully saved | transactionId={}", event.transactionId)
 		val sendNotificationEvent = SendNotificationEvent(

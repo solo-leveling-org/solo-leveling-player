@@ -6,12 +6,10 @@ import com.sleepkqq.sololeveling.player.model.entity.user.version
 import org.babyfish.jimmer.spring.repository.KRepository
 import org.babyfish.jimmer.sql.kt.ast.expression.eq
 import org.springframework.stereotype.Repository
-import org.springframework.transaction.annotation.Transactional
 
 @Repository
 interface UserRepository : KRepository<User, Long> {
 
-	@Transactional
 	fun findVersionById(id: Long): Int? =
 		sql.createQuery(User::class) {
 			where(table.id eq id)
