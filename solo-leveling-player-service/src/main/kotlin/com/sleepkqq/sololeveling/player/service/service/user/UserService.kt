@@ -28,23 +28,24 @@ class UserService(
 	fun insert(user: User): User = userRepository.save(user, SaveMode.INSERT_ONLY)
 
 	@Transactional
-	fun update(user: User, now: LocalDateTime): User = userRepository.save(
-		User(user) { updatedAt = now },
-		SaveMode.UPDATE_ONLY
-	)
-
-	@Transactional
-	fun update(user: User): User = update(user, LocalDateTime.now())
+	fun update(user: User, now: LocalDateTime = LocalDateTime.now()): User =
+		userRepository.save(
+			User(user) { updatedAt = now },
+			SaveMode.UPDATE_ONLY
+		)
 
 	@Transactional
 	fun upsert(user: User): User {
 		val now = LocalDateTime.now()
 		return findVersion(user.id)
 			?.let {
-				User(user) {
-					version = it
-					lastLoginAt = now
-				}
+				update(
+					User(user) {
+						version = it
+						lastLoginAt = now
+					},
+					now
+				)
 			}
 			?: insert(userRegistrationService.register(user))
 	}
