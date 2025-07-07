@@ -5,6 +5,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStat
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.UUID
@@ -39,7 +40,7 @@ class PlayerTaskService(
 		)
 	}
 
-	@Transactional
+	@Transactional(propagation = Propagation.MANDATORY)
 	fun setStatus(
 		ids: Collection<UUID>,
 		status: PlayerTaskStatus,

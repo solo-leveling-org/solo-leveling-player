@@ -32,6 +32,7 @@ class PlayerApi(
 
 	private val log = LoggerFactory.getLogger(PlayerApi::class.java)
 
+	@Transactional
 	override fun getPlayerInfo(
 		request: GetPlayerInfoRequest,
 		responseObserver: StreamObserver<GetPlayerInfoResponse>
@@ -69,6 +70,7 @@ class PlayerApi(
 		}
 	}
 
+	@Transactional
 	override fun savePlayerTopics(
 		request: SavePlayerTopicsRequest,
 		responseObserver: StreamObserver<Empty>
@@ -88,6 +90,7 @@ class PlayerApi(
 		}
 	}
 
+	@Transactional
 	override fun generateTasks(
 		request: GenerateTasksRequest,
 		responseObserver: StreamObserver<Empty>
@@ -104,6 +107,7 @@ class PlayerApi(
 		}
 	}
 
+	@Transactional
 	override fun completeTask(
 		request: CompleteTaskRequest,
 		responseObserver: StreamObserver<Empty>
@@ -121,6 +125,7 @@ class PlayerApi(
 		}
 	}
 
+	@Transactional
 	override fun skipTask(
 		request: SkipTaskRequest,
 		responseObserver: StreamObserver<Empty>
