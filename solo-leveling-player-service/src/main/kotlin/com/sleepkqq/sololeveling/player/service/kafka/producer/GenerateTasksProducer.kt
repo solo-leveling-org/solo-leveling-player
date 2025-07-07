@@ -40,11 +40,13 @@ class GenerateTasksProducer(
 			"Incorrect current tasks count=$tasksCount, playerId=$playerId"
 		}
 
-		val generateTasks = generateSequence { UUID.randomUUID() }
+		val taskIds = generateSequence { UUID.randomUUID() }
 			.take(tasksCount.toInt())
-			.onEach { createEmptyPlayerTask(playerId, it) }
-			.map { generateTask(player.taskTopics, it) }
 			.toList()
+
+		taskService.insertTasks(taskIds.map { emptyTask(it, playerId) })
+
+		val generateTasks = taskIds.map { generateTask(player.taskTopics, it) }
 		val event = GenerateTasksEvent.newBuilder()
 			.setTransactionId(UUID.randomUUID().toString())
 			.setPlayerId(playerId)
@@ -66,17 +68,14 @@ class GenerateTasksProducer(
 		)
 	}
 
-	private fun createEmptyPlayerTask(linkedPlayerId: Long, taskId: UUID) =
-		taskService.insert(
-			Task {
-				id = taskId
-				playerTasks = listOf(
-					PlayerTask {
-						id = UUID.randomUUID()
-						status = PlayerTaskStatus.PREPARING
-						playerId = linkedPlayerId
-					}
-				)
+	private fun emptyTask(taskId: UUID, linkedPlayerId: Long): Task = Task {
+		id = taskId
+		playerTasks = listOf(
+			PlayerTask {
+				id = UUID.randomUUID()
+				status = PlayerTaskStatus.PREPARING
+				playerId = linkedPlayerId
 			}
 		)
+	}
 }

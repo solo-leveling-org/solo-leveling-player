@@ -51,11 +51,11 @@ interface PlayerTaskRepository : KRepository<PlayerTask, UUID> {
 	}
 		.fetchOne()
 
-	fun findIdByPlayerIdAndTasksIdIn(playerId: Long, tasksId: Collection<UUID>): List<UUID> =
+	fun findIdByPlayerIdAndTaskIdsIn(playerId: Long, taskIds: Collection<UUID>): List<UUID> =
 		sql.createQuery(PlayerTask::class) {
 			where(
 				table.playerId eq playerId,
-				table.taskId valueIn tasksId
+				table.taskId valueIn taskIds
 			)
 			select(table.id)
 		}

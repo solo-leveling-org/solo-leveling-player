@@ -43,11 +43,11 @@ class SaveTasksConsumer(
 
 		taskService.updateTasks(tasks)
 
-		val playerTasksId = playerTaskService.findPlayerTasksId(
+		val playerTaskIds = playerTaskService.findPlayerTaskIds(
 			event.playerId,
 			tasks.map { it.id }
 		)
-		playerTaskService.setStatus(playerTasksId, PlayerTaskStatus.IN_PROGRESS, now)
+		playerTaskService.setStatus(playerTaskIds, PlayerTaskStatus.IN_PROGRESS, now)
 
 		log.info("<< Tasks successfully saved | transactionId={}", event.transactionId)
 		val sendNotificationEvent = SendNotificationEvent(

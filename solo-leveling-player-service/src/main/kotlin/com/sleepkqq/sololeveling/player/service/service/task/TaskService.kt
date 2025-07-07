@@ -29,6 +29,10 @@ class TaskService(
 		taskRepository.save(task, SaveMode.INSERT_ONLY)
 
 	@Transactional
+	fun insertTasks(tasks: Collection<Task>) =
+		taskRepository.saveEntities(tasks, SaveMode.INSERT_ONLY)
+
+	@Transactional
 	fun update(task: Task, now: LocalDateTime): Task = taskRepository.save(
 		Task(task) { updatedAt = now },
 		SaveMode.UPDATE_ONLY

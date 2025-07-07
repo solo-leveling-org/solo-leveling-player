@@ -24,8 +24,8 @@ class PlayerTaskService(
 	}
 
 	@Transactional(readOnly = true)
-	fun findPlayerTasksId(playerId: Long, tasksId: Collection<UUID>): List<UUID> =
-		playerTaskRepository.findIdByPlayerIdAndTasksIdIn(playerId, tasksId)
+	fun findPlayerTaskIds(playerId: Long, taskIds: Collection<UUID>): List<UUID> =
+		playerTaskRepository.findIdByPlayerIdAndTaskIdsIn(playerId, taskIds)
 
 	@Transactional
 	fun insert(playerTask: PlayerTask): PlayerTask =
