@@ -16,8 +16,8 @@ dependencies {
 	api("org.springframework:spring-context")
 
 	// Database
-	api("org.postgresql:postgresql:42.7.7")
-	api("org.liquibase:liquibase-core:4.32.0")
+	api("org.postgresql:postgresql:42.7.5")
+	api("org.liquibase:liquibase-core:4.31.1")
 	api("org.babyfish.jimmer:jimmer-spring-boot-starter:0.9.96")
 	ksp("org.babyfish.jimmer:jimmer-ksp:0.9.96")
 }
