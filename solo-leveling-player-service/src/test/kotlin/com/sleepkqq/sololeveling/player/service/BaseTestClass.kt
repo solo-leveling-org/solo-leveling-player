@@ -13,7 +13,7 @@ import org.testcontainers.kafka.ConfluentKafkaContainer
 
 @Testcontainers
 @ActiveProfiles("test")
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class BaseTestClass {
 
 	@LocalServerPort
