@@ -7,6 +7,12 @@ plugins {
 	alias(libs.plugins.kotlinPluginSerialization)
 }
 
+dependencyManagement {
+	imports {
+		mavenBom("org.testcontainers:testcontainers-bom:1.21.3")
+	}
+}
+
 dependencies {
 	implementation(libs.bundles.kotlinxEcosystem)
 	// Spring Boot
@@ -32,4 +38,9 @@ dependencies {
 
 	// Tests
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.springframework.boot:spring-boot-testcontainers")
+	testImplementation("org.testcontainers:kafka")
+	testImplementation("org.testcontainers:postgresql")
+	testImplementation("org.testcontainers:junit-jupiter")
+	testImplementation("io.rest-assured:rest-assured")
 }
