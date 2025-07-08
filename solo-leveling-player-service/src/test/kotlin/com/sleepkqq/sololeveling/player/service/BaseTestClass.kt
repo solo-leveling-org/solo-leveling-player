@@ -2,7 +2,10 @@ package com.sleepkqq.sololeveling.player.service
 
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.test.context.ActiveProfiles
+import org.testcontainers.containers.Network
+import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.kafka.ConfluentKafkaContainer
@@ -20,5 +23,11 @@ abstract class BaseTestClass {
 		@JvmStatic
 		@Container
 		val kafkaContainer = ConfluentKafkaContainer("confluentinc/cp-kafka:latest")
+
+		@JvmStatic
+		@Container
+		@ServiceConnection
+		val postgresContainer = PostgreSQLContainer("postgres:latest")
+			.withNetwork(Network.SHARED)
 	}
 }
