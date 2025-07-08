@@ -13,6 +13,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
+import org.springframework.kafka.listener.ContainerProperties
 
 @EnableKafka
 @Configuration
@@ -37,8 +38,11 @@ class KafkaConfig(
 	@Bean
 	fun kafkaListenerContainerFactorySaveTasksEvent(
 		consumerFactory: ConsumerFactory<String, SaveTasksEvent>
-	): ConcurrentKafkaListenerContainerFactory<String, SaveTasksEvent> =
-		createKafkaListenerContainerFactory(consumerFactory)
+	): ConcurrentKafkaListenerContainerFactory<String, SaveTasksEvent> {
+		val factory = createKafkaListenerContainerFactory(consumerFactory)
+		factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
+		return factory
+	}
 
 	@Bean
 	fun producerFactorySendNotificationEvent(): ProducerFactory<String, SendNotificationEvent> =
@@ -48,4 +52,13 @@ class KafkaConfig(
 	fun kafkaTemplateSendNotificationEvent(
 		producerFactory: ProducerFactory<String, SendNotificationEvent>
 	): KafkaTemplate<String, SendNotificationEvent> = createKafkaTemplate(producerFactory)
+
+	@Bean
+	fun producerFactoryString(): ProducerFactory<String, String> =
+		createProducerFactory()
+
+	@Bean
+	fun kafkaTemplateString(
+		producerFactory: ProducerFactory<String, String>
+	): KafkaTemplate<String, String> = createKafkaTemplate(producerFactory)
 }
