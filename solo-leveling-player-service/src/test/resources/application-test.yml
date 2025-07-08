@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    hikari:
+      connectionTimeout: 20000
+      maximumPoolSize: 5
+      pool-name: app-hikari-pool-name
+      username: test
+      password: test
+    url: jdbc:tc:postgresql:latest:///testdb
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver

@@ -9,7 +9,7 @@ plugins {
 
 dependencyManagement {
 	imports {
-		mavenBom("org.testcontainers:testcontainers-bom:1.19.0")
+		mavenBom("org.testcontainers:testcontainers-bom:1.21.3")
 	}
 }
 
