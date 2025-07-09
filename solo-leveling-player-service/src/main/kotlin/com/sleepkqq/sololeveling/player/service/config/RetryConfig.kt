@@ -7,26 +7,24 @@ import org.springframework.retry.backoff.ExponentialBackOffPolicy
 import org.springframework.retry.policy.SimpleRetryPolicy
 import org.springframework.retry.support.RetryTemplate
 
-@Configuration
 @EnableRetry
+@Configuration
 class RetryConfig {
 
-    @Bean
-    fun kafkaRetryTemplate(): RetryTemplate {
-        val retryTemplate = RetryTemplate()
-        
-        // Configure backoff policy
-        val backOffPolicy = ExponentialBackOffPolicy()
-        backOffPolicy.initialInterval = 1000L
-        backOffPolicy.multiplier = 2.0
-        backOffPolicy.maxInterval = 10000L
-        retryTemplate.setBackOffPolicy(backOffPolicy)
-        
-        // Configure retry policy
-        val retryPolicy = SimpleRetryPolicy()
-        retryPolicy.maxAttempts = 3
-        retryTemplate.setRetryPolicy(retryPolicy)
-        
-        return retryTemplate
-    }
-} 
+	@Bean
+	fun kafkaRetryTemplate(): RetryTemplate {
+		val retryTemplate = RetryTemplate()
+
+		val backOffPolicy = ExponentialBackOffPolicy()
+		backOffPolicy.initialInterval = 1000L
+		backOffPolicy.multiplier = 2.0
+		backOffPolicy.maxInterval = 10000L
+		retryTemplate.setBackOffPolicy(backOffPolicy)
+
+		val retryPolicy = SimpleRetryPolicy()
+		retryPolicy.maxAttempts = 3
+		retryTemplate.setRetryPolicy(retryPolicy)
+
+		return retryTemplate
+	}
+}
