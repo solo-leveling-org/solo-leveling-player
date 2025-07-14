@@ -32,7 +32,7 @@ class GenerateTasksProducer(
 	private val avroMapper: AvroMapper
 ) {
 
-	private val log = LoggerFactory.getLogger(GenerateTasksProducer::class.java)
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	@Transactional
 	@Retryable(maxAttempts = 3, backoff = Backoff(delay = 1000, multiplier = 2.0))

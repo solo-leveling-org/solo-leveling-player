@@ -17,11 +17,17 @@ dependencies {
 	implementation(libs.bundles.kotlinxEcosystem)
 	// Spring Boot
 	implementation("org.springframework.boot:spring-boot-starter")
-	implementation("org.springframework.kafka:spring-kafka")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.retry:spring-retry")
 	implementation("org.springframework:spring-aspects")
+
+	// Kafka
+	implementation("org.springframework.kafka:spring-kafka")
+
+	// Redis
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+	implementation("io.lettuce:lettuce-core")
 
 	// GRPC
 	implementation(platform("org.springframework.grpc:spring-grpc-dependencies:0.10.0-SNAPSHOT"))

@@ -13,7 +13,7 @@ class SendNotificationProducer(
 	private val kafkaTemplate: KafkaTemplate<String, SendNotificationEvent>
 ) {
 
-	private val log = LoggerFactory.getLogger(SendNotificationProducer::class.java)
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	@Retryable(maxAttempts = 3, backoff = Backoff(delay = 1000, multiplier = 2.0))
 	fun send(event: SendNotificationEvent) {

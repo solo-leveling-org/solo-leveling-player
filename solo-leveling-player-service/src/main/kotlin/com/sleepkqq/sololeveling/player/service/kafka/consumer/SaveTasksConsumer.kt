@@ -11,6 +11,7 @@ import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.service.kafka.producer.SendNotificationProducer
 import com.sleepkqq.sololeveling.player.service.mapper.AvroMapper
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
+import com.sleepkqq.sololeveling.player.service.service.redis.IdempotencyService
 import com.sleepkqq.sololeveling.player.service.service.task.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
@@ -25,10 +26,11 @@ class SaveTasksConsumer(
 	private val taskService: TaskService,
 	private val playerTaskService: PlayerTaskService,
 	private val sendNotificationProducer: SendNotificationProducer,
-	private val avroMapper: AvroMapper
+	private val avroMapper: AvroMapper,
+	private val idempotencyService: IdempotencyService
 ) {
 
-	private val log = LoggerFactory.getLogger(SaveTasksConsumer::class.java)
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	@KafkaListener(
 		topics = [KafkaTaskTopics.SAVE_TASKS_TOPIC],
@@ -38,7 +40,15 @@ class SaveTasksConsumer(
 	@Transactional
 	fun listen(event: SaveTasksEvent, ack: Acknowledgment) {
 		val startTime = System.currentTimeMillis()
-		log.info(">> Start processing SaveTasksEvent | transactionId={}", event.transactionId)
+		val txId = event.transactionId
+
+		log.info(">> Start processing SaveTasksEvent | transactionId={}", txId)
+
+		if (idempotencyService.isProcessed(txId)) {
+			log.warn("Duplicate transaction detected, skipping... | transactionId={}", txId)
+			ack.acknowledge()
+			return
+		}
 
 		try {
 			processSaveTasksEvent(event)
@@ -46,7 +56,7 @@ class SaveTasksConsumer(
 			val processingTime = System.currentTimeMillis() - startTime
 			log.info(
 				"<< Successfully processed SaveTasksEvent | transactionId={}, processingTime={}ms",
-				event.transactionId, processingTime
+				txId, processingTime
 			)
 
 			ack.acknowledge()
@@ -55,7 +65,7 @@ class SaveTasksConsumer(
 			val processingTime = System.currentTimeMillis() - startTime
 			log.error(
 				"Failed to process SaveTasksEvent | transactionId={}, processingTime={}ms, error={}",
-				event.transactionId, processingTime, e.message, e
+				txId, processingTime, e.message, e
 			)
 
 			throw e
