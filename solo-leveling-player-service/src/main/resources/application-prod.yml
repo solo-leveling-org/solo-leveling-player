@@ -5,7 +5,8 @@ spring:
     bootstrap-servers: kafka-service:9092
     properties:
       schema.registry.url: http://schema-registry-service:8081
-  redis:
-    host: redis
+  data:
+    redis:
+      host: redis
 server:
   port: 8080
