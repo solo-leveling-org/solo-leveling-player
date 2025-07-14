@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${SERVER_HOST}:5432/solo_leveling
+    url: jdbc:postgresql://postgres:5432/solo_leveling
   kafka:
-    bootstrap-servers: ${SERVER_HOST}:9092
+    bootstrap-servers: kafka-service:9092
     properties:
-      schema.registry.url: http://${SERVER_HOST}:8081
+      schema.registry.url: http://schema-registry-service:8081
 server:
   port: 8080
