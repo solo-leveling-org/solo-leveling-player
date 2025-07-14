@@ -44,13 +44,12 @@ class SaveTasksConsumer(
 
 		log.info(">> Start processing SaveTasksEvent | transactionId={}", txId)
 
-		if (idempotencyService.isProcessed(txId)) {
-			log.warn("Duplicate transaction detected, skipping... | transactionId={}", txId)
-			ack.acknowledge()
-			return
-		}
-
 		try {
+			if (idempotencyService.isProcessed(txId)) {
+				ack.acknowledge()
+				return
+			}
+
 			processSaveTasksEvent(event)
 
 			val processingTime = System.currentTimeMillis() - startTime
