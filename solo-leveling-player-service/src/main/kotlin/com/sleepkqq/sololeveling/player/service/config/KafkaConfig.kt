@@ -17,8 +17,8 @@ import org.springframework.kafka.core.ProducerFactory
 @EnableKafka
 @Configuration
 class KafkaConfig(
-	@Value("\${spring.kafka.bootstrap-servers}") bootstrapServers: String,
-	@Value("\${spring.kafka.properties.schema.registry.url}") schemaRegistryUrl: String
+	@Value($$"${spring.kafka.bootstrap-servers}") bootstrapServers: String,
+	@Value($$"${spring.kafka.properties.schema.registry.url}") schemaRegistryUrl: String
 ) : DefaultKafkaConfig(bootstrapServers, schemaRegistryUrl) {
 
 	@Bean

@@ -23,8 +23,6 @@ spec:
             - containerPort: 9090
               name: grpc
           env:
-            - name: SERVER_HOST
-              value: "${SERVER_HOST}"
             - name: POSTGRES_USER
               value: "${POSTGRES_USER}"
             - name: POSTGRES_PASSWORD

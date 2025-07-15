@@ -17,7 +17,7 @@ class UserApi(
 	private val protoMapper: ProtoMapper
 ) : UserServiceImplBase() {
 
-	private val log = LoggerFactory.getLogger(UserApi::class.java)
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	override fun getUserInfo(
 		request: GetUserInfoRequest,
