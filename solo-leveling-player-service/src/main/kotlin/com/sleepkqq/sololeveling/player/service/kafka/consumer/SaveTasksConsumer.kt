@@ -52,6 +52,8 @@ class SaveTasksConsumer(
 
 			processSaveTasksEvent(event)
 
+			sendSuccessNotification(event)
+
 			val processingTime = System.currentTimeMillis() - startTime
 			log.info(
 				"<< Successfully processed SaveTasksEvent | transactionId={}, processingTime={}ms",
@@ -94,8 +96,6 @@ class SaveTasksConsumer(
 			)
 			playerTaskService.setStatus(playerTaskIds, PlayerTaskStatus.IN_PROGRESS, now)
 		}
-
-		sendSuccessNotification(event)
 	}
 
 	private fun validateSaveTasksEvent(event: SaveTasksEvent) {
