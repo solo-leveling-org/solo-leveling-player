@@ -48,7 +48,6 @@ jobs:
 
       - name: Set environment variables for deployment
         run: |
-          echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> $GITHUB_ENV
           echo "GIT_COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
           echo "DOCKERHUB_USER=${{ secrets.DOCKERHUB_USER }}" >> $GITHUB_ENV
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> $GITHUB_ENV

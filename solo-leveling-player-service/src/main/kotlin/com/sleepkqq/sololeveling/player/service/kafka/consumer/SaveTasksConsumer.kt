@@ -11,11 +11,14 @@ import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.service.kafka.producer.SendNotificationProducer
 import com.sleepkqq.sololeveling.player.service.mapper.AvroMapper
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
+import com.sleepkqq.sololeveling.player.service.service.redis.IdempotencyService
 import com.sleepkqq.sololeveling.player.service.service.task.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.Assert
 import java.time.LocalDateTime
 
 @Service
@@ -23,10 +26,11 @@ class SaveTasksConsumer(
 	private val taskService: TaskService,
 	private val playerTaskService: PlayerTaskService,
 	private val sendNotificationProducer: SendNotificationProducer,
-	private val avroMapper: AvroMapper
+	private val avroMapper: AvroMapper,
+	private val idempotencyService: IdempotencyService
 ) {
 
-	private val log = LoggerFactory.getLogger(SaveTasksConsumer::class.java)
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	@KafkaListener(
 		topics = [KafkaTaskTopics.SAVE_TASKS_TOPIC],
@@ -34,28 +38,92 @@ class SaveTasksConsumer(
 		containerFactory = "kafkaListenerContainerFactorySaveTasksEvent"
 	)
 	@Transactional
-	fun listen(event: SaveTasksEvent) {
-		log.info(">> Start saving tasks | transactionId={}", event.transactionId)
+	fun listen(event: SaveTasksEvent, ack: Acknowledgment) {
+		val startTime = System.currentTimeMillis()
+		val txId = event.transactionId
+
+		log.info(">> Start processing SaveTasksEvent | transactionId={}", txId)
+
+		try {
+			if (idempotencyService.isProcessed(txId)) {
+				ack.acknowledge()
+				return
+			}
+
+			processSaveTasksEvent(event)
+
+			sendSuccessNotification(event)
+
+			val processingTime = System.currentTimeMillis() - startTime
+			log.info(
+				"<< Successfully processed SaveTasksEvent | transactionId={}, processingTime={}ms",
+				txId, processingTime
+			)
+
+			ack.acknowledge()
+
+		} catch (e: Exception) {
+			val processingTime = System.currentTimeMillis() - startTime
+			log.error(
+				"Failed to process SaveTasksEvent | transactionId={}, processingTime={}ms, error={}",
+				txId, processingTime, e.message, e
+			)
+
+			throw e
+		}
+	}
+
+	private fun processSaveTasksEvent(event: SaveTasksEvent) {
 		val now = LocalDateTime.now()
+
+		validateSaveTasksEvent(event)
+
 		val tasks = event.tasks.map {
 			Task(avroMapper.map(it)) { updatedAt = now }
 		}
 
+		log.info("Updating {} tasks for player {}", tasks.size, event.playerId)
 		taskService.updateTasks(tasks)
 
-		val playerTaskIds = playerTaskService.findPlayerTaskIds(
-			event.playerId,
-			tasks.map { it.id }
-		)
-		playerTaskService.setStatus(playerTaskIds, PlayerTaskStatus.IN_PROGRESS, now)
+		val taskIds = tasks.map { it.id }
+		val playerTaskIds = playerTaskService.findPlayerTaskIds(event.playerId, taskIds)
 
-		log.info("<< Tasks successfully saved | transactionId={}", event.transactionId)
-		val sendNotificationEvent = SendNotificationEvent(
-			event.transactionId,
-			event.playerId,
-			NotificationPriority.LOW,
-			Notification("Your tasks have been successfully generated!")
-		)
-		sendNotificationProducer.send(sendNotificationEvent)
+		if (playerTaskIds.isNotEmpty()) {
+			log.info(
+				"Setting {} player tasks to IN_PROGRESS for player {}",
+				playerTaskIds.size,
+				event.playerId
+			)
+			playerTaskService.setStatus(playerTaskIds, PlayerTaskStatus.IN_PROGRESS, now)
+		}
+	}
+
+	private fun validateSaveTasksEvent(event: SaveTasksEvent) {
+		Assert.hasText(event.transactionId, "Transaction ID cannot be blank")
+		Assert.notEmpty(event.tasks, "Tasks list cannot be empty")
+		Assert.isTrue(event.playerId > 0, "Player ID must be positive")
+
+		event.tasks.forEach {
+			Assert.hasText(it.taskId, "Task ID cannot be blank")
+		}
+	}
+
+	private fun sendSuccessNotification(event: SaveTasksEvent) {
+		try {
+			val sendNotificationEvent = SendNotificationEvent(
+				event.transactionId,
+				event.playerId,
+				NotificationPriority.LOW,
+				Notification("Your tasks have been successfully generated!")
+			)
+			sendNotificationProducer.send(sendNotificationEvent)
+			log.info("Success notification sent for transaction {}", event.transactionId)
+		} catch (e: Exception) {
+			log.error(
+				"Failed to send success notification for transaction {}: {}",
+				event.transactionId,
+				e.message
+			)
+		}
 	}
 }

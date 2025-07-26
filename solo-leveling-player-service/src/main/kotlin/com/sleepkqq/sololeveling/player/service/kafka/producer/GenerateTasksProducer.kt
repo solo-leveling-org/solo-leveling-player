@@ -15,6 +15,8 @@ import com.sleepkqq.sololeveling.player.service.service.task.DefineTaskTopicServ
 import com.sleepkqq.sololeveling.player.service.service.task.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.retry.annotation.Backoff
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -30,42 +32,72 @@ class GenerateTasksProducer(
 	private val avroMapper: AvroMapper
 ) {
 
-	private val log = LoggerFactory.getLogger(GenerateTasksProducer::class.java)
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	@Transactional
+	@Retryable(maxAttempts = 3, backoff = Backoff(delay = 1000, multiplier = 2.0))
 	fun send(playerId: Long) {
-		val player = playerService.get(playerId)
-		val tasksCount = player.maxTasks - playerTaskService.getCurrentTasksCount(playerId)
-		require(!(tasksCount < 1 || tasksCount > player.maxTasks)) {
-			"Incorrect current tasks count=$tasksCount, playerId=$playerId"
+		log.info(">> Start generating tasks for player {}", playerId)
+
+		try {
+			val player = playerService.get(playerId)
+			val tasksCount = player.maxTasks - playerTaskService.getCurrentTasksCount(playerId)
+
+			require(tasksCount >= 1 && tasksCount <= player.maxTasks) {
+				"Incorrect current tasks count=$tasksCount, playerId=$playerId, maxTasks=${player.maxTasks}"
+			}
+
+			val taskIds = generateSequence { UUID.randomUUID() }
+				.take(tasksCount.toInt())
+				.toList()
+
+			log.info("Generated {} task IDs for player {}", taskIds.size, playerId)
+
+			taskService.insertTasks(taskIds.map { emptyTask(it, playerId) })
+
+			val generateTasks = taskIds.map { generateTask(player.taskTopics, it) }
+			val event = GenerateTasksEvent.newBuilder()
+				.setTransactionId(UUID.randomUUID().toString())
+				.setPlayerId(playerId)
+				.setInputs(generateTasks)
+				.build()
+
+			sendEvent(event)
+
+		} catch (e: Exception) {
+			log.error("Failed to generate tasks for player {}: {}", playerId, e.message, e)
+			throw e
 		}
+	}
 
-		val taskIds = generateSequence { UUID.randomUUID() }
-			.take(tasksCount.toInt())
-			.toList()
-
-		taskService.insertTasks(taskIds.map { emptyTask(it, playerId) })
-
-		val generateTasks = taskIds.map { generateTask(player.taskTopics, it) }
-		val event = GenerateTasksEvent.newBuilder()
-			.setTransactionId(UUID.randomUUID().toString())
-			.setPlayerId(playerId)
-			.setInputs(generateTasks)
-			.build()
-
-		kafkaTemplate.send(KafkaTaskTopics.GENERATE_TASKS_TOPIC, event)
-		log.info("<< Generate tasks event sent | transactionId={}", event.transactionId)
+	private fun sendEvent(event: GenerateTasksEvent) {
+		try {
+			kafkaTemplate.send(KafkaTaskTopics.GENERATE_TASKS_TOPIC, event.transactionId, event)
+			log.info("<< Generate tasks event sent successfully | transactionId={}", event.transactionId)
+		} catch (throwable: Exception) {
+			log.error(
+				"Failed to send generate tasks event | transactionId={}, error={}",
+				event.transactionId, throwable.message, throwable
+			)
+			throw RuntimeException("Failed to send generate tasks event", throwable)
+		}
 	}
 
 	private fun generateTask(playerTaskTopics: List<PlayerTaskTopic>, taskId: UUID): GenerateTask {
-		val taskTopicsMap = playerTaskTopics.associateBy { it.taskTopic }
-		val topics = defineTaskTopicService.define(taskTopicsMap.keys)
-		val mappedTopics = topics.map(taskTopicsMap::getValue)
-		return GenerateTask(
-			avroMapper.map(taskId),
-			avroMapper.map(defineTaskRarityService.define(mappedTopics)),
-			topics.map(avroMapper::map)
-		)
+		try {
+			val taskTopicsMap = playerTaskTopics.associateBy { it.taskTopic }
+			val topics = defineTaskTopicService.define(taskTopicsMap.keys)
+			val mappedTopics = topics.map(taskTopicsMap::getValue)
+
+			return GenerateTask(
+				avroMapper.map(taskId),
+				avroMapper.map(defineTaskRarityService.define(mappedTopics)),
+				topics.map(avroMapper::map)
+			)
+		} catch (e: Exception) {
+			log.error("Failed to generate task for taskId {}: {}", taskId, e.message, e)
+			throw e
+		}
 	}
 
 	private fun emptyTask(taskId: UUID, linkedPlayerId: Long): Task = Task {

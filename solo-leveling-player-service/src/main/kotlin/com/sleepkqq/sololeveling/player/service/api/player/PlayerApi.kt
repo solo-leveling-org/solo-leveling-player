@@ -30,7 +30,7 @@ class PlayerApi(
 	private val protoMapper: ProtoMapper
 ) : PlayerServiceImplBase() {
 
-	private val log = LoggerFactory.getLogger(PlayerApi::class.java)
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	@Transactional
 	override fun getPlayerInfo(
