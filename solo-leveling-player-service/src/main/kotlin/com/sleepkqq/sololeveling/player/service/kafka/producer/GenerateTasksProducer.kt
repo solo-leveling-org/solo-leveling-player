@@ -62,7 +62,7 @@ class GenerateTasksProducer(
 				.setInputs(generateTasks)
 				.build()
 
-			sendWithRetry(event)
+			sendEvent(event)
 
 		} catch (e: Exception) {
 			log.error("Failed to generate tasks for player {}: {}", playerId, e.message, e)
@@ -70,7 +70,7 @@ class GenerateTasksProducer(
 		}
 	}
 
-	private fun sendWithRetry(event: GenerateTasksEvent) {
+	private fun sendEvent(event: GenerateTasksEvent) {
 		try {
 			kafkaTemplate.send(KafkaTaskTopics.GENERATE_TASKS_TOPIC, event.transactionId, event)
 			log.info("<< Generate tasks event sent successfully | transactionId={}", event.transactionId)

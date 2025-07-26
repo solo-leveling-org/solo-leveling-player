@@ -4,5 +4,5 @@ liquibase:
 jimmer:
   language: kotlin
   default-enum-strategy: ORDINAL
-  show-sql: true
+  show-sql: false
   dialect: org.babyfish.jimmer.sql.dialect.PostgresDialect
