@@ -57,4 +57,4 @@ class PlayerTaskServiceImpl(
 	@Transactional(readOnly = true)
 	override fun getCurrentTasksCount(playerId: Long): Long =
 		playerTaskRepository.countByPlayerIdAndStatusIn(playerId, CURRENT_TASKS_STATUSES)
-} 
+}

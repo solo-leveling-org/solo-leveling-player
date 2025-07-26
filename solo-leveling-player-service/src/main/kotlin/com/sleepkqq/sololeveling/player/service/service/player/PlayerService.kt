@@ -8,4 +8,4 @@ interface PlayerService {
 	fun insert(player: Player): Player
 	fun update(player: Player, now: LocalDateTime = LocalDateTime.now()): Player
 	fun find(id: Long): Player?
-} 
+}

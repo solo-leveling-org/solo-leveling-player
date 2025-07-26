@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
+@Suppress("unused")
 @Service
 @Profile("!test")
 class LevelServiceImpl(
@@ -46,4 +47,4 @@ class LevelServiceImpl(
 		experienceToNextLevel =
 			countExperienceService.countTopicExperienceToNextLevel(BASE_FIRST_LEVEL)
 	}
-} 
+}
