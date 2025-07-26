@@ -1,0 +1,41 @@
+name: "Build project with tests"
+
+on:
+  pull_request:
+    branches-ignore: [ ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build project with tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create gradle.properties
+        env:
+          GITHUB_USER: ${{ secrets.GITHUB_USER }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat <<EOL > gradle.properties
+          org.gradle.caching=true
+          org.gradle.configuration-cache=true
+          github.user=${GITHUB_USER}
+          github.token=${GITHUB_TOKEN}
+          EOL
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '24'
+          distribution: 'temurin'
+
+      - name: Build project with Gradle
+        run: |
+          ./gradlew clean build
+
+      - name: Clean up temporary files (security)
+        run: |
+          rm -f gradle.properties
