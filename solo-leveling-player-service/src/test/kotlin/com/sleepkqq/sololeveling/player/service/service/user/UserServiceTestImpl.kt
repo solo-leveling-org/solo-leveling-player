@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
 
+@Suppress("unused")
 @Service
 @Profile("test")
 class UserServiceTestImpl : UserService {
@@ -52,4 +53,4 @@ class UserServiceTestImpl : UserService {
 	}
 
 	fun clear() = users.clear()
-} 
+}

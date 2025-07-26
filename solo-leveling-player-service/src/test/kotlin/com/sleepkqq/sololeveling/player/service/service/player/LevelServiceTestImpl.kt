@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
+@Suppress("unused")
 @Service
 @Profile("test")
 class LevelServiceTestImpl : LevelService {
@@ -40,4 +41,4 @@ class LevelServiceTestImpl : LevelService {
 	}
 
 	fun clear() = levels.clear()
-} 
+}

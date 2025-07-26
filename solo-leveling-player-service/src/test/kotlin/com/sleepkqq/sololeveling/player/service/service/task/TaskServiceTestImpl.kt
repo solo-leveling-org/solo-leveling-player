@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
+@Suppress("unused")
 @Service
 @Profile("test")
 class TaskServiceTestImpl : TaskService {
@@ -46,4 +47,4 @@ class TaskServiceTestImpl : TaskService {
 	override fun update(task: Task): Task = update(task, LocalDateTime.now())
 
 	fun clear() = tasks.clear()
-} 
+}

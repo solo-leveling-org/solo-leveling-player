@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
 
+@Suppress("unused")
 @Service
 @Profile("test")
 class PlayerServiceTestImpl : PlayerService {
@@ -32,9 +33,7 @@ class PlayerServiceTestImpl : PlayerService {
 		return updated
 	}
 
-	override fun update(player: Player): Player = update(player, LocalDateTime.now())
-
 	override fun find(id: Long): Player? = players[id]
 
 	fun clear() = players.clear()
-} 
+}

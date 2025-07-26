@@ -7,6 +7,9 @@ import java.time.LocalDateTime
 interface PlayerTaskTopicService {
 	fun initialize(linkedPlayerId: Long, linkedTaskTopic: TaskTopic): PlayerTaskTopic
 	fun insert(topic: PlayerTaskTopic): PlayerTaskTopic
-	fun update(playerTaskTopic: PlayerTaskTopic, now: LocalDateTime): PlayerTaskTopic
-	fun update(topic: PlayerTaskTopic): PlayerTaskTopic
+	fun insertAll(topics: Collection<PlayerTaskTopic>): List<PlayerTaskTopic>
+	fun update(
+		playerTaskTopic: PlayerTaskTopic,
+		now: LocalDateTime = LocalDateTime.now()
+	): PlayerTaskTopic
 }

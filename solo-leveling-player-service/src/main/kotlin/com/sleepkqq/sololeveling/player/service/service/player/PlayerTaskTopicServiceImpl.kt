@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.UUID
 
+@Suppress("unused")
 @Service
 @Profile("!test")
 class PlayerTaskTopicServiceImpl(
@@ -30,14 +31,14 @@ class PlayerTaskTopicServiceImpl(
 		playerTaskTopicRepository.save(topic, SaveMode.INSERT_ONLY)
 
 	@Transactional
+	override fun insertAll(topics: Collection<PlayerTaskTopic>) =
+		playerTaskTopicRepository.saveAll(topics)
+
+	@Transactional
 	override fun update(playerTaskTopic: PlayerTaskTopic, now: LocalDateTime): PlayerTaskTopic {
 		return playerTaskTopicRepository.save(
 			PlayerTaskTopic(playerTaskTopic) { updatedAt = now },
 			SaveMode.UPDATE_ONLY
 		)
 	}
-
-	@Transactional
-	override fun update(topic: PlayerTaskTopic): PlayerTaskTopic =
-		update(topic, LocalDateTime.now())
-} 
+}

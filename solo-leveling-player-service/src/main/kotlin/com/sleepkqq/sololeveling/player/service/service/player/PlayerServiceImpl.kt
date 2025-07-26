@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
+@Suppress("unused")
 @Service
 @Profile("!test")
 class PlayerServiceImpl(
@@ -30,9 +31,6 @@ class PlayerServiceImpl(
 			Player(player) { updatedAt = now },
 			SaveMode.UPDATE_ONLY
 		)
-
-	@Transactional
-	override fun update(player: Player): Player = update(player, LocalDateTime.now())
 
 	@Transactional(readOnly = true)
 	override fun find(id: Long): Player? = playerRepository.findNullable(id)

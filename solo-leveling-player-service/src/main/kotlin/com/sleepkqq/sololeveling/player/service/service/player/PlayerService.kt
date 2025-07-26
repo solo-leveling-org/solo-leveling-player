@@ -6,7 +6,6 @@ import java.time.LocalDateTime
 interface PlayerService {
 	fun get(id: Long): Player
 	fun insert(player: Player): Player
-	fun update(player: Player, now: LocalDateTime): Player
-	fun update(player: Player): Player
+	fun update(player: Player, now: LocalDateTime = LocalDateTime.now()): Player
 	fun find(id: Long): Player?
 } 

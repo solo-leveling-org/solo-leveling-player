@@ -10,6 +10,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
+@Suppress("unused")
 @Service
 @Profile("test")
 class PlayerTaskTopicServiceTestImpl : PlayerTaskTopicService {
@@ -39,6 +40,8 @@ class PlayerTaskTopicServiceTestImpl : PlayerTaskTopicService {
 		return topic
 	}
 
+	override fun insertAll(topics: Collection<PlayerTaskTopic>) = topics.map(this::insert)
+
 	override fun update(playerTaskTopic: PlayerTaskTopic, now: LocalDateTime): PlayerTaskTopic {
 		if (!playerTaskTopics.containsKey(playerTaskTopic.id)) {
 			throw IllegalStateException("PlayerTaskTopic with id ${playerTaskTopic.id} not found")
@@ -48,7 +51,5 @@ class PlayerTaskTopicServiceTestImpl : PlayerTaskTopicService {
 		return updated
 	}
 
-	override fun update(topic: PlayerTaskTopic): PlayerTaskTopic = update(topic, LocalDateTime.now())
-
 	fun clear() = playerTaskTopics.clear()
-} 
+}

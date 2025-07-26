@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.grpc.server.service.GrpcService
 import org.springframework.transaction.annotation.Transactional
 
+@Suppress("unused")
 @GrpcService
 class PlayerApi(
 	private val playerService: PlayerService,
@@ -76,13 +77,13 @@ class PlayerApi(
 		responseObserver: StreamObserver<Empty>
 	) {
 		try {
-			request.topicList
+			val topics = request.topicList
 				.map(protoMapper::map)
 				.map { playerTaskTopicService.initialize(request.playerId, it) }
-				.forEach { playerTaskTopicService.insert(it) }
-			val response = Empty.newBuilder().build()
 
-			responseObserver.onNext(response)
+			playerTaskTopicService.insertAll(topics)
+
+			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
 		} catch (e: Exception) {
 			log.error("savePlayerTopics error", e)
@@ -97,9 +98,8 @@ class PlayerApi(
 	) {
 		try {
 			generateTasksProducer.send(request.playerId)
-			val response = Empty.newBuilder().build()
 
-			responseObserver.onNext(response)
+			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
 		} catch (e: Exception) {
 			log.error("savePlayerTopics error", e)
@@ -115,9 +115,8 @@ class PlayerApi(
 		try {
 			val playerTaskId = protoMapper.map(request.playerTaskId)
 			playerTaskService.setStatus(setOf(playerTaskId), PlayerTaskStatus.PENDING_COMPLETION)
-			val response = Empty.newBuilder().build()
 
-			responseObserver.onNext(response)
+			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
 		} catch (e: Exception) {
 			log.error("completeTask error", e)
@@ -133,9 +132,8 @@ class PlayerApi(
 		try {
 			val playerTaskId = protoMapper.map(request.playerTaskId)
 			playerTaskService.setStatus(setOf(playerTaskId), PlayerTaskStatus.SKIPPED)
-			val response = Empty.newBuilder().build()
 
-			responseObserver.onNext(response)
+			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
 		} catch (e: Exception) {
 			log.error("completeTask error", e)

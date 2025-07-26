@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
+@Suppress("unused")
 @Service
 @Profile("test")
 class PlayerTaskServiceTestImpl : PlayerTaskService {
@@ -68,4 +69,4 @@ class PlayerTaskServiceTestImpl : PlayerTaskService {
 	}
 
 	fun clear() = playerTasks.clear()
-} 
+}
