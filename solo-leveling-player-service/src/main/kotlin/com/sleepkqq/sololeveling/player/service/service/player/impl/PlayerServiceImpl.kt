@@ -1,8 +1,9 @@
-package com.sleepkqq.sololeveling.player.service.service.player
+package com.sleepkqq.sololeveling.player.service.service.player.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerRepository
 import com.sleepkqq.sololeveling.player.service.exception.ModelNotFoundException
+import com.sleepkqq.sololeveling.player.service.service.player.PlayerService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service

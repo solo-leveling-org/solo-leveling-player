@@ -1,8 +1,10 @@
-package com.sleepkqq.sololeveling.player.service.service.player
+package com.sleepkqq.sololeveling.player.service.service.player.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskTopicRepository
+import com.sleepkqq.sololeveling.player.service.service.player.LevelService
+import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskTopicService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
