@@ -5,14 +5,14 @@ import org.springframework.stereotype.Service
 @Service
 class CountExperienceService {
 
-	companion object {
-		private const val FIRST_LEVEL_PLAYER_EXPERIENCE = 100
-		private const val NEXT_LEVEL_PLAYER_EXPERIENCE = 10
+	private companion object {
+		const val FIRST_LEVEL_PLAYER_EXPERIENCE = 100
+		const val NEXT_LEVEL_PLAYER_EXPERIENCE = 10
 
-		private const val PLAYER_TASK_TOPIC_COEFFICIENT = 5
-		private const val FIRST_LEVEL_TOPIC_EXPERIENCE =
+		const val PLAYER_TASK_TOPIC_COEFFICIENT = 5
+		const val FIRST_LEVEL_TOPIC_EXPERIENCE =
 			FIRST_LEVEL_PLAYER_EXPERIENCE / PLAYER_TASK_TOPIC_COEFFICIENT
-		private const val NEXT_LEVEL_TOPIC_EXPERIENCE =
+		const val NEXT_LEVEL_TOPIC_EXPERIENCE =
 			NEXT_LEVEL_PLAYER_EXPERIENCE / PLAYER_TASK_TOPIC_COEFFICIENT
 	}
 
