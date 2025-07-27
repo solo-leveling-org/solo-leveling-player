@@ -2,11 +2,15 @@ package com.sleepkqq.sololeveling.player.service
 
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
+import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.kafka.ConfluentKafkaContainer
 
+@Suppress("unused")
 @Testcontainers
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -21,5 +25,23 @@ abstract class BaseTestClass {
 		@Container
 		val redisContainer = GenericContainer("redis:7")
 			.withExposedPorts(6379)
+
+		@JvmStatic
+		@Container
+		val postgresContainer = PostgreSQLContainer<Nothing>("postgres:15")
+			.apply {
+				withDatabaseName("sololeveling_test")
+				withUsername("test")
+				withPassword("test")
+				withReuse(true)
+			}
+
+		@JvmStatic
+		@DynamicPropertySource
+		fun configureProperties(registry: DynamicPropertyRegistry) {
+			registry.add("spring.datasource.url", postgresContainer::getJdbcUrl)
+			registry.add("spring.datasource.username", postgresContainer::getUsername)
+			registry.add("spring.datasource.password", postgresContainer::getPassword)
+		}
 	}
 }

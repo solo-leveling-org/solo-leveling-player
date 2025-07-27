@@ -6,7 +6,6 @@ import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskTopicR
 import com.sleepkqq.sololeveling.player.service.service.player.LevelService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskTopicService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -14,7 +13,6 @@ import java.util.UUID
 
 @Suppress("unused")
 @Service
-@Profile("!test")
 class PlayerTaskTopicServiceImpl(
 	private val playerTaskTopicRepository: PlayerTaskTopicRepository,
 	private val levelService: LevelService

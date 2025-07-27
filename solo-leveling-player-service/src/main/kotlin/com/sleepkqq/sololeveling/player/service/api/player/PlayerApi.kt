@@ -77,7 +77,7 @@ class PlayerApi(
 		responseObserver: StreamObserver<Empty>
 	) {
 		try {
-			val topics = request.topicList
+			val topics = request.appendTopicList
 				.map(protoMapper::map)
 				.map { playerTaskTopicService.initialize(request.playerId, it) }
 
@@ -113,8 +113,11 @@ class PlayerApi(
 		responseObserver: StreamObserver<Empty>
 	) {
 		try {
-			val playerTaskId = protoMapper.map(request.playerTaskId)
-			playerTaskService.setStatus(setOf(playerTaskId), PlayerTaskStatus.PENDING_COMPLETION)
+			val playerTaskId = protoMapper.map(request.playerTaskInfo)
+			playerTaskService.setStatus(
+				setOf(playerTaskId).map { it.id },
+				PlayerTaskStatus.PENDING_COMPLETION
+			)
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
@@ -130,8 +133,12 @@ class PlayerApi(
 		responseObserver: StreamObserver<Empty>
 	) {
 		try {
-			val playerTaskId = protoMapper.map(request.playerTaskId)
-			playerTaskService.setStatus(setOf(playerTaskId), PlayerTaskStatus.SKIPPED)
+			val playerTaskId = protoMapper.map(request.playerTaskInfo)
+			playerTaskService.setStatus(
+				setOf(playerTaskId).map { it.id },
+				PlayerTaskStatus.PENDING_COMPLETION
+			)
+
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()

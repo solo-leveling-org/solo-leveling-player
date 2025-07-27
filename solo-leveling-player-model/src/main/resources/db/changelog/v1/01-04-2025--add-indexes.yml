@@ -1,0 +1,62 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-04-01-add-performance-and-unique-indexes
+      author: sleepkqq
+      changes:
+        # Index for player_task unique constraint
+        - createIndex:
+            tableName: player_tasks
+            indexName: idx_player_task_player_task
+            unique: true
+            columns:
+              - column:
+                  name: player_id
+              - column:
+                  name: task_id
+
+        # Index for player_task_topics unique constraint
+        - createIndex:
+            tableName: player_task_topics
+            indexName: idx_player_task_topics_player_topic
+            unique: true
+            columns:
+              - column:
+                  name: player_id
+              - column:
+                  name: task_topic
+
+        # Index for foreign keys to improve join performance
+        - createIndex:
+            tableName: levels
+            indexName: idx_levels_player_id
+            columns:
+              - column:
+                  name: player_id
+
+        - createIndex:
+            tableName: levels
+            indexName: idx_levels_player_task_topic_id
+            columns:
+              - column:
+                  name: player_task_topic_id
+
+        - createIndex:
+            tableName: player_tasks
+            indexName: idx_player_task_player_id
+            columns:
+              - column:
+                  name: player_id
+
+        - createIndex:
+            tableName: player_tasks
+            indexName: idx_player_task_task_id
+            columns:
+              - column:
+                  name: task_id
+
+        - createIndex:
+            tableName: player_task_topics
+            indexName: idx_player_task_topics_player_id
+            columns:
+              - column:
+                  name: player_id

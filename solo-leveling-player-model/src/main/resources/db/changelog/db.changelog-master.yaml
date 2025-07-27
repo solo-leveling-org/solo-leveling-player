@@ -1,5 +1,10 @@
 databaseChangeLog:
-  - includeAll:
-      path: db/changelog/v1
-  - includeAll:
-      path: db/changelog/v2
+  # v1
+  - include:
+      file: db/changelog/v1/01-04-2025--initial-schema.yml
+  - include:
+      file: db/changelog/v1/01-04-2025--add-indexes.yml
+
+  # v2
+  - include:
+      file: db/changelog/v2/27-07-2025--player-balance.yml

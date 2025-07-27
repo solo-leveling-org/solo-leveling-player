@@ -6,14 +6,12 @@ import com.sleepkqq.sololeveling.player.model.repository.player.LevelRepository
 import com.sleepkqq.sololeveling.player.service.exception.ModelNotFoundException
 import com.sleepkqq.sololeveling.player.service.service.player.CountExperienceService
 import com.sleepkqq.sololeveling.player.service.service.player.LevelService
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Suppress("unused")
 @Service
-@Profile("!test")
 class LevelServiceImpl(
 	private val levelRepository: LevelRepository,
 	private val countExperienceService: CountExperienceService

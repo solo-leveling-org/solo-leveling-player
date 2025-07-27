@@ -41,12 +41,13 @@ dependencies {
 
 	// Project modules
 	implementation(project(":solo-leveling-player-model"))
-	implementation("com.sleepkqq:solo-leveling-proto:2.1.0")
+	implementation("com.sleepkqq:solo-leveling-proto:3.0.1")
 	implementation("com.sleepkqq:solo-leveling-avro:2.1.0")
 
 	// Tests
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("org.testcontainers:kafka")
+	testImplementation("org.testcontainers:postgresql")
 	testImplementation("org.testcontainers:junit-jupiter")
 }

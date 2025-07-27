@@ -27,8 +27,22 @@ class ProtoMapper : BaseMapper() {
 	fun map(playerTaskStatus: com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus): PlayerTaskStatus =
 		playerTaskStatus.name.let { PlayerTaskStatus.valueOf(it) }
 
+	fun map(playerTaskStatus: PlayerTaskStatus): com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus =
+		playerTaskStatus.name.let {
+			com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus.valueOf(
+				it
+			)
+		}
+
 	fun map(taskRarity: com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity): TaskRarity =
 		taskRarity.name.let { TaskRarity.valueOf(it) }
+
+	fun map(taskRarity: TaskRarity): com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity =
+		taskRarity.name.let {
+			com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity.valueOf(
+				it
+			)
+		}
 
 	fun map(userRole: UserRole): com.sleepkqq.sololeveling.proto.user.UserRole =
 		userRole.name.let { com.sleepkqq.sololeveling.proto.user.UserRole.valueOf(it) }
@@ -69,6 +83,14 @@ class ProtoMapper : BaseMapper() {
 		}
 		.build()
 
+	fun map(playerTaskInfo: PlayerTaskInfo): PlayerTask = PlayerTask {
+		id = map(playerTaskInfo.id)
+		task = map(playerTaskInfo.taskInfo)
+		status = map(playerTaskInfo.status)
+		createdAt = map(playerTaskInfo.createdAt)
+		closedAt = map(playerTaskInfo.closedAt)
+	}
+
 	fun map(task: Task): TaskInfo = TaskInfo.newBuilder()
 		.apply {
 			id = map(task.id)
@@ -82,6 +104,18 @@ class ProtoMapper : BaseMapper() {
 			task.intelligence?.let { intelligence = it }
 		}
 		.build()
+
+	fun map(taskInfo: TaskInfo): Task = Task {
+		id = map(taskInfo.id)
+		topics = taskInfo.topicList.map { map(it) }
+		title = taskInfo.title
+		description = taskInfo.description
+		experience = taskInfo.experience
+		rarity = map(taskInfo.rarity)
+		agility = taskInfo.agility
+		strength = taskInfo.strength
+		intelligence = taskInfo.intelligence
+	}
 
 	fun map(user: User): UserInfo = UserInfo.newBuilder()
 		.setId(user.id)

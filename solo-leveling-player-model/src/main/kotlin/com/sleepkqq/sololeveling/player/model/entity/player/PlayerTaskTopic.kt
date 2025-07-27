@@ -16,6 +16,8 @@ interface PlayerTaskTopic : Model {
 
 	val taskTopic: TaskTopic
 
+	val isActive: Boolean
+
 	@ManyToOne
 	@JoinColumn(name = "player_id")
 	val player: Player

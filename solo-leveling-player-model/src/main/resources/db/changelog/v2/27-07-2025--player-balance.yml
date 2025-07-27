@@ -1,0 +1,137 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-07-27-add-currency-reward-to-tasks
+      author: sleepkqq
+      changes:
+        - addColumn:
+            tableName: tasks
+            columns:
+              - column:
+                  name: currency_reward
+                  type: DECIMAL(19,2)
+                  constraints:
+                    nullable: true
+
+  - changeSet:
+      id: 2025-07-27-add-player-balance-tables
+      author: sleepkqq
+      changes:
+        - createTable:
+            tableName: player_balances
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: balance
+                  type: DECIMAL(19,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: player_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: version
+                  type: integer
+                  defaultValue: 0
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: player_balance_transactions
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: amount
+                  type: DECIMAL(19,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cause
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: balance_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: integer
+                  defaultValue: 0
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: player_balances
+            baseColumnNames: player_id
+            constraintName: fk_player_balance_player
+            referencedTableName: players
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: player_balance_transactions
+            baseColumnNames: balance_id
+            constraintName: fk_player_balance_transaction_balance
+            referencedTableName: player_balances
+            referencedColumnNames: id
+
+        - createIndex:
+            tableName: player_balances
+            indexName: idx_player_balance_player_id
+            columns:
+              - column:
+                  name: player_id
+
+        - createIndex:
+            tableName: player_balance_transactions
+            indexName: idx_player_balance_transaction_balance_id
+            columns:
+              - column:
+                  name: balance_id
+
+        - createIndex:
+            tableName: player_balance_transactions
+            indexName: idx_player_balance_transaction_type_cause
+            columns:
+              - column:
+                  name: type
+              - column:
+                  name: cause

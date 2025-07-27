@@ -1,17 +1,17 @@
-package com.sleepkqq.sololeveling.player.service.service.task
+package com.sleepkqq.sololeveling.player.service.service.task.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.repository.task.TaskRepository
 import com.sleepkqq.sololeveling.player.service.exception.ModelNotFoundException
+import com.sleepkqq.sololeveling.player.service.service.task.TaskService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.UUID
 
+@Suppress("unused")
 @Service
-@Profile("!test")
 class TaskServiceImpl(
 	private val taskRepository: TaskRepository
 ) : TaskService {
