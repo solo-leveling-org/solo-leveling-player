@@ -20,11 +20,17 @@ abstract class BaseTestClass {
 		@JvmStatic
 		@Container
 		val kafkaContainer = ConfluentKafkaContainer("confluentinc/cp-kafka:latest")
+			.withExposedPorts(9092)
 
 		@JvmStatic
 		@Container
 		val redisContainer = GenericContainer("redis:7")
 			.withExposedPorts(6379)
+
+		@JvmStatic
+		@Container
+		val schemaRegistryContainer = GenericContainer("confluentinc/cp-schema-registry:7.2.15")
+			.withExposedPorts(8081)
 
 		@JvmStatic
 		@Container
@@ -34,6 +40,7 @@ abstract class BaseTestClass {
 				withUsername("test")
 				withPassword("test")
 				withReuse(true)
+				withExposedPorts(5432)
 			}
 
 		@JvmStatic
@@ -42,6 +49,14 @@ abstract class BaseTestClass {
 			registry.add("spring.datasource.url", postgresContainer::getJdbcUrl)
 			registry.add("spring.datasource.username", postgresContainer::getUsername)
 			registry.add("spring.datasource.password", postgresContainer::getPassword)
+
+			registry.add("spring.data.redis.port", redisContainer::getFirstMappedPort)
+			registry.add("spring.data.redis.host", redisContainer::getHost)
+
+			registry.add("spring.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers)
+			registry.add("spring.kafka.properties.schema.registry.url") {
+				"http://${schemaRegistryContainer.host}:${schemaRegistryContainer.firstMappedPort}"
+			}
 		}
 	}
 }
