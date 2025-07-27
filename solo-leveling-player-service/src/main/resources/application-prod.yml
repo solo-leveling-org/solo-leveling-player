@@ -1,6 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://postgres:5432/solo_leveling
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
   kafka:
     bootstrap-servers: kafka-service:9092
     properties:

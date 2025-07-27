@@ -32,8 +32,10 @@ jobs:
           java-version: '24'
           distribution: 'temurin'
 
-      - name: Set up Docker
-        uses: docker/setup-docker-action@v4
+      - name: Start Docker daemon
+        run: |
+          sudo systemctl start docker
+          docker info
 
       - name: Build project with Gradle
         run: |
