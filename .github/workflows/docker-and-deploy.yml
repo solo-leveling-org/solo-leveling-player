@@ -76,7 +76,7 @@ jobs:
 
       - name: Wait for deployment rollout
         run: |
-          kubectl rollout status deployment/solo-leveling-player --timeout=90s
+          kubectl rollout status deployment/solo-leveling-player --timeout=120s
 
       - name: Clean up temporary files (security)
         run: |
