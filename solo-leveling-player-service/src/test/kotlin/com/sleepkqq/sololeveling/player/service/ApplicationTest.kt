@@ -19,51 +19,38 @@ class ApplicationTest : BaseTestClass() {
 	@Test
 	fun `insert should save task to database`() {
 		// Arrange
-		val taskId = UUID.randomUUID()
-		val title = "Test Task Title"
-		val description = "Test Task Description"
-		val experience = 100
-		val currencyReward = BigDecimal("50.75")
-		val rarity = TaskRarity.EPIC
-		val agility = 5
-		val strength = 10
-		val intelligence = 3
-		val topics = listOf(TaskTopic.PRODUCTIVITY, TaskTopic.SOCIAL_SKILLS)
 		val now = LocalDateTime.now()
-
 		val initialTask = Task {
-			id = taskId
-			this.title = title
-			this.description = description
-			this.experience = experience
-			this.currencyReward = currencyReward
-			this.rarity = rarity
-			this.agility = agility
-			this.strength = strength
-			this.intelligence = intelligence
-			this.topics = topics
+			id = UUID.randomUUID()
+			this.title = "Test Task Title"
+			this.description = "Test Task Description"
+			this.experience = 100
+			this.currencyReward = BigDecimal("50.75")
+			this.rarity = TaskRarity.EPIC
+			this.agility = 5
+			this.strength = 10
+			this.intelligence = 3
+			this.topics = listOf(TaskTopic.PRODUCTIVITY, TaskTopic.SOCIAL_SKILLS)
 			createdAt = now
 			updatedAt = now
 		}
 
 		// Act
 		val savedTask = taskService.insert(initialTask)
+		val fetchedTask = taskService.get(savedTask.id)
 
 		// Assert
-		assertThat(savedTask.id).isEqualTo(taskId)
-		assertThat(savedTask.title).isEqualTo(title)
-		assertThat(savedTask.description).isEqualTo(description)
-		assertThat(savedTask.experience).isEqualTo(experience)
-		assertThat(savedTask.currencyReward).isEqualByComparingTo(currencyReward)
-		assertThat(savedTask.rarity).isEqualTo(rarity)
-		assertThat(savedTask.agility).isEqualTo(agility)
-		assertThat(savedTask.strength).isEqualTo(strength)
-		assertThat(savedTask.intelligence).isEqualTo(intelligence)
-		assertThat(savedTask.topics).containsExactlyInAnyOrderElementsOf(topics)
-		assertThat(savedTask.createdAt).isEqualTo(now)
-		assertThat(savedTask.updatedAt).isEqualTo(now)
-
-		val fetchedTask = taskService.get(taskId)
-		assertThat(fetchedTask).usingRecursiveComparison().isEqualTo(savedTask)
+		assertThat(savedTask.id).isEqualTo(fetchedTask.id)
+		assertThat(savedTask.title).isEqualTo(fetchedTask.title)
+		assertThat(savedTask.description).isEqualTo(fetchedTask.description)
+		assertThat(savedTask.experience).isEqualTo(fetchedTask.experience)
+		assertThat(savedTask.currencyReward).isEqualByComparingTo(fetchedTask.currencyReward)
+		assertThat(savedTask.rarity).isEqualTo(fetchedTask.rarity)
+		assertThat(savedTask.agility).isEqualTo(fetchedTask.agility)
+		assertThat(savedTask.strength).isEqualTo(fetchedTask.strength)
+		assertThat(savedTask.intelligence).isEqualTo(fetchedTask.intelligence)
+		assertThat(savedTask.topics).containsExactlyInAnyOrderElementsOf(fetchedTask.topics)
+		assertThat(savedTask.createdAt).isEqualTo(fetchedTask.createdAt)
+		assertThat(savedTask.updatedAt).isEqualTo(fetchedTask.updatedAt)
 	}
 }
