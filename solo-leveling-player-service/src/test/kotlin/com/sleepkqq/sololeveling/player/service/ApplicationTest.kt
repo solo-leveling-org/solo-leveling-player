@@ -37,20 +37,16 @@ class ApplicationTest : BaseTestClass() {
 
 		// Act
 		val savedTask = taskService.insert(initialTask)
-		val fetchedTask = taskService.get(savedTask.id)
+
+		val newAgilityValue = 7
+		taskService.update(Task(savedTask) {
+			agility = newAgilityValue
+		})
+
+		val updatedTask = taskService.get(initialTask.id)
 
 		// Assert
-		assertThat(savedTask.id).isEqualTo(fetchedTask.id)
-		assertThat(savedTask.title).isEqualTo(fetchedTask.title)
-		assertThat(savedTask.description).isEqualTo(fetchedTask.description)
-		assertThat(savedTask.experience).isEqualTo(fetchedTask.experience)
-		assertThat(savedTask.currencyReward).isEqualByComparingTo(fetchedTask.currencyReward)
-		assertThat(savedTask.rarity).isEqualTo(fetchedTask.rarity)
-		assertThat(savedTask.agility).isEqualTo(fetchedTask.agility)
-		assertThat(savedTask.strength).isEqualTo(fetchedTask.strength)
-		assertThat(savedTask.intelligence).isEqualTo(fetchedTask.intelligence)
-		assertThat(savedTask.topics).containsExactlyInAnyOrderElementsOf(fetchedTask.topics)
-		assertThat(savedTask.createdAt).isEqualTo(fetchedTask.createdAt)
-		assertThat(savedTask.updatedAt).isEqualTo(fetchedTask.updatedAt)
+		assertThat(updatedTask.version).isEqualTo(savedTask.version + 1)
+		assertThat(updatedTask.agility).isEqualTo(newAgilityValue)
 	}
 }

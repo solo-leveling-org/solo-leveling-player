@@ -39,7 +39,4 @@ class TaskServiceImpl(
 		Task(task) { updatedAt = now },
 		SaveMode.UPDATE_ONLY
 	)
-
-	@Transactional
-	override fun update(task: Task): Task = update(task, LocalDateTime.now())
 }
