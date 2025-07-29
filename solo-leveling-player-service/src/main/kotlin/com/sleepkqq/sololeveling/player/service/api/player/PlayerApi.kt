@@ -146,7 +146,7 @@ class PlayerApi(
 			val playerTask = protoMapper.map(request.playerTask)
 			playerTaskService.setStatus(
 				setOf(playerTask.toEntity()),
-				PlayerTaskStatus.PENDING_COMPLETION
+				PlayerTaskStatus.SKIPPED
 			)
 
 			responseObserver.onNext(Empty.newBuilder().build())
