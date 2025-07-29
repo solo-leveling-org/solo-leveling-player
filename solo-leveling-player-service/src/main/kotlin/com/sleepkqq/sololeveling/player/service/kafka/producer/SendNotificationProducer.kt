@@ -30,7 +30,7 @@ class SendNotificationProducer(
 				"Failed to send notification event | transactionId={}, error={}",
 				event.transactionId, e.message, e
 			)
-			throw RuntimeException("Failed to send notification event", e)
+			throw e
 		}
 	}
 }

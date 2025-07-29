@@ -1,5 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.service.task.impl
 
+import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.repository.task.TaskRepository
 import com.sleepkqq.sololeveling.player.service.exception.ModelNotFoundException
@@ -15,6 +17,10 @@ import java.util.UUID
 class TaskServiceImpl(
 	private val taskRepository: TaskRepository
 ) : TaskService {
+
+	private companion object {
+		const val INITIAL_TASK_VERSION = 0
+	}
 
 	@Transactional(readOnly = true)
 	override fun get(id: UUID): Task = find(id)
@@ -45,4 +51,16 @@ class TaskServiceImpl(
 		Task(task) { updatedAt = now },
 		SaveMode.UPDATE_ONLY
 	)
+
+	override fun initialize(playerId: Long): Task = Task {
+		id = UUID.randomUUID()
+		version = INITIAL_TASK_VERSION
+		playerTasks = listOf(
+			PlayerTask {
+				id = UUID.randomUUID()
+				status = PlayerTaskStatus.PREPARING
+				this.playerId = playerId
+			}
+		)
+	}
 }

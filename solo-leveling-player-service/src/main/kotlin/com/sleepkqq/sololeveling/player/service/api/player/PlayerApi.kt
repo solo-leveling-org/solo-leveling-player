@@ -149,6 +149,8 @@ class PlayerApi(
 				PlayerTaskStatus.SKIPPED
 			)
 
+			generateTasksProducer.send(request.playerId)
+
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
 		} catch (e: Exception) {

@@ -1,6 +1,8 @@
 package com.sleepkqq.sololeveling.player.service.mapper
 
+import com.sleepkqq.sololeveling.avro.task.GenerateTask
 import com.sleepkqq.sololeveling.avro.task.SaveTask
+import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
@@ -19,20 +21,6 @@ import org.springframework.stereotype.Component
 )
 class AvroMapper : BaseMapper() {
 
-	fun map(saveTask: SaveTask): TaskInput = TaskInput(
-		id = map(saveTask.taskId),
-		title = saveTask.title,
-		description = saveTask.description,
-		experience = saveTask.experience,
-		currencyReward = saveTask.currencyReward.toBigDecimal(),
-		rarity = map(saveTask.rarity),
-		topics = saveTask.topics.map { map(it) },
-		agility = saveTask.agility,
-		strength = saveTask.strength,
-		intelligence = saveTask.intelligence,
-		version = saveTask.version,
-	)
-
 	@Named("toEntityTaskRarity")
 	fun map(taskRarity: com.sleepkqq.sololeveling.avro.task.TaskRarity): TaskRarity =
 		TaskRarity.valueOf(taskRarity.name)
@@ -48,4 +36,26 @@ class AvroMapper : BaseMapper() {
 	@Named("toAvroTaskTopic")
 	fun map(topic: TaskTopic): com.sleepkqq.sololeveling.avro.task.TaskTopic =
 		com.sleepkqq.sololeveling.avro.task.TaskTopic.valueOf(topic.name)
+
+	fun map(saveTask: SaveTask): TaskInput = TaskInput(
+		id = map(saveTask.taskId),
+		title = saveTask.title,
+		description = saveTask.description,
+		experience = saveTask.experience,
+		currencyReward = saveTask.currencyReward.toBigDecimal(),
+		rarity = map(saveTask.rarity),
+		topics = saveTask.topics.map { map(it) },
+		agility = saveTask.agility,
+		strength = saveTask.strength,
+		intelligence = saveTask.intelligence,
+		version = saveTask.version,
+	)
+
+	fun map(task: Task, taskTopics: Collection<TaskTopic>, rarity: TaskRarity): GenerateTask =
+		GenerateTask(
+			map(task.id),
+			task.version,
+			map(rarity),
+			taskTopics.map(this::map)
+		)
 }
