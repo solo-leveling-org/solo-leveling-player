@@ -17,11 +17,11 @@ class LevelServiceImpl(
 	private val countExperienceService: CountExperienceService
 ) : LevelService {
 
-	companion object {
-		private const val BASE_FIRST_LEVEL = 1
-		private const val BASE_BEGIN_EXPERIENCE = 0
+	private companion object {
+		const val BASE_FIRST_LEVEL = 1
+		const val BASE_BEGIN_EXPERIENCE = 0
 
-		private val BASE_LEVEL = Level {
+		val BASE_LEVEL = Level {
 			level = BASE_FIRST_LEVEL
 			totalExperience = BASE_BEGIN_EXPERIENCE
 			currentExperience = BASE_BEGIN_EXPERIENCE

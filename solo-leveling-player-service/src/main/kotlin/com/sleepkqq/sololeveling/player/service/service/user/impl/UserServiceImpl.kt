@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.service.user.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.user.User
+import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.player.model.repository.user.UserRepository
 import com.sleepkqq.sololeveling.player.service.exception.ModelNotFoundException
 import com.sleepkqq.sololeveling.player.service.service.user.UserRegistrationService
@@ -18,11 +19,13 @@ class UserServiceImpl(
 ) : UserService {
 
 	@Transactional(readOnly = true)
-	override fun get(id: Long): User = find(id)
+	override fun get(id: Long): UserView = find(id)
 		?: throw ModelNotFoundException(User::class, id)
 
 	@Transactional(readOnly = true)
-	override fun find(id: Long): User? = userRepository.findNullable(id)
+	override fun find(id: Long): UserView? = userRepository
+		.viewer(UserView::class)
+		.findNullable(id)
 
 	@Transactional(readOnly = true)
 	override fun findVersion(id: Long): Int? = userRepository.findVersionById(id)

@@ -18,12 +18,13 @@ class PlayerTaskTopicServiceImpl(
 	private val levelService: LevelService
 ) : PlayerTaskTopicService {
 
-	override fun initialize(linkedPlayerId: Long, linkedTaskTopic: TaskTopic): PlayerTaskTopic =
+	override fun initialize(playerId: Long, taskTopic: TaskTopic): PlayerTaskTopic =
 		PlayerTaskTopic {
 			id = UUID.randomUUID()
-			taskTopic = linkedTaskTopic
-			playerId = linkedPlayerId
+			this.taskTopic = taskTopic
+			this.playerId = playerId
 			level = levelService.initializeTopicLevel()
+			isActive = true
 		}
 
 	@Transactional
@@ -31,14 +32,21 @@ class PlayerTaskTopicServiceImpl(
 		playerTaskTopicRepository.save(topic, SaveMode.INSERT_ONLY)
 
 	@Transactional
-	override fun insertAll(topics: Collection<PlayerTaskTopic>) =
-		playerTaskTopicRepository.saveAll(topics)
+	override fun saveAll(topics: Collection<PlayerTaskTopic>) =
+		playerTaskTopicRepository.upsertAll(topics)
 
 	@Transactional
-	override fun update(playerTaskTopic: PlayerTaskTopic, now: LocalDateTime): PlayerTaskTopic {
-		return playerTaskTopicRepository.save(
+	override fun update(playerTaskTopic: PlayerTaskTopic, now: LocalDateTime): PlayerTaskTopic =
+		playerTaskTopicRepository.save(
 			PlayerTaskTopic(playerTaskTopic) { updatedAt = now },
 			SaveMode.UPDATE_ONLY
 		)
-	}
+
+	@Transactional(readOnly = true)
+	override fun getActiveTopics(playerId: Long): List<PlayerTaskTopic> =
+		playerTaskTopicRepository.findByPlayerIdAndIsActiveTrue(playerId)
+
+	@Transactional(readOnly = true)
+	override fun getTopics(playerId: Long): List<PlayerTaskTopic> =
+		playerTaskTopicRepository.findByPlayerId(playerId)
 }

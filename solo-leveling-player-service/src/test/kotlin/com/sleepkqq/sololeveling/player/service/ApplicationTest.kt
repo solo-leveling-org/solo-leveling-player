@@ -39,8 +39,10 @@ class ApplicationTest : BaseTestClass() {
 		val savedTask = taskService.insert(initialTask)
 
 		val newAgilityValue = 7
-		taskService.update(Task(savedTask) {
+		taskService.update(Task {
+			id = savedTask.id
 			agility = newAgilityValue
+			version = savedTask.version
 		})
 
 		val updatedTask = taskService.get(initialTask.id)
@@ -48,5 +50,6 @@ class ApplicationTest : BaseTestClass() {
 		// Assert
 		assertThat(updatedTask.version).isEqualTo(savedTask.version + 1)
 		assertThat(updatedTask.agility).isEqualTo(newAgilityValue)
+		assertThat(updatedTask.createdAt).isNotNull()
 	}
 }

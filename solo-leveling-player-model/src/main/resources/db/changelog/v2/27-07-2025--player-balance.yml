@@ -135,3 +135,17 @@ databaseChangeLog:
                   name: type
               - column:
                   name: cause
+
+  - changeSet:
+      id: 2025-07-28-add-is-active-to-player-task-topics
+      author: sleepkqq
+      changes:
+        - addColumn:
+            tableName: player_task_topics
+            columns:
+              - column:
+                  name: is_active
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false

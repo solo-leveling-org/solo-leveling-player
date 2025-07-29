@@ -1,31 +1,34 @@
 package com.sleepkqq.sololeveling.player.service.mapper
 
 import com.google.protobuf.Timestamp
-import java.time.Instant
+import org.mapstruct.Named
 import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
+import java.util.UUID
 
 abstract class BaseMapper {
 
-	fun map(timestamp: Timestamp): LocalDateTime {
-		val instant = Instant.ofEpochSecond(timestamp.seconds, timestamp.nanos.toLong())
-		return LocalDateTime.ofInstant(instant, ZoneOffset.UTC)
-	}
+	@Named("uuidToString")
+	fun map(uuid: UUID?): String? = uuid?.toString()
 
-	fun map(localDateTime: LocalDateTime): Timestamp {
-		val instant = localDateTime.toInstant(ZoneOffset.UTC)
-		return Timestamp.newBuilder()
-			.setSeconds(instant.epochSecond)
-			.setNanos(instant.nano)
-			.build()
-	}
+	@Named("stringToUuid")
+	fun map(id: String?): UUID? = id?.let { UUID.fromString(it) }
 
-	fun map(string: String): UUID {
-		return UUID.fromString(string)
-	}
+	@Named("localDateTimeToTimestamp")
+	fun map(localDateTime: LocalDateTime?): Timestamp? =
+		localDateTime?.let {
+			Timestamp.newBuilder()
+				.setSeconds(it.atZone(java.time.ZoneOffset.UTC).toEpochSecond())
+				.setNanos(it.nano)
+				.build()
+		}
 
-	fun map(uuid: UUID): String {
-		return uuid.toString()
-	}
+	@Named("timestampToLocalDateTime")
+	fun map(timestamp: Timestamp?): LocalDateTime? =
+		timestamp?.let {
+			LocalDateTime.ofEpochSecond(
+				it.seconds,
+				it.nanos,
+				java.time.ZoneOffset.UTC
+			)
+		}
 }

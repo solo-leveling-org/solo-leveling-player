@@ -6,6 +6,7 @@ import org.babyfish.jimmer.sql.*
 
 @Entity
 @Table(name = "players")
+@KeyUniqueConstraint
 interface Player : Model {
 
 	@Id

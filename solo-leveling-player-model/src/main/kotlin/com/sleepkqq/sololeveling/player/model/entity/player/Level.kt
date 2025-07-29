@@ -8,6 +8,7 @@ import java.util.*
 
 @Entity
 @Table(name = "levels")
+@KeyUniqueConstraint
 interface Level : Model {
 
 	@Id

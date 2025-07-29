@@ -7,6 +7,7 @@ import org.babyfish.jimmer.sql.Entity
 import org.babyfish.jimmer.sql.GeneratedValue
 import org.babyfish.jimmer.sql.Id
 import org.babyfish.jimmer.sql.JoinColumn
+import org.babyfish.jimmer.sql.KeyUniqueConstraint
 import org.babyfish.jimmer.sql.ManyToOne
 import org.babyfish.jimmer.sql.Table
 import org.babyfish.jimmer.sql.meta.UUIDIdGenerator
@@ -15,6 +16,7 @@ import java.util.UUID
 
 @Entity
 @Table(name = "player_balance_transactions")
+@KeyUniqueConstraint
 interface PlayerBalanceTransaction : Model {
 
 	@Id

@@ -8,8 +8,8 @@ import java.util.Random
 @Service
 class DefineTaskTopicService {
 
-	companion object {
-		private val RANDOM = Random()
+	private companion object {
+		val RANDOM = Random()
 	}
 
 	fun define(topics: Set<TaskTopic>): List<TaskTopic> {

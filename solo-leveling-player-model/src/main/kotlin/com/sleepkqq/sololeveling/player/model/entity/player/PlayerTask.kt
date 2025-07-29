@@ -10,6 +10,7 @@ import java.util.*
 
 @Entity
 @Table(name = "player_tasks")
+@KeyUniqueConstraint
 interface PlayerTask : Model {
 
 	@Id

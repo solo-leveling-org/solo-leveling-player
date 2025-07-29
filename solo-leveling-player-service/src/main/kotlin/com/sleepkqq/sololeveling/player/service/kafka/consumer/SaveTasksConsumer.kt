@@ -7,7 +7,6 @@ import com.sleepkqq.sololeveling.avro.notification.NotificationPriority
 import com.sleepkqq.sololeveling.avro.notification.SendNotificationEvent
 import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
-import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.service.kafka.producer.SendNotificationProducer
 import com.sleepkqq.sololeveling.player.service.mapper.AvroMapper
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
@@ -19,8 +18,8 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.Assert
-import java.time.LocalDateTime
 
+@Suppress("unused")
 @Service
 class SaveTasksConsumer(
 	private val taskService: TaskService,
@@ -74,27 +73,25 @@ class SaveTasksConsumer(
 	}
 
 	private fun processSaveTasksEvent(event: SaveTasksEvent) {
-		val now = LocalDateTime.now()
-
 		validateSaveTasksEvent(event)
 
 		val tasks = event.tasks.map {
-			Task(avroMapper.map(it)) { updatedAt = now }
+			avroMapper.map(it).toEntity()
 		}
 
 		log.info("Updating {} tasks for player {}", tasks.size, event.playerId)
-		taskService.updateTasks(tasks)
+		taskService.updateAll(tasks)
 
 		val taskIds = tasks.map { it.id }
-		val playerTaskIds = playerTaskService.findPlayerTaskIds(event.playerId, taskIds)
+		val playerTasks = playerTaskService.find(event.playerId, taskIds)
 
-		if (playerTaskIds.isNotEmpty()) {
+		if (playerTasks.isNotEmpty()) {
 			log.info(
 				"Setting {} player tasks to IN_PROGRESS for player {}",
-				playerTaskIds.size,
+				playerTasks.size,
 				event.playerId
 			)
-			playerTaskService.setStatus(playerTaskIds, PlayerTaskStatus.IN_PROGRESS, now)
+			playerTaskService.setStatus(playerTasks, PlayerTaskStatus.IN_PROGRESS)
 		}
 	}
 

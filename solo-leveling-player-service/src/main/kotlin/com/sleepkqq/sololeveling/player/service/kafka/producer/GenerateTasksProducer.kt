@@ -41,7 +41,7 @@ class GenerateTasksProducer(
 
 		try {
 			val player = playerService.get(playerId)
-			val tasksCount = player.maxTasks - playerTaskService.getCurrentTasksCount(playerId)
+			val tasksCount = player.maxTasks - playerTaskService.getActiveTasksCount(playerId)
 
 			require(tasksCount >= 1 && tasksCount <= player.maxTasks) {
 				"Incorrect current tasks count=$tasksCount, playerId=$playerId, maxTasks=${player.maxTasks}"
@@ -53,9 +53,10 @@ class GenerateTasksProducer(
 
 			log.info("Generated {} task IDs for player {}", taskIds.size, playerId)
 
-			taskService.insertTasks(taskIds.map { emptyTask(it, playerId) })
+			taskService.insertAll(taskIds.map { emptyTask(it, playerId) })
 
-			val generateTasks = taskIds.map { generateTask(player.taskTopics, it) }
+			val taskTopics = player.taskTopics.map { it.toEntity() }
+			val generateTasks = taskIds.map { generateTask(taskTopics, it) }
 			val event = GenerateTasksEvent.newBuilder()
 				.setTransactionId(UUID.randomUUID().toString())
 				.setPlayerId(playerId)
@@ -91,6 +92,7 @@ class GenerateTasksProducer(
 
 			return GenerateTask(
 				avroMapper.map(taskId),
+				0,
 				avroMapper.map(defineTaskRarityService.define(mappedTopics)),
 				topics.map(avroMapper::map)
 			)
@@ -102,6 +104,7 @@ class GenerateTasksProducer(
 
 	private fun emptyTask(taskId: UUID, linkedPlayerId: Long): Task = Task {
 		id = taskId
+		version = 0
 		playerTasks = listOf(
 			PlayerTask {
 				id = UUID.randomUUID()

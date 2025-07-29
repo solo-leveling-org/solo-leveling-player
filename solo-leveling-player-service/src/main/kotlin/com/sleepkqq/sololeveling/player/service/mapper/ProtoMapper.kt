@@ -1,141 +1,111 @@
 package com.sleepkqq.sololeveling.player.service.mapper
 
-import com.sleepkqq.sololeveling.player.model.entity.player.Level
-import com.sleepkqq.sololeveling.player.model.entity.player.Player
-import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
-import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
-import com.sleepkqq.sololeveling.player.model.entity.task.Task
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskInput
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.Assessment
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
+import com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskView
+import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
-import com.sleepkqq.sololeveling.player.model.entity.user.User
+import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserInput
+import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole
-import com.sleepkqq.sololeveling.proto.player.*
-import com.sleepkqq.sololeveling.proto.user.UserInfo
+import org.mapstruct.*
 import org.springframework.stereotype.Component
 
 @Component
-class ProtoMapper : BaseMapper() {
+@Mapper(
+	componentModel = "spring",
+	unmappedTargetPolicy = ReportingPolicy.IGNORE,
+	collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED
+)
+abstract class ProtoMapper : BaseMapper() {
 
+	@Named("toEntityTaskTopic")
+	fun map(taskTopic: com.sleepkqq.sololeveling.proto.player.TaskTopic): TaskTopic =
+		TaskTopic.valueOf(taskTopic.name)
+
+	@Named("toProtoTaskTopic")
 	fun map(taskTopic: TaskTopic): com.sleepkqq.sololeveling.proto.player.TaskTopic =
-		taskTopic.name.let { com.sleepkqq.sololeveling.proto.player.TaskTopic.valueOf(it) }
+		com.sleepkqq.sololeveling.proto.player.TaskTopic.valueOf(taskTopic.name)
 
-	fun map(taskTopic: com.sleepkqq.sololeveling.proto.player.TaskTopic) =
-		taskTopic.name.let { TaskTopic.valueOf(it) }
+	@Named("toProtoAssessment")
+	fun map(assessment: Assessment): com.sleepkqq.sololeveling.proto.player.Assessment =
+		com.sleepkqq.sololeveling.proto.player.Assessment.valueOf(assessment.name)
 
-	fun map(assessment: com.sleepkqq.sololeveling.player.model.entity.player.enums.Assessment): Assessment =
-		assessment.name.let { Assessment.valueOf(it) }
+	@Named("toEntityAssessment")
+	fun map(assessment: com.sleepkqq.sololeveling.proto.player.Assessment): Assessment =
+		Assessment.valueOf(assessment.name)
 
-	fun map(playerTaskStatus: com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus): PlayerTaskStatus =
-		playerTaskStatus.name.let { PlayerTaskStatus.valueOf(it) }
+	@Named("toProtoPlayerTaskStatus")
+	fun map(playerTaskStatus: PlayerTaskStatus): com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus =
+		com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus.valueOf(playerTaskStatus.name)
 
-	fun map(playerTaskStatus: PlayerTaskStatus): com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus =
-		playerTaskStatus.name.let {
-			com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus.valueOf(
-				it
-			)
-		}
+	@Named("toEntityPlayerTaskStatus")
+	fun map(playerTaskStatus: com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus): PlayerTaskStatus =
+		PlayerTaskStatus.valueOf(
+			playerTaskStatus.name
+		)
 
-	fun map(taskRarity: com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity): TaskRarity =
-		taskRarity.name.let { TaskRarity.valueOf(it) }
+	@Named("toProtoTaskRarity")
+	fun map(taskRarity: TaskRarity): com.sleepkqq.sololeveling.proto.player.TaskRarity =
+		com.sleepkqq.sololeveling.proto.player.TaskRarity.valueOf(taskRarity.name)
 
-	fun map(taskRarity: TaskRarity): com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity =
-		taskRarity.name.let {
-			com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity.valueOf(
-				it
-			)
-		}
+	@Named("toEntityTaskRarity")
+	fun map(taskRarity: com.sleepkqq.sololeveling.proto.player.TaskRarity): TaskRarity =
+		TaskRarity.valueOf(taskRarity.name)
 
+	@Named("toProtoUserRole")
 	fun map(userRole: UserRole): com.sleepkqq.sololeveling.proto.user.UserRole =
-		userRole.name.let { com.sleepkqq.sololeveling.proto.user.UserRole.valueOf(it) }
+		com.sleepkqq.sololeveling.proto.user.UserRole.valueOf(userRole.name)
 
+	@Named("toEntityUserRole")
 	fun map(userRole: com.sleepkqq.sololeveling.proto.user.UserRole): UserRole =
-		userRole.name.let { UserRole.valueOf(it) }
+		UserRole.valueOf(userRole.name)
 
-	fun map(player: Player): PlayerInfo = player.let {
-		PlayerInfo.newBuilder()
-			.setId(it.id)
-			.setMaxTasks(it.maxTasks)
-			.addAllPlayerTaskTopicInfo(it.taskTopics.map { t -> map(t) })
-			.build()
-	}
+	abstract fun map(playerView: PlayerView): com.sleepkqq.sololeveling.proto.player.PlayerView
 
-	fun map(level: Level): LevelInfo = LevelInfo.newBuilder()
-		.setId(map(level.id))
-		.setLevel(level.level)
-		.setTotalExperience(level.totalExperience)
-		.setCurrentExperience(level.currentExperience)
-		.setExperienceToNextLevel(level.experienceToNextLevel)
-		.setAssessment(map(level.assessment))
-		.build()
+	@Mapping(target = "id", source = "id", qualifiedByName = ["uuidToString"])
+	@Mapping(target = "taskTopic", source = "taskTopic", qualifiedByName = ["toProtoTaskTopic"])
+	abstract fun map(playerTaskTopicView: PlayerTaskTopicView): com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicView
 
-	fun map(playerTaskTopic: PlayerTaskTopic): PlayerTaskTopicInfo = PlayerTaskTopicInfo.newBuilder()
-		.setId(map(playerTaskTopic.id))
-		.setTaskTopic(map(playerTaskTopic.taskTopic))
-		.setLevelInfo(playerTaskTopic.level?.let { map(it) })
-		.build()
+	@Mapping(target = "id", source = "id", qualifiedByName = ["uuidToString"])
+	@Mapping(target = "rarity", source = "rarity", qualifiedByName = ["toProtoTaskRarity"])
+	abstract fun map(taskView: TaskView): com.sleepkqq.sololeveling.proto.player.TaskView
 
-	fun map(playerTask: PlayerTask): PlayerTaskInfo = PlayerTaskInfo.newBuilder()
-		.apply {
-			id = map(playerTask.id)
-			taskInfo = map(playerTask.task)
-			status = map(playerTask.status)
-			createdAt = map(playerTask.createdAt)
-			playerTask.closedAt?.let { c -> closedAt = map(c) }
-		}
-		.build()
+	@Mapping(target = "id", source = "id", qualifiedByName = ["uuidToString"])
+	abstract fun map(playerTaskView: PlayerTaskView): com.sleepkqq.sololeveling.proto.player.PlayerTaskView
 
-	fun map(playerTaskInfo: PlayerTaskInfo): PlayerTask = PlayerTask {
-		id = map(playerTaskInfo.id)
-		task = map(playerTaskInfo.taskInfo)
-		status = map(playerTaskInfo.status)
-		createdAt = map(playerTaskInfo.createdAt)
-		closedAt = map(playerTaskInfo.closedAt)
-	}
+	fun map(playerTaskInput: com.sleepkqq.sololeveling.proto.player.PlayerTaskInput): PlayerTaskInput =
+		PlayerTaskInput(
+			id = map(playerTaskInput.id),
+			version = playerTaskInput.version,
+			status = map(playerTaskInput.status)
+		)
 
-	fun map(task: Task): TaskInfo = TaskInfo.newBuilder()
-		.apply {
-			id = map(task.id)
-			task.topics?.let { t -> addAllTopic(t.map { c -> map(c) }) }
-			task.title?.let { title = it }
-			task.description?.let { description = it }
-			task.experience?.let { experience = it }
-			task.rarity?.let { rarity = map(it) }
-			task.agility?.let { agility = it }
-			task.strength?.let { strength = it }
-			task.intelligence?.let { intelligence = it }
-		}
-		.build()
+	@Mapping(target = "rolesList", source = "roles", qualifiedByName = ["toProtoUserRole"])
+	@Mapping(
+		target = "createdAt",
+		source = "createdAt",
+		qualifiedByName = ["localDateTimeToTimestamp"]
+	)
+	@Mapping(
+		target = "lastLoginAt",
+		source = "lastLoginAt",
+		qualifiedByName = ["localDateTimeToTimestamp"]
+	)
+	abstract fun map(userView: UserView): com.sleepkqq.sololeveling.proto.user.UserView
 
-	fun map(taskInfo: TaskInfo): Task = Task {
-		id = map(taskInfo.id)
-		topics = taskInfo.topicList.map { map(it) }
-		title = taskInfo.title
-		description = taskInfo.description
-		experience = taskInfo.experience
-		rarity = map(taskInfo.rarity)
-		agility = taskInfo.agility
-		strength = taskInfo.strength
-		intelligence = taskInfo.intelligence
-	}
-
-	fun map(user: User): UserInfo = UserInfo.newBuilder()
-		.setId(user.id)
-		.setUsername(user.username)
-		.setFirstName(user.firstName)
-		.setLastName(user.lastName)
-		.setPhotoUrl(user.photoUrl)
-		.setLocale(user.locale)
-		.addAllRole(user.roles?.map { map(it) })
-		.build()
-
-	fun map(userInfo: UserInfo): User = userInfo.let {
-		User {
-			id = it.id
-			username = it.username
-			firstName = it.firstName
-			lastName = it.lastName
-			photoUrl = it.photoUrl
-			locale = it.locale
-			roles = it.roleList.map { r -> map(r) }
-		}
-	}
+	fun map(userInput: com.sleepkqq.sololeveling.proto.user.UserInput): UserInput =
+		UserInput(
+			id = userInput.id,
+			username = userInput.username,
+			firstName = userInput.firstName,
+			lastName = userInput.lastName,
+			photoUrl = userInput.photoUrl,
+			locale = userInput.locale,
+			roles = userInput.rolesList.map { map(it) }
+		)
 }

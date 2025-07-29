@@ -11,6 +11,7 @@ import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
 import org.springframework.grpc.server.service.GrpcService
 
+@Suppress("unused")
 @GrpcService
 class UserApi(
 	private val userService: UserService,
@@ -26,7 +27,7 @@ class UserApi(
 		try {
 			val user = userService.get(request.userId)
 			val response = GetUserInfoResponse.newBuilder()
-				.setUserInfo(protoMapper.map(user))
+				.setUser(protoMapper.map(user))
 				.build()
 
 			responseObserver.onNext(response)
@@ -42,7 +43,8 @@ class UserApi(
 		responseObserver: StreamObserver<Empty>
 	) {
 		try {
-			userService.upsert(protoMapper.map(request.userInfo))
+			val user = protoMapper.map(request.user)
+			userService.upsert(user.toEntity())
 			val response = Empty.newBuilder().build()
 
 			responseObserver.onNext(response)

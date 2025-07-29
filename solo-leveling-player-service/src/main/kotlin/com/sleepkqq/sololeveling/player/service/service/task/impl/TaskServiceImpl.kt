@@ -24,15 +24,21 @@ class TaskServiceImpl(
 	override fun find(id: UUID): Task? = taskRepository.findNullable(id)
 
 	@Transactional
-	override fun updateTasks(tasks: Collection<Task>) = taskRepository.updateTasks(tasks)
+	override fun updateAll(tasks: Collection<Task>, now: LocalDateTime) {
+		taskRepository.saveEntities(
+			tasks.map { Task(it) { updatedAt = now } },
+			SaveMode.UPDATE_ONLY
+		)
+	}
 
 	@Transactional
 	override fun insert(task: Task): Task =
 		taskRepository.save(task, SaveMode.INSERT_ONLY)
 
 	@Transactional
-	override fun insertTasks(tasks: Collection<Task>) =
+	override fun insertAll(tasks: Collection<Task>) {
 		taskRepository.saveEntities(tasks, SaveMode.INSERT_ONLY)
+	}
 
 	@Transactional
 	override fun update(task: Task, now: LocalDateTime): Task = taskRepository.save(

@@ -8,6 +8,7 @@ plugins {
 	kotlin("plugin.spring") version "2.2.0"
 	alias(libs.plugins.kotlinPluginSerialization)
 	`java-library`
+	kotlin("kapt")
 }
 
 dependencies {
@@ -18,8 +19,9 @@ dependencies {
 	// Database
 	api("org.postgresql:postgresql:42.7.7")
 	api("org.liquibase:liquibase-core:4.32.0")
-	api("org.babyfish.jimmer:jimmer-spring-boot-starter:0.9.96")
-	ksp("org.babyfish.jimmer:jimmer-ksp:0.9.96")
+	api("org.babyfish.jimmer:jimmer-spring-boot-starter:0.9.99")
+	ksp("org.babyfish.jimmer:jimmer-ksp:0.9.99")
+	kapt("org.babyfish.jimmer:jimmer-mapstruct-apt:0.9.99")
 }
 
 kotlin {
@@ -30,4 +32,8 @@ kotlin {
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.compilerOptions {
 	freeCompilerArgs.set(listOf("-Xannotation-default-target=param-property"))
+}
+
+tasks.withType<com.google.devtools.ksp.gradle.KspTaskJvm> {
+	outputs.cacheIf { false }
 }

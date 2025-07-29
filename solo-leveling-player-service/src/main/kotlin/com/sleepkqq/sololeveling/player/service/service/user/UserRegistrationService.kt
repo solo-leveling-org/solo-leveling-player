@@ -10,9 +10,8 @@ class UserRegistrationService(
 	private val levelService: LevelService
 ) {
 
-	companion object {
-
-		private const val BASE_PLAYER_MAX_TASKS = 5
+	private companion object {
+		const val BASE_PLAYER_MAX_TASKS = 5
 	}
 
 	fun register(user: User): User = User(user) {

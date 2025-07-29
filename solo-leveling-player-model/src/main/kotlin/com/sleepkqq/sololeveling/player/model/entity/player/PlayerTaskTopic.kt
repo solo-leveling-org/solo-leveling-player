@@ -8,6 +8,7 @@ import java.util.*
 
 @Entity
 @Table(name = "player_task_topics")
+@KeyUniqueConstraint
 interface PlayerTaskTopic : Model {
 
 	@Id
