@@ -5,6 +5,7 @@ import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import java.time.LocalDateTime
 
 interface PlayerTaskTopicService {
+
 	fun initialize(playerId: Long, taskTopic: TaskTopic): PlayerTaskTopic
 	fun insert(topic: PlayerTaskTopic): PlayerTaskTopic
 	fun saveAll(topics: Collection<PlayerTaskTopic>): List<PlayerTaskTopic>

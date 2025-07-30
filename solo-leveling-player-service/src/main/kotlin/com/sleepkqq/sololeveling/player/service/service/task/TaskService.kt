@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 interface TaskService {
+
 	fun get(id: UUID): Task
 	fun find(id: UUID): Task?
 	fun updateAll(tasks: Collection<Task>, now: LocalDateTime = LocalDateTime.now())

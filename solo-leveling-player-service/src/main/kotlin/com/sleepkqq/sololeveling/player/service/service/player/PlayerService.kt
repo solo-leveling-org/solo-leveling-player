@@ -5,6 +5,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import java.time.LocalDateTime
 
 interface PlayerService {
+
 	fun find(id: Long): PlayerView?
 	fun get(id: Long): PlayerView
 	fun insert(player: Player): Player

@@ -5,6 +5,7 @@ import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import java.time.LocalDateTime
 
 interface UserService {
+
 	fun get(id: Long): UserView
 	fun find(id: Long): UserView?
 	fun findVersion(id: Long): Int?

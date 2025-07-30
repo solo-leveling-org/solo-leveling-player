@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 interface PlayerTaskService {
+
 	fun find(playerId: Long, taskIds: Collection<UUID>): List<PlayerTask>
 	fun insert(playerTask: PlayerTask): PlayerTask
 	fun update(playerTask: PlayerTask, now: LocalDateTime = LocalDateTime.now()): PlayerTask
@@ -15,7 +16,6 @@ interface PlayerTaskService {
 		status: PlayerTaskStatus,
 		now: LocalDateTime = LocalDateTime.now()
 	)
-	fun skipTask(playerTask: PlayerTask, playerId: Long)
 
 	fun getActiveTasks(playerId: Long): List<PlayerTaskView>
 	fun getTasksCount(playerId: Long): Long

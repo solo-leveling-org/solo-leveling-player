@@ -11,4 +11,8 @@ PlayerView {
   taskTopics {
     #allScalars
   }
+
+  balance {
+    #allScalars
+  }
 }
