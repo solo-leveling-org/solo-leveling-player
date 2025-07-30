@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 
 @Entity
 @Table(name = "users")
+@KeyUniqueConstraint
 interface User : Model {
 	@Id
 	val id: Long

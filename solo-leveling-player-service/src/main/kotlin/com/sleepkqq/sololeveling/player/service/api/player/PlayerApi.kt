@@ -1,26 +1,20 @@
 package com.sleepkqq.sololeveling.player.service.api.player
 
 import com.google.protobuf.Empty
+import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.service.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.service.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskTopicService
-import com.sleepkqq.sololeveling.proto.player.CompleteTaskRequest
-import com.sleepkqq.sololeveling.proto.player.GenerateTasksRequest
-import com.sleepkqq.sololeveling.proto.player.GetCurrentTasksRequest
-import com.sleepkqq.sololeveling.proto.player.GetCurrentTasksResponse
-import com.sleepkqq.sololeveling.proto.player.GetPlayerInfoRequest
-import com.sleepkqq.sololeveling.proto.player.GetPlayerInfoResponse
+import com.sleepkqq.sololeveling.proto.player.*
 import com.sleepkqq.sololeveling.proto.player.PlayerServiceGrpc.PlayerServiceImplBase
-import com.sleepkqq.sololeveling.proto.player.SavePlayerTopicsRequest
-import com.sleepkqq.sololeveling.proto.player.SkipTaskRequest
 import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
 import org.springframework.grpc.server.service.GrpcService
-import org.springframework.transaction.annotation.Transactional
 
+@Suppress("unused")
 @GrpcService
 class PlayerApi(
 	private val playerService: PlayerService,
@@ -32,7 +26,6 @@ class PlayerApi(
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	@Transactional
 	override fun getPlayerInfo(
 		request: GetPlayerInfoRequest,
 		responseObserver: StreamObserver<GetPlayerInfoResponse>
@@ -40,7 +33,7 @@ class PlayerApi(
 		try {
 			val player = playerService.get(request.playerId)
 			val response = GetPlayerInfoResponse.newBuilder()
-				.setPlayerInfo(protoMapper.map(player))
+				.setPlayer(protoMapper.map(player))
 				.build()
 
 			responseObserver.onNext(response)
@@ -51,15 +44,20 @@ class PlayerApi(
 		}
 	}
 
-	@Transactional
-	override fun getCurrentTasks(
-		request: GetCurrentTasksRequest,
-		responseObserver: StreamObserver<GetCurrentTasksResponse>
+	override fun getActiveTasks(
+		request: GetActiveTasksRequest,
+		responseObserver: StreamObserver<GetActiveTasksResponse>
 	) {
 		try {
-			val currentTasks = playerTaskService.getCurrentTasks(request.playerId)
-			val response = GetCurrentTasksResponse.newBuilder()
-				.addAllCurrentTask(currentTasks.map(protoMapper::map))
+			val activeTasks = playerTaskService.getActiveTasks(request.playerId)
+				.map { protoMapper.map(it) }
+
+			val tasksCount = playerTaskService.getTasksCount(request.playerId)
+			val isFirstTime = tasksCount == 0L
+
+			val response = GetActiveTasksResponse.newBuilder()
+				.addAllTasks(activeTasks)
+				.setFirstTime(isFirstTime)
 				.build()
 
 			responseObserver.onNext(response)
@@ -70,19 +68,28 @@ class PlayerApi(
 		}
 	}
 
-	@Transactional
 	override fun savePlayerTopics(
 		request: SavePlayerTopicsRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
 		try {
-			request.topicList
-				.map(protoMapper::map)
-				.map { playerTaskTopicService.initialize(request.playerId, it) }
-				.forEach { playerTaskTopicService.insert(it) }
-			val response = Empty.newBuilder().build()
+			val receivedEnumTopics = request.topicsList.map(protoMapper::map)
 
-			responseObserver.onNext(response)
+			val initialTopics = playerTaskTopicService.getTopics(request.playerId)
+
+			val restoredTopics = initialTopics.map {
+				PlayerTaskTopic(it)
+				{ isActive = it.taskTopic in receivedEnumTopics }
+			}
+
+			val initialEnumTopics = initialTopics.map { it.taskTopic }
+			val newTopics = receivedEnumTopics
+				.filter { it !in initialEnumTopics }
+				.map { playerTaskTopicService.initialize(request.playerId, it) }
+
+			playerTaskTopicService.saveAll(restoredTopics + newTopics)
+
+			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
 		} catch (e: Exception) {
 			log.error("savePlayerTopics error", e)
@@ -90,16 +97,14 @@ class PlayerApi(
 		}
 	}
 
-	@Transactional
 	override fun generateTasks(
 		request: GenerateTasksRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
 		try {
 			generateTasksProducer.send(request.playerId)
-			val response = Empty.newBuilder().build()
 
-			responseObserver.onNext(response)
+			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
 		} catch (e: Exception) {
 			log.error("savePlayerTopics error", e)
@@ -107,17 +112,18 @@ class PlayerApi(
 		}
 	}
 
-	@Transactional
 	override fun completeTask(
 		request: CompleteTaskRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
 		try {
-			val playerTaskId = protoMapper.map(request.playerTaskId)
-			playerTaskService.setStatus(setOf(playerTaskId), PlayerTaskStatus.PENDING_COMPLETION)
-			val response = Empty.newBuilder().build()
+			val playerTask = protoMapper.map(request.playerTask)
+			playerTaskService.setStatus(
+				setOf(playerTask.toEntity()),
+				PlayerTaskStatus.PENDING_COMPLETION
+			)
 
-			responseObserver.onNext(response)
+			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
 		} catch (e: Exception) {
 			log.error("completeTask error", e)
@@ -125,17 +131,21 @@ class PlayerApi(
 		}
 	}
 
-	@Transactional
 	override fun skipTask(
 		request: SkipTaskRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
 		try {
-			val playerTaskId = protoMapper.map(request.playerTaskId)
-			playerTaskService.setStatus(setOf(playerTaskId), PlayerTaskStatus.SKIPPED)
-			val response = Empty.newBuilder().build()
+			val playerTask = protoMapper.map(request.playerTask)
+				.toEntity()
+			playerTaskService.setStatus(
+				listOf(playerTask),
+				PlayerTaskStatus.SKIPPED
+			)
 
-			responseObserver.onNext(response)
+			generateTasksProducer.send(request.playerId)
+
+			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
 		} catch (e: Exception) {
 			log.error("completeTask error", e)

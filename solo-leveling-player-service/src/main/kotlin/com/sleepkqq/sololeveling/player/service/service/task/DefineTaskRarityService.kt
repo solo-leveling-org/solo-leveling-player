@@ -9,21 +9,21 @@ import kotlin.math.max
 @Service
 class DefineTaskRarityService {
 
-	companion object {
-		private val RANDOM = Random()
+	private companion object {
+		val RANDOM = Random()
 
-		private const val COMMON_BASE_WEIGHT = 80.0
-		private const val UNCOMMON_BASE_WEIGHT = 15.0
-		private const val RARE_BASE_WEIGHT = 5.0
+		const val COMMON_BASE_WEIGHT = 80.0
+		const val UNCOMMON_BASE_WEIGHT = 15.0
+		const val RARE_BASE_WEIGHT = 5.0
 
-		private const val EPIC_LEVEL_THRESHOLD = 40.0
-		private const val LEGENDARY_LEVEL_THRESHOLD = 60.0
-		private const val COMMON_DISABLE_LEVEL_THRESHOLD = 80.0
+		const val EPIC_LEVEL_THRESHOLD = 40.0
+		const val LEGENDARY_LEVEL_THRESHOLD = 60.0
+		const val COMMON_DISABLE_LEVEL_THRESHOLD = 80.0
 
-		private const val UNCOMMON_WEIGHT_MULTIPLIER = 0.5
-		private const val RARE_WEIGHT_MULTIPLIER = 0.3
-		private const val EPIC_WEIGHT_MULTIPLIER = 0.2
-		private const val LEGENDARY_WEIGHT_MULTIPLIER = 0.1
+		const val UNCOMMON_WEIGHT_MULTIPLIER = 0.5
+		const val RARE_WEIGHT_MULTIPLIER = 0.3
+		const val EPIC_WEIGHT_MULTIPLIER = 0.2
+		const val LEGENDARY_WEIGHT_MULTIPLIER = 0.1
 	}
 
 	fun define(topics: List<PlayerTaskTopic>): TaskRarity {
@@ -47,7 +47,7 @@ class DefineTaskRarityService {
 			(weights[i] / totalWeight) * 100
 		}
 
-		val randomValue: Double = RANDOM.nextDouble() * 100
+		val randomValue = RANDOM.nextDouble() * 100
 		var cumulativeWeight = 0.0
 
 		for (i in 0..<normalizedWeights.size) {
@@ -62,12 +62,19 @@ class DefineTaskRarityService {
 
 	private fun getWeights(avgLevel: Double): DoubleArray {
 		var commonWeight = max(0.0, COMMON_BASE_WEIGHT - avgLevel)
-		val uncommonWeight: Double = UNCOMMON_BASE_WEIGHT + (avgLevel * UNCOMMON_WEIGHT_MULTIPLIER)
-		val rareWeight: Double = RARE_BASE_WEIGHT + (avgLevel * RARE_WEIGHT_MULTIPLIER)
-		val epicWeight =
-			if (avgLevel >= EPIC_LEVEL_THRESHOLD) (avgLevel * EPIC_WEIGHT_MULTIPLIER) else 0.0
-		val legendaryWeight =
-			if (avgLevel >= LEGENDARY_LEVEL_THRESHOLD) (avgLevel * LEGENDARY_WEIGHT_MULTIPLIER) else 0.0
+		val uncommonWeight = UNCOMMON_BASE_WEIGHT + (avgLevel * UNCOMMON_WEIGHT_MULTIPLIER)
+		val rareWeight = RARE_BASE_WEIGHT + (avgLevel * RARE_WEIGHT_MULTIPLIER)
+
+		val epicWeight = if (avgLevel >= EPIC_LEVEL_THRESHOLD) {
+			(avgLevel * EPIC_WEIGHT_MULTIPLIER)
+		} else {
+			0.0
+		}
+		val legendaryWeight = if (avgLevel >= LEGENDARY_LEVEL_THRESHOLD) {
+			(avgLevel * LEGENDARY_WEIGHT_MULTIPLIER)
+		} else {
+			0.0
+		}
 
 		if (avgLevel >= COMMON_DISABLE_LEVEL_THRESHOLD) {
 			commonWeight = 0.0

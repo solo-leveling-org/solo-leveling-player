@@ -5,13 +5,17 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import org.babyfish.jimmer.sql.*
-import java.util.*
+import org.babyfish.jimmer.sql.meta.UUIDIdGenerator
+import java.math.BigDecimal
+import java.util.UUID
 
 @Entity
 @Table(name = "tasks")
+@KeyUniqueConstraint
 interface Task : Model {
 
 	@Id
+	@GeneratedValue(generatorType = UUIDIdGenerator::class)
 	val id: UUID
 
 	val title: String?
@@ -19,6 +23,8 @@ interface Task : Model {
 	val description: String?
 
 	val experience: Int?
+
+	val currencyReward: BigDecimal?
 
 	val rarity: TaskRarity?
 

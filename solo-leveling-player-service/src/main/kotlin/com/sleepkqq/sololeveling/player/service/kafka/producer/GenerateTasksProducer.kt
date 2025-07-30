@@ -3,9 +3,7 @@ package com.sleepkqq.sololeveling.player.service.kafka.producer
 import com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics
 import com.sleepkqq.sololeveling.avro.task.GenerateTask
 import com.sleepkqq.sololeveling.avro.task.GenerateTasksEvent
-import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.service.mapper.AvroMapper
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerService
@@ -41,28 +39,32 @@ class GenerateTasksProducer(
 
 		try {
 			val player = playerService.get(playerId)
-			val tasksCount = player.maxTasks - playerTaskService.getCurrentTasksCount(playerId)
+			val tasksCount = player.maxTasks - playerTaskService.getActiveTasksCount(playerId)
 
 			require(tasksCount >= 1 && tasksCount <= player.maxTasks) {
 				"Incorrect current tasks count=$tasksCount, playerId=$playerId, maxTasks=${player.maxTasks}"
 			}
 
-			val taskIds = generateSequence { UUID.randomUUID() }
+			val tasks = generateSequence { taskService.initialize(playerId) }
 				.take(tasksCount.toInt())
 				.toList()
 
-			log.info("Generated {} task IDs for player {}", taskIds.size, playerId)
+			log.info("Generated {} tasks for player {}", tasks.size, playerId)
 
-			taskService.insertTasks(taskIds.map { emptyTask(it, playerId) })
+			taskService.insertAll(tasks)
 
-			val generateTasks = taskIds.map { generateTask(player.taskTopics, it) }
+			val taskTopics = player.taskTopics.map { it.toEntity() }
+			val generateTasks = tasks.map {
+				generateTask(it, taskTopics)
+			}
+
 			val event = GenerateTasksEvent.newBuilder()
 				.setTransactionId(UUID.randomUUID().toString())
 				.setPlayerId(playerId)
 				.setInputs(generateTasks)
 				.build()
 
-			sendEvent(event)
+			kafkaTemplate.send(KafkaTaskTopics.GENERATE_TASKS_TOPIC, event.transactionId, event)
 
 		} catch (e: Exception) {
 			log.error("Failed to generate tasks for player {}: {}", playerId, e.message, e)
@@ -70,44 +72,14 @@ class GenerateTasksProducer(
 		}
 	}
 
-	private fun sendEvent(event: GenerateTasksEvent) {
-		try {
-			kafkaTemplate.send(KafkaTaskTopics.GENERATE_TASKS_TOPIC, event.transactionId, event)
-			log.info("<< Generate tasks event sent successfully | transactionId={}", event.transactionId)
-		} catch (throwable: Exception) {
-			log.error(
-				"Failed to send generate tasks event | transactionId={}, error={}",
-				event.transactionId, throwable.message, throwable
-			)
-			throw RuntimeException("Failed to send generate tasks event", throwable)
-		}
-	}
+	private fun generateTask(task: Task, playerTaskTopics: List<PlayerTaskTopic>): GenerateTask {
+		val playerTaskTopicsMap = playerTaskTopics.associateBy { it.taskTopic }
 
-	private fun generateTask(playerTaskTopics: List<PlayerTaskTopic>, taskId: UUID): GenerateTask {
-		try {
-			val taskTopicsMap = playerTaskTopics.associateBy { it.taskTopic }
-			val topics = defineTaskTopicService.define(taskTopicsMap.keys)
-			val mappedTopics = topics.map(taskTopicsMap::getValue)
+		val definedTopics = defineTaskTopicService.define(playerTaskTopicsMap.keys)
+		val chosenTopics = definedTopics.map(playerTaskTopicsMap::getValue)
 
-			return GenerateTask(
-				avroMapper.map(taskId),
-				avroMapper.map(defineTaskRarityService.define(mappedTopics)),
-				topics.map(avroMapper::map)
-			)
-		} catch (e: Exception) {
-			log.error("Failed to generate task for taskId {}: {}", taskId, e.message, e)
-			throw e
-		}
-	}
+		val rarity = defineTaskRarityService.define(chosenTopics)
 
-	private fun emptyTask(taskId: UUID, linkedPlayerId: Long): Task = Task {
-		id = taskId
-		playerTasks = listOf(
-			PlayerTask {
-				id = UUID.randomUUID()
-				status = PlayerTaskStatus.PREPARING
-				playerId = linkedPlayerId
-			}
-		)
+		return avroMapper.map(task, definedTopics, rarity)
 	}
 }

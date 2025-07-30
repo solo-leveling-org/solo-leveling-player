@@ -8,6 +8,7 @@ import java.util.*
 
 @Entity
 @Table(name = "player_task_topics")
+@KeyUniqueConstraint
 interface PlayerTaskTopic : Model {
 
 	@Id
@@ -15,6 +16,8 @@ interface PlayerTaskTopic : Model {
 	val id: UUID
 
 	val taskTopic: TaskTopic
+
+	val isActive: Boolean
 
 	@ManyToOne
 	@JoinColumn(name = "player_id")

@@ -1,0 +1,18 @@
+export com.sleepkqq.sololeveling.player.model.entity.user.User
+  -> package com.sleepkqq.sololeveling.player.model.entity.user.dto
+
+input UserInput {
+  #allScalars
+
+  -createdAt
+
+  -updatedAt
+
+  -lastLoginAt
+
+  -version
+}
+
+UserView {
+  #allScalars
+}

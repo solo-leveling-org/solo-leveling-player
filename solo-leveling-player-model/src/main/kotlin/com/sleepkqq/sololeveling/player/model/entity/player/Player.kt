@@ -6,6 +6,7 @@ import org.babyfish.jimmer.sql.*
 
 @Entity
 @Table(name = "players")
+@KeyUniqueConstraint
 interface Player : Model {
 
 	@Id
@@ -19,6 +20,9 @@ interface Player : Model {
 
 	@OneToOne(mappedBy = "player")
 	val level: Level?
+
+	@OneToOne(mappedBy = "player")
+	val balance: PlayerBalance?
 
 	@OneToMany(mappedBy = "player")
 	val taskTopics: List<PlayerTaskTopic>
