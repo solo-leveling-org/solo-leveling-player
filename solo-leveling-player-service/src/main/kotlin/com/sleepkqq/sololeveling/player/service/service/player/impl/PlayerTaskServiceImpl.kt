@@ -4,6 +4,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
+import com.sleepkqq.sololeveling.player.service.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Service
@@ -14,7 +15,8 @@ import java.util.UUID
 @Suppress("unused")
 @Service
 class PlayerTaskServiceImpl(
-	private val playerTaskRepository: PlayerTaskRepository
+	private val playerTaskRepository: PlayerTaskRepository,
+	private val generateTasksProducer: GenerateTasksProducer
 ) : PlayerTaskService {
 
 	private companion object {
@@ -34,12 +36,11 @@ class PlayerTaskServiceImpl(
 		playerTaskRepository.save(playerTask, SaveMode.INSERT_ONLY)
 
 	@Transactional
-	override fun update(playerTask: PlayerTask, now: LocalDateTime): PlayerTask {
-		return playerTaskRepository.save(
+	override fun update(playerTask: PlayerTask, now: LocalDateTime): PlayerTask =
+		playerTaskRepository.save(
 			PlayerTask(playerTask) { updatedAt = now },
 			SaveMode.UPDATE_ONLY
 		)
-	}
 
 	@Transactional
 	override fun setStatus(
@@ -56,6 +57,12 @@ class PlayerTaskServiceImpl(
 			},
 			SaveMode.UPDATE_ONLY
 		)
+	}
+
+	@Transactional
+	override fun skipTask(playerTask: PlayerTask, playerId: Long) {
+		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED)
+		generateTasksProducer.send(playerId)
 	}
 
 	@Transactional(readOnly = true)

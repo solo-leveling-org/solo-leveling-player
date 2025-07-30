@@ -11,4 +11,4 @@ interface UserService {
 	fun insert(user: User): User
 	fun update(user: User, now: LocalDateTime = LocalDateTime.now()): User
 	fun upsert(user: User): User
-} 
+}

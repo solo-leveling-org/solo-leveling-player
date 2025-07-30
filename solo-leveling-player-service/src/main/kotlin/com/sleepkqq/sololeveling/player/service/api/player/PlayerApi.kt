@@ -13,7 +13,6 @@ import com.sleepkqq.sololeveling.proto.player.PlayerServiceGrpc.PlayerServiceImp
 import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
 import org.springframework.grpc.server.service.GrpcService
-import org.springframework.transaction.annotation.Transactional
 
 @Suppress("unused")
 @GrpcService
@@ -27,7 +26,6 @@ class PlayerApi(
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	@Transactional
 	override fun getPlayerInfo(
 		request: GetPlayerInfoRequest,
 		responseObserver: StreamObserver<GetPlayerInfoResponse>
@@ -46,7 +44,6 @@ class PlayerApi(
 		}
 	}
 
-	@Transactional
 	override fun getActiveTasks(
 		request: GetActiveTasksRequest,
 		responseObserver: StreamObserver<GetActiveTasksResponse>
@@ -71,7 +68,6 @@ class PlayerApi(
 		}
 	}
 
-	@Transactional
 	override fun savePlayerTopics(
 		request: SavePlayerTopicsRequest,
 		responseObserver: StreamObserver<Empty>
@@ -101,7 +97,6 @@ class PlayerApi(
 		}
 	}
 
-	@Transactional
 	override fun generateTasks(
 		request: GenerateTasksRequest,
 		responseObserver: StreamObserver<Empty>
@@ -117,7 +112,6 @@ class PlayerApi(
 		}
 	}
 
-	@Transactional
 	override fun completeTask(
 		request: CompleteTaskRequest,
 		responseObserver: StreamObserver<Empty>
@@ -137,19 +131,14 @@ class PlayerApi(
 		}
 	}
 
-	@Transactional
 	override fun skipTask(
 		request: SkipTaskRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
 		try {
 			val playerTask = protoMapper.map(request.playerTask)
-			playerTaskService.setStatus(
-				setOf(playerTask.toEntity()),
-				PlayerTaskStatus.SKIPPED
-			)
-
-			generateTasksProducer.send(request.playerId)
+				.toEntity()
+			playerTaskService.skipTask(playerTask, request.playerId)
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()

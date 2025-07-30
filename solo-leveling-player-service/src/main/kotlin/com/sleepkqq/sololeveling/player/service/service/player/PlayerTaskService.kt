@@ -15,6 +15,7 @@ interface PlayerTaskService {
 		status: PlayerTaskStatus,
 		now: LocalDateTime = LocalDateTime.now()
 	)
+	fun skipTask(playerTask: PlayerTask, playerId: Long)
 
 	fun getActiveTasks(playerId: Long): List<PlayerTaskView>
 	fun getTasksCount(playerId: Long): Long

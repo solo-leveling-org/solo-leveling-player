@@ -12,4 +12,4 @@ interface TaskService {
 	fun insertAll(tasks: Collection<Task>)
 	fun update(task: Task, now: LocalDateTime = LocalDateTime.now()): Task
 	fun initialize(playerId: Long): Task
-} 
+}
