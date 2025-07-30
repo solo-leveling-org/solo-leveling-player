@@ -2,6 +2,7 @@ package com.sleepkqq.sololeveling.player.service.mapper
 
 import com.google.protobuf.Timestamp
 import org.mapstruct.Named
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -31,4 +32,7 @@ abstract class BaseMapper {
 				java.time.ZoneOffset.UTC
 			)
 		}
+
+	@Named("bigDecimalToString")
+	fun map(bigDecimal: BigDecimal): String = bigDecimal.toString()
 }

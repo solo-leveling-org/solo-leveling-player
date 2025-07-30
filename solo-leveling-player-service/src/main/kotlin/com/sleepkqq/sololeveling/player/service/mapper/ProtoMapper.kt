@@ -65,6 +65,17 @@ abstract class ProtoMapper : BaseMapper() {
 	fun map(userRole: com.sleepkqq.sololeveling.proto.user.UserRole): UserRole =
 		UserRole.valueOf(userRole.name)
 
+	@Named("toProtoPlayerBalance")
+	@Mapping(target = "id", source = "id", qualifiedByName = ["uuidToString"])
+	@Mapping(target = "balance", source = "balance", qualifiedByName = ["bigDecimalToString"])
+	abstract fun map(playerBalance: PlayerView.TargetOf_balance): com.sleepkqq.sololeveling.proto.player.PlayerBalanceView
+
+	@Named("toProtoLevel")
+	@Mapping(target = "id", source = "id", qualifiedByName = ["uuidToString"])
+	abstract fun map(level: PlayerView.TargetOf_level): com.sleepkqq.sololeveling.proto.player.LevelView
+
+	@Mapping(target = "balance", source = "balance", qualifiedByName = ["toProtoPlayerBalance"])
+	@Mapping(target = "level", source = "level", qualifiedByName = ["toProtoLevel"])
 	abstract fun map(playerView: PlayerView): com.sleepkqq.sololeveling.proto.player.PlayerView
 
 	@Mapping(target = "id", source = "id", qualifiedByName = ["uuidToString"])
@@ -86,16 +97,6 @@ abstract class ProtoMapper : BaseMapper() {
 		)
 
 	@Mapping(target = "rolesList", source = "roles", qualifiedByName = ["toProtoUserRole"])
-	@Mapping(
-		target = "createdAt",
-		source = "createdAt",
-		qualifiedByName = ["localDateTimeToTimestamp"]
-	)
-	@Mapping(
-		target = "lastLoginAt",
-		source = "lastLoginAt",
-		qualifiedByName = ["localDateTimeToTimestamp"]
-	)
 	abstract fun map(userView: UserView): com.sleepkqq.sololeveling.proto.user.UserView
 
 	fun map(userInput: com.sleepkqq.sololeveling.proto.user.UserInput): UserInput =
