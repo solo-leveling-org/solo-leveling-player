@@ -39,23 +39,26 @@ class GenerateTasksProducer(
 
 		try {
 			val player = playerService.get(playerId)
-			val tasksCount = player.maxTasks - playerTaskService.getActiveTasksCount(playerId)
+			{
+				allScalarFields()
+				taskTopics { allScalarFields() }
+			}
+			val tasksToGenerateCount = player.maxTasks - playerTaskService.getActiveTasksCount(playerId)
 
-			require(tasksCount >= 1 && tasksCount <= player.maxTasks) {
-				"Incorrect current tasks count=$tasksCount, playerId=$playerId, maxTasks=${player.maxTasks}"
+			require(tasksToGenerateCount >= 1 && tasksToGenerateCount <= player.maxTasks) {
+				"Incorrect current tasks count=$tasksToGenerateCount, playerId=$playerId, maxTasks=${player.maxTasks}"
 			}
 
 			val tasks = generateSequence { taskService.initialize(playerId) }
-				.take(tasksCount.toInt())
+				.take(tasksToGenerateCount.toInt())
 				.toList()
 
 			log.info("Generated {} tasks for player {}", tasks.size, playerId)
 
 			taskService.insertAll(tasks)
 
-			val taskTopics = player.taskTopics.map { it.toEntity() }
 			val generateTasks = tasks.map {
-				generateTask(it, taskTopics)
+				generateTask(it, player.taskTopics)
 			}
 
 			val event = GenerateTasksEvent.newBuilder()

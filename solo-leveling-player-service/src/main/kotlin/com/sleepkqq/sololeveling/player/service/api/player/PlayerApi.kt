@@ -26,24 +26,6 @@ class PlayerApi(
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	override fun getPlayerInfo(
-		request: GetPlayerInfoRequest,
-		responseObserver: StreamObserver<GetPlayerInfoResponse>
-	) {
-		try {
-			val player = playerService.get(request.playerId)
-			val response = GetPlayerInfoResponse.newBuilder()
-				.setPlayer(protoMapper.map(player))
-				.build()
-
-			responseObserver.onNext(response)
-			responseObserver.onCompleted()
-		} catch (e: Exception) {
-			log.error("getPlayerInfo error", e)
-			responseObserver.onError(e)
-		}
-	}
-
 	override fun getActiveTasks(
 		request: GetActiveTasksRequest,
 		responseObserver: StreamObserver<GetActiveTasksResponse>
@@ -62,8 +44,30 @@ class PlayerApi(
 
 			responseObserver.onNext(response)
 			responseObserver.onCompleted()
+
 		} catch (e: Exception) {
 			log.error("getCurrentTasks error", e)
+			responseObserver.onError(e)
+		}
+	}
+
+	override fun getPlayerTopics(
+		request: GetPlayerTopicsRequest,
+		responseObserver: StreamObserver<GetPlayerTopicsResponse>
+	) {
+		try {
+			val topics = playerTaskTopicService.getActiveTopics(request.playerId)
+				.map { protoMapper.map(it) }
+
+			val response = GetPlayerTopicsResponse.newBuilder()
+				.addAllPlayerTaskTopics(topics)
+				.build()
+
+			responseObserver.onNext(response)
+			responseObserver.onCompleted()
+
+		} catch (e: Exception) {
+			log.error("getPlayerTopics error", e)
 			responseObserver.onError(e)
 		}
 	}
@@ -91,6 +95,7 @@ class PlayerApi(
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
+
 		} catch (e: Exception) {
 			log.error("savePlayerTopics error", e)
 			responseObserver.onError(e)
@@ -106,6 +111,7 @@ class PlayerApi(
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
+
 		} catch (e: Exception) {
 			log.error("savePlayerTopics error", e)
 			responseObserver.onError(e)
@@ -125,6 +131,7 @@ class PlayerApi(
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
+
 		} catch (e: Exception) {
 			log.error("completeTask error", e)
 			responseObserver.onError(e)
@@ -147,6 +154,7 @@ class PlayerApi(
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
+
 		} catch (e: Exception) {
 			log.error("completeTask error", e)
 			responseObserver.onError(e)
