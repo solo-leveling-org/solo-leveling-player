@@ -38,8 +38,7 @@ class GenerateTasksProducer(
 		log.info(">> Start generating tasks for player {}", playerId)
 
 		try {
-			val player = playerService.get(playerId)
-			{
+			val player = playerService.get(playerId) {
 				allScalarFields()
 				taskTopics { allScalarFields() }
 			}
