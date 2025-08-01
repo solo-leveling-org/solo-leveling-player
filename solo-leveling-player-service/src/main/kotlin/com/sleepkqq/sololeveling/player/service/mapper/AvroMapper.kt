@@ -12,6 +12,7 @@ import org.mapstruct.Mapper
 import org.mapstruct.Named
 import org.mapstruct.ReportingPolicy
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 @Component
 @Mapper(
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Component
 	unmappedTargetPolicy = ReportingPolicy.IGNORE,
 	collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED
 )
-class AvroMapper : BaseMapper() {
+class AvroMapper {
 
 	@Named("toEntityTaskRarity")
 	fun map(taskRarity: com.sleepkqq.sololeveling.avro.task.TaskRarity): TaskRarity =
@@ -38,7 +39,7 @@ class AvroMapper : BaseMapper() {
 		com.sleepkqq.sololeveling.avro.task.TaskTopic.valueOf(topic.name)
 
 	fun map(saveTask: SaveTask): TaskInput = TaskInput(
-		id = map(saveTask.taskId),
+		id = UUID.fromString(saveTask.taskId),
 		title = saveTask.title,
 		description = saveTask.description,
 		experience = saveTask.experience,
@@ -53,7 +54,7 @@ class AvroMapper : BaseMapper() {
 
 	fun map(task: Task, taskTopics: Collection<TaskTopic>, rarity: TaskRarity): GenerateTask =
 		GenerateTask(
-			map(task.id),
+			task.id.toString(),
 			task.version,
 			map(rarity),
 			taskTopics.map(this::map)

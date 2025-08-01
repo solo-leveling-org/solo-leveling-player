@@ -15,4 +15,16 @@ input UserInput {
 
 UserView {
   #allScalars
+
+  player {
+    #allScalars
+
+    level {
+      #allScalars
+    }
+
+    balance {
+      #allScalars
+    }
+  }
 }
