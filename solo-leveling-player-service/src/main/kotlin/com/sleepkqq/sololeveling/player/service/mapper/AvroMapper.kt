@@ -9,6 +9,7 @@ import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.service.extenstions.toBigDecimal
 import org.mapstruct.CollectionMappingStrategy
 import org.mapstruct.Mapper
+import org.mapstruct.Mapping
 import org.mapstruct.Named
 import org.mapstruct.ReportingPolicy
 import org.springframework.stereotype.Component
@@ -20,7 +21,7 @@ import java.util.UUID
 	unmappedTargetPolicy = ReportingPolicy.IGNORE,
 	collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED
 )
-class AvroMapper {
+abstract class AvroMapper {
 
 	@Named("toEntityTaskRarity")
 	fun map(taskRarity: com.sleepkqq.sololeveling.avro.task.TaskRarity): TaskRarity =
@@ -52,11 +53,8 @@ class AvroMapper {
 		version = saveTask.version,
 	)
 
-	fun map(task: Task, taskTopics: Collection<TaskTopic>, rarity: TaskRarity): GenerateTask =
-		GenerateTask(
-			task.id.toString(),
-			task.version,
-			map(rarity),
-			taskTopics.map(this::map)
-		)
+	@Mapping(target = "taskId", source = "task.id")
+	@Mapping(target = "topics", source = "topics", qualifiedByName = ["toAvroTaskTopic"])
+	@Mapping(target = "rarity", source = "rarity", qualifiedByName = ["toAvroTaskRarity"])
+	abstract fun map(task: Task, topics: Collection<TaskTopic>, rarity: TaskRarity): GenerateTask
 }
