@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 2025-07-27-add-currency-reward-to-tasks
+      id: add-currency-reward-to-tasks
       author: sleepkqq
       changes:
         - addColumn:
@@ -8,12 +8,12 @@ databaseChangeLog:
             columns:
               - column:
                   name: currency_reward
-                  type: DECIMAL(19,2)
+                  type: INT
                   constraints:
                     nullable: true
 
   - changeSet:
-      id: 2025-07-27-add-player-balance-tables
+      id: add-player-balance-tables
       author: sleepkqq
       changes:
         - createTable:
@@ -137,7 +137,7 @@ databaseChangeLog:
                   name: cause
 
   - changeSet:
-      id: 2025-07-28-add-is-active-to-player-task-topics
+      id: add-is-active-to-player-task-topics
       author: sleepkqq
       changes:
         - addColumn:

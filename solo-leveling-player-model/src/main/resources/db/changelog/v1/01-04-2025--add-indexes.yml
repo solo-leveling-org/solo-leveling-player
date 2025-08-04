@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 2025-04-01-add-performance-and-unique-indexes
+      id: add-performance-and-unique-indexes
       author: sleepkqq
       changes:
         # Index for player_task unique constraint

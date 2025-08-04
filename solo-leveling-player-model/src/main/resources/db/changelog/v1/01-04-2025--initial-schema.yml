@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 2025-04-01-create-base-tables
+      id: create-base-tables
       author: sleepkqq
       changes:
         # Users table
@@ -265,7 +265,7 @@ databaseChangeLog:
                   type: timestamp
 
   - changeSet:
-      id: 2025-04-01-add-foreign-key-constraints
+      id: add-foreign-key-constraints
       author: sleepkqq
       changes:
         # Players FK
@@ -313,7 +313,7 @@ databaseChangeLog:
             referencedColumnNames: id
 
   - changeSet:
-      id: 2025-04-01-add-unique-constraints
+      id: add-unique-constraints
       author: sleepkqq
       changes:
         - addUniqueConstraint:

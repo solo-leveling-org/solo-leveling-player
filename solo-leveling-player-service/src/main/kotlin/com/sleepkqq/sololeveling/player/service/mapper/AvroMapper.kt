@@ -6,7 +6,6 @@ import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
-import com.sleepkqq.sololeveling.player.service.extenstions.toBigDecimal
 import org.mapstruct.CollectionMappingStrategy
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
@@ -44,7 +43,7 @@ abstract class AvroMapper {
 		title = saveTask.title,
 		description = saveTask.description,
 		experience = saveTask.experience,
-		currencyReward = saveTask.currencyReward.toBigDecimal(),
+		currencyReward = saveTask.currencyReward,
 		rarity = map(saveTask.rarity),
 		topics = saveTask.topics.map { map(it) },
 		agility = saveTask.agility,
