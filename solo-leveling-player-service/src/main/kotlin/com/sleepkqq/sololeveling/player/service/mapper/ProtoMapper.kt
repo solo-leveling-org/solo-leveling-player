@@ -24,7 +24,8 @@ import java.util.UUID
 	unmappedTargetPolicy = ReportingPolicy.IGNORE,
 	collectionMappingStrategy = CollectionMappingStrategy.ADDER_PREFERRED,
 	nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT,
-	nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT
+	nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT,
+	nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS
 )
 abstract class ProtoMapper {
 

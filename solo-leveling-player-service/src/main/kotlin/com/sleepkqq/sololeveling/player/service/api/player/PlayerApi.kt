@@ -30,7 +30,7 @@ class PlayerApi(
 		request: GetActiveTasksRequest,
 		responseObserver: StreamObserver<GetActiveTasksResponse>
 	) {
-		log.info(">> getActiveTasks call by user={}", request.playerId)
+		log.info(">> getActiveTasks called by user={}", request.playerId)
 
 		try {
 			val activeTasks = playerTaskService.getActiveTasks(request.playerId)
@@ -57,7 +57,7 @@ class PlayerApi(
 		request: GetPlayerTopicsRequest,
 		responseObserver: StreamObserver<GetPlayerTopicsResponse>
 	) {
-		log.info(">> getPlayerTopics call by user={}", request.playerId)
+		log.info(">> getPlayerTopics called by user={}", request.playerId)
 
 		try {
 			val topics = playerTaskTopicService.getActiveTopics(request.playerId)
@@ -80,7 +80,7 @@ class PlayerApi(
 		request: SavePlayerTopicsRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
-		log.info(">> savePlayerTopics call by user={}", request.playerId)
+		log.info(">> savePlayerTopics called by user={}", request.playerId)
 
 		try {
 			val receivedEnumTopics = request.topicsList.map(protoMapper::map)
@@ -112,7 +112,7 @@ class PlayerApi(
 		request: GenerateTasksRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
-		log.info(">> generateTasks call by user={}", request.playerId)
+		log.info(">> generateTasks called by user={}", request.playerId)
 
 		try {
 			generateTasksProducer.send(request.playerId)
