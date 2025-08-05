@@ -7,5 +7,6 @@ interface PlayerTaskStatusService {
 
 	fun skipTask(playerTask: PlayerTask, playerId: Long, now: LocalDateTime = LocalDateTime.now())
 	fun pendingCompleteTask(playerTask: PlayerTask, now: LocalDateTime = LocalDateTime.now())
+	fun inProgressTasks(tasks: Collection<PlayerTask>, now: LocalDateTime = LocalDateTime.now())
 	fun generateTasks(playerId: Long)
 }
