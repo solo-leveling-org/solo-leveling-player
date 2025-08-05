@@ -2,11 +2,10 @@ package com.sleepkqq.sololeveling.player.service.api.player
 
 import com.google.protobuf.Empty
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
-import com.sleepkqq.sololeveling.player.service.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.service.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
+import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskStatusService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskTopicService
 import com.sleepkqq.sololeveling.proto.player.*
 import com.sleepkqq.sololeveling.proto.player.PlayerServiceGrpc.PlayerServiceImplBase
@@ -19,8 +18,8 @@ import org.springframework.grpc.server.service.GrpcService
 class PlayerApi(
 	private val playerService: PlayerService,
 	private val playerTaskService: PlayerTaskService,
+	private val playerTaskStatusService: PlayerTaskStatusService,
 	private val playerTaskTopicService: PlayerTaskTopicService,
-	private val generateTasksProducer: GenerateTasksProducer,
 	private val protoMapper: ProtoMapper
 ) : PlayerServiceImplBase() {
 
@@ -115,7 +114,7 @@ class PlayerApi(
 		log.info(">> generateTasks called by user={}", request.playerId)
 
 		try {
-			generateTasksProducer.send(request.playerId)
+			playerTaskStatusService.generateTasks(request.playerId)
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
@@ -130,12 +129,12 @@ class PlayerApi(
 		request: CompleteTaskRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
+		log.info(">> completeTask task={} called", request.playerTask.id)
+
 		try {
 			val playerTask = protoMapper.map(request.playerTask)
-			playerTaskService.setStatus(
-				setOf(playerTask.toEntity()),
-				PlayerTaskStatus.PENDING_COMPLETION
-			)
+				.toEntity()
+			playerTaskStatusService.pendingCompleteTask(playerTask)
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
@@ -150,15 +149,12 @@ class PlayerApi(
 		request: SkipTaskRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
+		log.info(">> skipTask task={} called by user={}", request.playerTask.id, request.playerId)
+
 		try {
 			val playerTask = protoMapper.map(request.playerTask)
 				.toEntity()
-			playerTaskService.setStatus(
-				listOf(playerTask),
-				PlayerTaskStatus.SKIPPED
-			)
-
-			generateTasksProducer.send(request.playerId)
+			playerTaskStatusService.skipTask(playerTask, request.playerId)
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()

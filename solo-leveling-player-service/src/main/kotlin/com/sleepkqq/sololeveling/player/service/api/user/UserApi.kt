@@ -24,6 +24,8 @@ class UserApi(
 		request: GetUserRequest,
 		responseObserver: StreamObserver<GetUserResponse>
 	) {
+		log.info(">> getUser called by user={}", request.userId)
+
 		try {
 			val user = userService.get(request.userId)
 			val response = GetUserResponse.newBuilder()
@@ -42,6 +44,8 @@ class UserApi(
 		request: AuthUserRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
+		log.info(">> authUser called by user={}", request.user.id)
+
 		try {
 			val user = protoMapper.map(request.user)
 			userService.upsert(user.toEntity())

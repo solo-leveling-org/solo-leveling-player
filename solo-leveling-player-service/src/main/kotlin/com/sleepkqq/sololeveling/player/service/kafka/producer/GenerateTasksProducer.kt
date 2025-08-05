@@ -48,7 +48,7 @@ class GenerateTasksProducer(
 			val tasksToGenerateCount = player.maxTasks - playerTaskService.getActiveTasksCount(playerId)
 
 			require(tasksToGenerateCount >= 1 && tasksToGenerateCount <= player.maxTasks) {
-				"Incorrect current tasks count=$tasksToGenerateCount, playerId=$playerId, maxTasks=${player.maxTasks}"
+				"Incorrect tasks to generate count=$tasksToGenerateCount, playerId=$playerId, maxTasks=${player.maxTasks}"
 			}
 
 			val tasks = generateSequence { taskService.initialize(playerId) }
