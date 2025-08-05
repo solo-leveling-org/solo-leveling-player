@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.service.player.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskTopicRepository
 import com.sleepkqq.sololeveling.player.service.service.player.LevelService
@@ -43,7 +44,7 @@ class PlayerTaskTopicServiceImpl(
 		)
 
 	@Transactional(readOnly = true)
-	override fun getActiveTopics(playerId: Long): List<PlayerTaskTopic> =
+	override fun getActiveTopics(playerId: Long): List<PlayerTaskTopicView> =
 		playerTaskTopicRepository.findByPlayerIdAndIsActiveTrue(playerId)
 
 	@Transactional(readOnly = true)

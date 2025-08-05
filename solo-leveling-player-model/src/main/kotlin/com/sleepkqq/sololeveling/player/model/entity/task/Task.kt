@@ -6,7 +6,6 @@ import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import org.babyfish.jimmer.sql.*
 import org.babyfish.jimmer.sql.meta.UUIDIdGenerator
-import java.math.BigDecimal
 import java.util.UUID
 
 @Entity
@@ -24,7 +23,7 @@ interface Task : Model {
 
 	val experience: Int?
 
-	val currencyReward: BigDecimal?
+	val currencyReward: Int?
 
 	val rarity: TaskRarity?
 

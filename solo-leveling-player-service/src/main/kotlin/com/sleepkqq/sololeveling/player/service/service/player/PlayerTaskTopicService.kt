@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.service.player
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import java.time.LocalDateTime
 
@@ -14,6 +15,6 @@ interface PlayerTaskTopicService {
 		now: LocalDateTime = LocalDateTime.now()
 	): PlayerTaskTopic
 
-	fun getActiveTopics(playerId: Long): List<PlayerTaskTopic>
+	fun getActiveTopics(playerId: Long): List<PlayerTaskTopicView>
 	fun getTopics(playerId: Long): List<PlayerTaskTopic>
 }

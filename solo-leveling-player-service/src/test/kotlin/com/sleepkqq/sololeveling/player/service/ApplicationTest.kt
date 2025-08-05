@@ -7,7 +7,6 @@ import com.sleepkqq.sololeveling.player.service.service.task.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -25,7 +24,7 @@ class ApplicationTest : BaseTestClass() {
 			this.title = "Test Task Title"
 			this.description = "Test Task Description"
 			this.experience = 100
-			this.currencyReward = BigDecimal("50.75")
+			this.currencyReward = 50
 			this.rarity = TaskRarity.EPIC
 			this.agility = 5
 			this.strength = 10

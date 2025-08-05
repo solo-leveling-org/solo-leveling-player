@@ -40,23 +40,6 @@ class PlayerTaskServiceImpl(
 			SaveMode.UPDATE_ONLY
 		)
 
-	@Transactional
-	override fun setStatus(
-		playerTasks: Collection<PlayerTask>,
-		status: PlayerTaskStatus,
-		now: LocalDateTime
-	) {
-		playerTaskRepository.saveEntities(
-			playerTasks.map {
-				PlayerTask(it) {
-					this.status = status
-					updatedAt = now
-				}
-			},
-			SaveMode.UPDATE_ONLY
-		)
-	}
-
 	@Transactional(readOnly = true)
 	override fun getActiveTasks(playerId: Long): List<PlayerTaskView> =
 		playerTaskRepository.findByPlayerIdAndStatusIn(playerId, ACTIVE_TASKS_STATUSES)

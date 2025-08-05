@@ -2,11 +2,10 @@ package com.sleepkqq.sololeveling.player.service.api.player
 
 import com.google.protobuf.Empty
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
-import com.sleepkqq.sololeveling.player.service.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.service.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
+import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskStatusService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskTopicService
 import com.sleepkqq.sololeveling.proto.player.*
 import com.sleepkqq.sololeveling.proto.player.PlayerServiceGrpc.PlayerServiceImplBase
@@ -19,35 +18,19 @@ import org.springframework.grpc.server.service.GrpcService
 class PlayerApi(
 	private val playerService: PlayerService,
 	private val playerTaskService: PlayerTaskService,
+	private val playerTaskStatusService: PlayerTaskStatusService,
 	private val playerTaskTopicService: PlayerTaskTopicService,
-	private val generateTasksProducer: GenerateTasksProducer,
 	private val protoMapper: ProtoMapper
 ) : PlayerServiceImplBase() {
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	override fun getPlayerInfo(
-		request: GetPlayerInfoRequest,
-		responseObserver: StreamObserver<GetPlayerInfoResponse>
-	) {
-		try {
-			val player = playerService.get(request.playerId)
-			val response = GetPlayerInfoResponse.newBuilder()
-				.setPlayer(protoMapper.map(player))
-				.build()
-
-			responseObserver.onNext(response)
-			responseObserver.onCompleted()
-		} catch (e: Exception) {
-			log.error("getPlayerInfo error", e)
-			responseObserver.onError(e)
-		}
-	}
-
 	override fun getActiveTasks(
 		request: GetActiveTasksRequest,
 		responseObserver: StreamObserver<GetActiveTasksResponse>
 	) {
+		log.info(">> getActiveTasks called by user={}", request.playerId)
+
 		try {
 			val activeTasks = playerTaskService.getActiveTasks(request.playerId)
 				.map { protoMapper.map(it) }
@@ -62,8 +45,32 @@ class PlayerApi(
 
 			responseObserver.onNext(response)
 			responseObserver.onCompleted()
+
 		} catch (e: Exception) {
 			log.error("getCurrentTasks error", e)
+			responseObserver.onError(e)
+		}
+	}
+
+	override fun getPlayerTopics(
+		request: GetPlayerTopicsRequest,
+		responseObserver: StreamObserver<GetPlayerTopicsResponse>
+	) {
+		log.info(">> getPlayerTopics called by user={}", request.playerId)
+
+		try {
+			val topics = playerTaskTopicService.getActiveTopics(request.playerId)
+				.map { protoMapper.map(it) }
+
+			val response = GetPlayerTopicsResponse.newBuilder()
+				.addAllPlayerTaskTopics(topics)
+				.build()
+
+			responseObserver.onNext(response)
+			responseObserver.onCompleted()
+
+		} catch (e: Exception) {
+			log.error("getPlayerTopics error", e)
 			responseObserver.onError(e)
 		}
 	}
@@ -72,6 +79,8 @@ class PlayerApi(
 		request: SavePlayerTopicsRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
+		log.info(">> savePlayerTopics called by user={}", request.playerId)
+
 		try {
 			val receivedEnumTopics = request.topicsList.map(protoMapper::map)
 
@@ -91,6 +100,7 @@ class PlayerApi(
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
+
 		} catch (e: Exception) {
 			log.error("savePlayerTopics error", e)
 			responseObserver.onError(e)
@@ -101,11 +111,14 @@ class PlayerApi(
 		request: GenerateTasksRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
+		log.info(">> generateTasks called by user={}", request.playerId)
+
 		try {
-			generateTasksProducer.send(request.playerId)
+			playerTaskStatusService.generateTasks(request.playerId)
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
+
 		} catch (e: Exception) {
 			log.error("savePlayerTopics error", e)
 			responseObserver.onError(e)
@@ -116,15 +129,16 @@ class PlayerApi(
 		request: CompleteTaskRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
+		log.info(">> completeTask task={} called", request.playerTask.id)
+
 		try {
 			val playerTask = protoMapper.map(request.playerTask)
-			playerTaskService.setStatus(
-				setOf(playerTask.toEntity()),
-				PlayerTaskStatus.PENDING_COMPLETION
-			)
+				.toEntity()
+			playerTaskStatusService.pendingCompleteTask(playerTask)
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
+
 		} catch (e: Exception) {
 			log.error("completeTask error", e)
 			responseObserver.onError(e)
@@ -135,18 +149,16 @@ class PlayerApi(
 		request: SkipTaskRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
+		log.info(">> skipTask task={} called by user={}", request.playerTask.id, request.playerId)
+
 		try {
 			val playerTask = protoMapper.map(request.playerTask)
 				.toEntity()
-			playerTaskService.setStatus(
-				listOf(playerTask),
-				PlayerTaskStatus.SKIPPED
-			)
-
-			generateTasksProducer.send(request.playerId)
+			playerTaskStatusService.skipTask(playerTask, request.playerId)
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()
+
 		} catch (e: Exception) {
 			log.error("completeTask error", e)
 			responseObserver.onError(e)

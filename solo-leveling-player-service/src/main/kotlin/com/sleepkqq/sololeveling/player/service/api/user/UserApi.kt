@@ -4,8 +4,8 @@ import com.google.protobuf.Empty
 import com.sleepkqq.sololeveling.player.service.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.service.service.user.UserService
 import com.sleepkqq.sololeveling.proto.user.AuthUserRequest
-import com.sleepkqq.sololeveling.proto.user.GetUserInfoRequest
-import com.sleepkqq.sololeveling.proto.user.GetUserInfoResponse
+import com.sleepkqq.sololeveling.proto.user.GetUserRequest
+import com.sleepkqq.sololeveling.proto.user.GetUserResponse
 import com.sleepkqq.sololeveling.proto.user.UserServiceGrpc.UserServiceImplBase
 import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
@@ -20,13 +20,15 @@ class UserApi(
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	override fun getUserInfo(
-		request: GetUserInfoRequest,
-		responseObserver: StreamObserver<GetUserInfoResponse>
+	override fun getUser(
+		request: GetUserRequest,
+		responseObserver: StreamObserver<GetUserResponse>
 	) {
+		log.info(">> getUser called by user={}", request.userId)
+
 		try {
 			val user = userService.get(request.userId)
-			val response = GetUserInfoResponse.newBuilder()
+			val response = GetUserResponse.newBuilder()
 				.setUser(protoMapper.map(user))
 				.build()
 
@@ -42,6 +44,8 @@ class UserApi(
 		request: AuthUserRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
+		log.info(">> authUser called by user={}", request.user.id)
+
 		try {
 			val user = protoMapper.map(request.user)
 			userService.upsert(user.toEntity())

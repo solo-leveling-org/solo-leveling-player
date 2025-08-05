@@ -6,10 +6,10 @@ import com.sleepkqq.sololeveling.avro.notification.Notification
 import com.sleepkqq.sololeveling.avro.notification.NotificationPriority
 import com.sleepkqq.sololeveling.avro.notification.SendNotificationEvent
 import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.service.kafka.producer.SendNotificationProducer
 import com.sleepkqq.sololeveling.player.service.mapper.AvroMapper
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
+import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskStatusService
 import com.sleepkqq.sololeveling.player.service.service.redis.IdempotencyService
 import com.sleepkqq.sololeveling.player.service.service.task.TaskService
 import org.slf4j.LoggerFactory
@@ -24,6 +24,7 @@ import org.springframework.util.Assert
 class SaveTasksConsumer(
 	private val taskService: TaskService,
 	private val playerTaskService: PlayerTaskService,
+	private val playerTaskStatusService: PlayerTaskStatusService,
 	private val sendNotificationProducer: SendNotificationProducer,
 	private val avroMapper: AvroMapper,
 	private val idempotencyService: IdempotencyService
@@ -91,7 +92,7 @@ class SaveTasksConsumer(
 				playerTasks.size,
 				event.playerId
 			)
-			playerTaskService.setStatus(playerTasks, PlayerTaskStatus.IN_PROGRESS)
+			playerTaskStatusService.inProgressTasks(playerTasks)
 		}
 	}
 
