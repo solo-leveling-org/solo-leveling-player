@@ -53,7 +53,7 @@ class LevelServiceImpl(
 			val playerTaskTopic = playerTaskTopicsMap[it]!!
 			val processedTaskTopicLevel = processExperienceGain(
 				playerTaskTopic.level!!,
-				LevelType.PLAYER,
+				LevelType.TASK_TOPIC,
 				experience / taskTopics.size
 			)
 			playerTaskTopicsMap[it] = PlayerTaskTopic(playerTaskTopic) {
@@ -62,7 +62,7 @@ class LevelServiceImpl(
 		}
 
 		return Player(player) {
-			level = processExperienceGain(player.level!!, LevelType.TASK_TOPIC, experience)
+			level = processExperienceGain(player.level!!, LevelType.PLAYER, experience)
 			this.taskTopics = playerTaskTopicsMap.values.toList()
 		}
 	}

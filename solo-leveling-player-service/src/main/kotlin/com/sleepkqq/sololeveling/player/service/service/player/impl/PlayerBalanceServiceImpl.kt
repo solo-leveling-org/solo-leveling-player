@@ -72,7 +72,7 @@ class PlayerBalanceServiceImpl(
 		val currentBalance = playerBalance.balance
 		val newBalance = currentBalance.minus(amount)
 
-		require(newBalance > BigDecimal.ZERO) {
+		require(newBalance >= BigDecimal.ZERO) {
 			"Insufficient funds for playerBalance=${playerBalance.id}: " +
 					"current balance is $currentBalance, requested amount is $amount"
 		}
