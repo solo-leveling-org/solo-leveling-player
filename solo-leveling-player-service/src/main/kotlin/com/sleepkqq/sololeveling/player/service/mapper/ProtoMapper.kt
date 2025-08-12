@@ -68,7 +68,23 @@ abstract class ProtoMapper {
 		PlayerTaskInput(
 			id = UUID.fromString(input.id),
 			version = input.version,
+			task = map(input.task),
 			status = PlayerTaskStatus.valueOf(input.status.name)
+		)
+
+	fun map(input: com.sleepkqq.sololeveling.proto.player.TaskInput): PlayerTaskInput.TargetOf_task =
+		PlayerTaskInput.TargetOf_task(
+			id = UUID.fromString(input.id),
+			version = input.version,
+			title = input.title,
+			description = input.description,
+			experience = input.experience,
+			currencyReward = input.currencyReward,
+			rarity = TaskRarity.valueOf(input.rarity.name),
+			topics = input.topicsList.map { TaskTopic.valueOf(it.name) }.toSet(),
+			agility = input.agility,
+			strength = input.strength,
+			intelligence = input.intelligence
 		)
 
 	fun map(input: com.sleepkqq.sololeveling.proto.user.UserInput): UserInput =

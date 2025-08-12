@@ -21,7 +21,7 @@ abstract class BaseTestClass {
 	companion object {
 		@JvmStatic
 		@Container
-		val kafkaContainer = ConfluentKafkaContainer("confluentinc/cp-kafka:latest")
+		val kafkaContainer = ConfluentKafkaContainer("confluentinc/cp-kafka:7.6.0")
 			.apply {
 				withExposedPorts(9092)
 				withNetwork(Network.SHARED)
@@ -30,7 +30,7 @@ abstract class BaseTestClass {
 		@JvmStatic
 		@Container
 		@ServiceConnection
-		val redisContainer = GenericContainer("redis:latest")
+		val redisContainer = GenericContainer("redis:7.2.4")
 			.apply {
 				withExposedPorts(6379)
 				withNetwork(Network.SHARED)
@@ -38,7 +38,7 @@ abstract class BaseTestClass {
 
 		@JvmStatic
 		@Container
-		val schemaRegistryContainer = GenericContainer("confluentinc/cp-schema-registry:latest")
+		val schemaRegistryContainer = GenericContainer("confluentinc/cp-schema-registry:7.6.0")
 			.apply {
 				withExposedPorts(8081)
 				withNetwork(Network.SHARED)
@@ -47,7 +47,7 @@ abstract class BaseTestClass {
 		@JvmStatic
 		@Container
 		@ServiceConnection
-		val postgresContainer = PostgreSQLContainer<Nothing>("postgres:latest")
+		val postgresContainer = PostgreSQLContainer<Nothing>("postgres:16.2")
 			.apply {
 				withDatabaseName("sololeveling_test")
 				withUsername("test")
