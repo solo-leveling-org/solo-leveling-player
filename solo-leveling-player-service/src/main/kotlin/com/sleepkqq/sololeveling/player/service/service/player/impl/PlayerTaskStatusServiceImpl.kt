@@ -42,6 +42,7 @@ class PlayerTaskStatusServiceImpl(
 			balance { allScalarFields() }
 			level { allScalarFields() }
 			taskTopics {
+				allScalarFields()
 				level { allScalarFields() }
 			}
 		}
