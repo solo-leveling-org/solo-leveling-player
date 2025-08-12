@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.service.user
 
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.LevelType
 import com.sleepkqq.sololeveling.player.model.entity.user.User
 import com.sleepkqq.sololeveling.player.service.service.player.LevelService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerBalanceService
@@ -20,7 +21,7 @@ class UserRegistrationService(
 		player = Player {
 			id = user.id
 			maxTasks = INITIAL_PLAYER_MAX_TASKS
-			level = levelService.initializePlayerLevel()
+			level = levelService.initializeLevel(LevelType.PLAYER)
 			balance = playerBalanceService.initializePlayerBalance()
 		}
 	}

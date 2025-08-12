@@ -14,6 +14,12 @@ interface Player : Model {
 
 	val maxTasks: Int
 
+	val agility: Int
+
+	val strength: Int
+
+	val intelligence: Int
+
 	@OneToOne
 	@JoinColumn(name = "user_id")
 	val user: User

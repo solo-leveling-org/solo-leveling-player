@@ -27,9 +27,8 @@ class PlayerServiceImpl(
 		?: throw ModelNotFoundException(Player::class, id)
 
 	@Transactional
-	override fun insert(player: Player): Player {
-		return playerRepository.save(player, SaveMode.INSERT_ONLY)
-	}
+	override fun insert(player: Player): Player =
+		playerRepository.save(player, SaveMode.INSERT_ONLY)
 
 	@Transactional
 	override fun update(player: Player, now: LocalDateTime): Player =

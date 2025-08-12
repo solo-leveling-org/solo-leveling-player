@@ -129,12 +129,12 @@ class PlayerApi(
 		request: CompleteTaskRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
-		log.info(">> completeTask task={} called", request.playerTask.id)
+		log.info(">> completeTask task={} called by user={}", request.playerTask.id, request.playerId)
 
 		try {
 			val playerTask = protoMapper.map(request.playerTask)
 				.toEntity()
-			playerTaskStatusService.pendingCompleteTask(playerTask)
+			playerTaskStatusService.pendingCompleteTask(playerTask, request.playerId)
 
 			responseObserver.onNext(Empty.newBuilder().build())
 			responseObserver.onCompleted()

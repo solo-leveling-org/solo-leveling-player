@@ -9,6 +9,14 @@ input PlayerTaskInput {
   -updatedAt
 
   -closedAt
+
+  task {
+    #allScalars
+
+    -createdAt
+
+    -updatedAt
+  }
 }
 
 PlayerTaskView {

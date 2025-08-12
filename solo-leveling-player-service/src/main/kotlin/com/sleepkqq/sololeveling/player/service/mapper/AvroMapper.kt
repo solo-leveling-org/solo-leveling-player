@@ -45,7 +45,7 @@ abstract class AvroMapper {
 		experience = saveTask.experience,
 		currencyReward = saveTask.currencyReward,
 		rarity = map(saveTask.rarity),
-		topics = saveTask.topics.map { map(it) },
+		topics = saveTask.topics.map { map(it) }.toSet(),
 		agility = saveTask.agility,
 		strength = saveTask.strength,
 		intelligence = saveTask.intelligence,

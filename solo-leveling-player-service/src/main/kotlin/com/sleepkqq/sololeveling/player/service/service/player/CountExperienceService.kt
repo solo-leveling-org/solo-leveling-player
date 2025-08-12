@@ -1,5 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.service.player
 
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.LevelType
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,19 +17,20 @@ class CountExperienceService {
 			NEXT_LEVEL_PLAYER_EXPERIENCE / PLAYER_TASK_TOPIC_COEFFICIENT
 	}
 
-	fun countPlayerExperienceToNextLevel(level: Int): Int =
-		countExperienceToNextLevel(
-			level,
-			FIRST_LEVEL_PLAYER_EXPERIENCE,
-			NEXT_LEVEL_PLAYER_EXPERIENCE
-		)
+	fun countExperienceToNextLevel(level: Int, levelType: LevelType): Int =
+		when (levelType) {
+			LevelType.PLAYER -> countExperienceToNextLevel(
+				level,
+				FIRST_LEVEL_PLAYER_EXPERIENCE,
+				NEXT_LEVEL_PLAYER_EXPERIENCE
+			)
 
-	fun countTopicExperienceToNextLevel(level: Int): Int =
-		countExperienceToNextLevel(
-			level,
-			FIRST_LEVEL_TOPIC_EXPERIENCE,
-			NEXT_LEVEL_TOPIC_EXPERIENCE
-		)
+			LevelType.TASK_TOPIC -> countExperienceToNextLevel(
+				level,
+				FIRST_LEVEL_TOPIC_EXPERIENCE,
+				NEXT_LEVEL_TOPIC_EXPERIENCE
+			)
+		}
 
 	private fun countExperienceToNextLevel(
 		level: Int,

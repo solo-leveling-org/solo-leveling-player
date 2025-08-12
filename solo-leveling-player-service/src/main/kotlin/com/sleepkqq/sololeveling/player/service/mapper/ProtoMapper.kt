@@ -52,26 +52,39 @@ abstract class ProtoMapper {
 	@Named("toSoulCoins")
 	fun map(input: BigDecimal): Money = input.toMoney("SLCN")
 
-	@Named("toProtoPlayerBalance")
-	@Mapping(target = "balance", source = "balance", qualifiedByName = ["toSoulCoins"])
-	abstract fun map(input: UserView.TargetOf_player.TargetOf_balance): com.sleepkqq.sololeveling.proto.player.PlayerBalanceView
-
-	@Named("toProtoPlayer")
-	@Mapping(target = "balance", source = "balance", qualifiedByName = ["toProtoPlayerBalance"])
-	abstract fun map(input: UserView.TargetOf_player): com.sleepkqq.sololeveling.proto.player.PlayerView
-
 	abstract fun map(input: PlayerTaskTopicView): com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicView
 
+	@Mapping(target = "task.topicsList", source = "input.task.topics")
 	abstract fun map(input: PlayerTaskView): com.sleepkqq.sololeveling.proto.player.PlayerTaskView
 
-	@Mapping(target = "player", source = "player", qualifiedByName = ["toProtoPlayer"])
+	@Mapping(
+		target = "player.balance.balance",
+		source = "input.player.balance.balance",
+		qualifiedByName = ["toSoulCoins"]
+	)
 	abstract fun map(input: UserView): com.sleepkqq.sololeveling.proto.user.UserView
 
 	fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskInput): PlayerTaskInput =
 		PlayerTaskInput(
 			id = UUID.fromString(input.id),
 			version = input.version,
+			task = map(input.task),
 			status = PlayerTaskStatus.valueOf(input.status.name)
+		)
+
+	fun map(input: com.sleepkqq.sololeveling.proto.player.TaskInput): PlayerTaskInput.TargetOf_task =
+		PlayerTaskInput.TargetOf_task(
+			id = UUID.fromString(input.id),
+			version = input.version,
+			title = input.title,
+			description = input.description,
+			experience = input.experience,
+			currencyReward = input.currencyReward,
+			rarity = TaskRarity.valueOf(input.rarity.name),
+			topics = input.topicsList.map { TaskTopic.valueOf(it.name) }.toSet(),
+			agility = input.agility,
+			strength = input.strength,
+			intelligence = input.intelligence
 		)
 
 	fun map(input: com.sleepkqq.sololeveling.proto.user.UserInput): UserInput =

@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-player-attributes
+      author: sleepkqq
+      changes:
+        - addColumn:
+            tableName: players
+            columns:
+              - column:
+                  name: agility
+                  type: INT
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: strength
+                  type: INT
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: intelligence
+                  type: INT
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: set-default-player-attributes
+      author: sleepkqq
+      changes:
+        - update:
+            tableName: players
+            columns:
+              - column:
+                  name: agility
+                  value: 0
+            where: "agility IS NULL"
+        - update:
+            tableName: players
+            columns:
+              - column:
+                  name: strength
+                  value: 0
+            where: "strength IS NULL"
+        - update:
+            tableName: players
+            columns:
+              - column:
+                  name: intelligence
+                  value: 0
+            where: "intelligence IS NULL"
