@@ -6,8 +6,8 @@ import java.time.LocalDateTime
 
 interface PlayerService {
 
-	fun find(id: Long, block: PlayerFetcherDsl.() -> Unit = {}): Player?
-	fun get(id: Long, block: PlayerFetcherDsl.() -> Unit = {}): Player
+	fun find(id: Long, block: PlayerFetcherDsl.() -> Unit = { allScalarFields() }): Player?
+	fun get(id: Long, block: PlayerFetcherDsl.() -> Unit = { allScalarFields() }): Player
 	fun insert(player: Player): Player
 	fun update(player: Player, now: LocalDateTime = LocalDateTime.now()): Player
 }

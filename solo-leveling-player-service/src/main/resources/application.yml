@@ -8,6 +8,9 @@ spring:
           max-active: 8
   profiles:
     include: jimmer
+  threads:
+    virtual:
+      enabled: true
 logging:
   level:
     org.apache.kafka.clients.consumer.ConsumerConfig: WARN

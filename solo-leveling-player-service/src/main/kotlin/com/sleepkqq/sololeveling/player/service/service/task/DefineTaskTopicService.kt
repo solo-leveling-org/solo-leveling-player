@@ -8,8 +8,10 @@ import java.util.Random
 @Service
 class DefineTaskTopicService {
 
-	private companion object {
-		val RANDOM = Random()
+	companion object {
+		private val RANDOM = Random()
+
+		const val MAX_TASK_TOPICS_COUNT = 2
 	}
 
 	fun define(topics: Set<TaskTopic>): List<TaskTopic> {
@@ -36,7 +38,8 @@ class DefineTaskTopicService {
 		return listOf(topicsList.first())
 	}
 
+	// 1 topic - 66.7% chance, 2 topics - 33.3% chance
 	private fun oneTopic(): Boolean {
-		return RANDOM.nextInt(3) < 2
+		return RANDOM.nextInt(3) < MAX_TASK_TOPICS_COUNT
 	}
 }

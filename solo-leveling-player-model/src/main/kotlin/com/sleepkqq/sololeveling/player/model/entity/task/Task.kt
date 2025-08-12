@@ -34,7 +34,7 @@ interface Task : Model {
 	val intelligence: Int?
 
 	@Serialized
-	val topics: List<TaskTopic>?
+	val topics: Set<TaskTopic>?
 
 	@OneToMany(mappedBy = "task")
 	val playerTasks: List<PlayerTask>

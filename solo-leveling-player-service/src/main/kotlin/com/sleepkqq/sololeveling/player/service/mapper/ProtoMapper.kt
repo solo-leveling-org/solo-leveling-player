@@ -52,19 +52,16 @@ abstract class ProtoMapper {
 	@Named("toSoulCoins")
 	fun map(input: BigDecimal): Money = input.toMoney("SLCN")
 
-	@Named("toProtoPlayerBalance")
-	@Mapping(target = "balance", source = "balance", qualifiedByName = ["toSoulCoins"])
-	abstract fun map(input: UserView.TargetOf_player.TargetOf_balance): com.sleepkqq.sololeveling.proto.player.PlayerBalanceView
-
-	@Named("toProtoPlayer")
-	@Mapping(target = "balance", source = "balance", qualifiedByName = ["toProtoPlayerBalance"])
-	abstract fun map(input: UserView.TargetOf_player): com.sleepkqq.sololeveling.proto.player.PlayerView
-
 	abstract fun map(input: PlayerTaskTopicView): com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicView
 
+	@Mapping(target = "task.topicsList", source = "input.task.topics")
 	abstract fun map(input: PlayerTaskView): com.sleepkqq.sololeveling.proto.player.PlayerTaskView
 
-	@Mapping(target = "player", source = "player", qualifiedByName = ["toProtoPlayer"])
+	@Mapping(
+		target = "player.balance.balance",
+		source = "input.player.balance.balance",
+		qualifiedByName = ["toSoulCoins"]
+	)
 	abstract fun map(input: UserView): com.sleepkqq.sololeveling.proto.user.UserView
 
 	fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskInput): PlayerTaskInput =

@@ -2,6 +2,7 @@ package com.sleepkqq.sololeveling.player.service.service.player.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.LevelType
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskTopicRepository
 import com.sleepkqq.sololeveling.player.service.service.player.LevelService
@@ -24,7 +25,7 @@ class PlayerTaskTopicServiceImpl(
 			id = UUID.randomUUID()
 			this.taskTopic = taskTopic
 			this.playerId = playerId
-			level = levelService.initializeTopicLevel()
+			level = levelService.initializeLevel(LevelType.TASK_TOPIC)
 			isActive = true
 		}
 
