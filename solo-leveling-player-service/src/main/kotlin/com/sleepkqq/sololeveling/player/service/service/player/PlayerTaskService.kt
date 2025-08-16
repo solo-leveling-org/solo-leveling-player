@@ -10,7 +10,9 @@ interface PlayerTaskService {
 	fun find(playerId: Long, taskIds: Collection<UUID>): List<PlayerTask>
 	fun insert(playerTask: PlayerTask): PlayerTask
 	fun update(playerTask: PlayerTask, now: LocalDateTime = LocalDateTime.now()): PlayerTask
+	fun insertAll(playerTasks: Collection<PlayerTask>)
 	fun getActiveTasks(playerId: Long): List<PlayerTaskView>
 	fun getTasksCount(playerId: Long): Long
 	fun getActiveTasksCount(playerId: Long): Long
+	fun initialize(playerId: Long, order: Int): PlayerTask
 }

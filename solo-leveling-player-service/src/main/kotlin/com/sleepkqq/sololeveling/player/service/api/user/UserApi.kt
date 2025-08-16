@@ -26,18 +26,13 @@ class UserApi(
 	) {
 		log.info(">> getUser called by user={}", request.userId)
 
-		try {
-			val user = userService.get(request.userId)
-			val response = GetUserResponse.newBuilder()
-				.setUser(protoMapper.map(user))
-				.build()
+		val user = userService.get(request.userId)
+		val response = GetUserResponse.newBuilder()
+			.setUser(protoMapper.map(user))
+			.build()
 
-			responseObserver.onNext(response)
-			responseObserver.onCompleted()
-		} catch (e: Exception) {
-			log.error("getUserInfo error", e)
-			responseObserver.onError(e)
-		}
+		responseObserver.onNext(response)
+		responseObserver.onCompleted()
 	}
 
 	override fun authUser(
@@ -46,16 +41,11 @@ class UserApi(
 	) {
 		log.info(">> authUser called by user={}", request.user.id)
 
-		try {
-			val user = protoMapper.map(request.user)
-			userService.upsert(user.toEntity())
-			val response = Empty.newBuilder().build()
+		val user = protoMapper.map(request.user)
+		userService.upsert(user.toEntity())
+		val response = Empty.newBuilder().build()
 
-			responseObserver.onNext(response)
-			responseObserver.onCompleted()
-		} catch (e: Exception) {
-			log.error("authUser error", e)
-			responseObserver.onError(e)
-		}
+		responseObserver.onNext(response)
+		responseObserver.onCompleted()
 	}
 }

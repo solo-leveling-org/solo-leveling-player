@@ -1,7 +1,5 @@
 package com.sleepkqq.sololeveling.player.service.service.task.impl
 
-import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.repository.task.TaskRepository
 import com.sleepkqq.sololeveling.player.service.exception.ModelNotFoundException
@@ -42,25 +40,8 @@ class TaskServiceImpl(
 		taskRepository.save(task, SaveMode.INSERT_ONLY)
 
 	@Transactional
-	override fun insertAll(tasks: Collection<Task>) {
-		taskRepository.saveEntities(tasks, SaveMode.INSERT_ONLY)
-	}
-
-	@Transactional
 	override fun update(task: Task, now: LocalDateTime): Task = taskRepository.save(
 		Task(task) { updatedAt = now },
 		SaveMode.UPDATE_ONLY
 	)
-
-	override fun initialize(playerId: Long): Task = Task {
-		id = UUID.randomUUID()
-		version = INITIAL_TASK_VERSION
-		playerTasks = listOf(
-			PlayerTask {
-				id = UUID.randomUUID()
-				status = PlayerTaskStatus.PREPARING
-				this.playerId = playerId
-			}
-		)
-	}
 }

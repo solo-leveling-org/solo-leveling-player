@@ -19,6 +19,8 @@ interface PlayerTask : Model {
 
 	val status: PlayerTaskStatus
 
+	val order: Int
+
 	val closedAt: LocalDateTime?
 
 	@ManyToOne

@@ -1,10 +1,13 @@
 package com.sleepkqq.sololeveling.player.service.mapper
 
+import com.google.protobuf.Timestamp
 import com.google.type.Money
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskInput
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Assessment
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
@@ -12,9 +15,11 @@ import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserInput
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole
 import com.sleepkqq.sololeveling.player.service.extenstions.toMoney
+import com.sleepkqq.sololeveling.player.service.extenstions.toTimestamp
 import org.mapstruct.*
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Suppress("unused")
@@ -49,27 +54,36 @@ abstract class ProtoMapper {
 	fun map(input: com.sleepkqq.sololeveling.proto.user.UserRole): UserRole =
 		UserRole.valueOf(input.name)
 
-	@Named("toSoulCoins")
-	fun map(input: BigDecimal): Money = input.toMoney("SLCN")
+	@Named("toTimestamp")
+	fun map(input: LocalDateTime): Timestamp = input.toTimestamp()
 
 	abstract fun map(input: PlayerTaskTopicView): com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicView
 
 	@Mapping(target = "task.topicsList", source = "input.task.topics")
+	@Mapping(target = "closedAt", source = "closedAt", qualifiedByName = ["toTimestamp"])
 	abstract fun map(input: PlayerTaskView): com.sleepkqq.sololeveling.proto.player.PlayerTaskView
+
+	fun map(balance: BigDecimal, currencyCode: CurrencyCode): Money = balance.toMoney(currencyCode)
 
 	@Mapping(
 		target = "player.balance.balance",
-		source = "input.player.balance.balance",
-		qualifiedByName = ["toSoulCoins"]
+		expression = "java(map(targetOf_balance.getBalance(), targetOf_balance.getCurrencyCode()))"
 	)
 	abstract fun map(input: UserView): com.sleepkqq.sololeveling.proto.user.UserView
+
+	@Mapping(
+		target = "balance.balance",
+		expression = "java(map(targetOf_balance.getBalance(), targetOf_balance.getCurrencyCode()))"
+	)
+	abstract fun map(input: PlayerView): com.sleepkqq.sololeveling.proto.player.PlayerView
 
 	fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskInput): PlayerTaskInput =
 		PlayerTaskInput(
 			id = UUID.fromString(input.id),
 			version = input.version,
-			task = map(input.task),
-			status = PlayerTaskStatus.valueOf(input.status.name)
+			order = input.order,
+			status = PlayerTaskStatus.valueOf(input.status.name),
+			task = map(input.task)
 		)
 
 	fun map(input: com.sleepkqq.sololeveling.proto.player.TaskInput): PlayerTaskInput.TargetOf_task =

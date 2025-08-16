@@ -1,0 +1,22 @@
+export com.sleepkqq.sololeveling.player.model.entity.player.Player
+  -> package com.sleepkqq.sololeveling.player.model.entity.player.dto
+
+PlayerView {
+  #allScalars
+
+  level {
+    #allScalars
+  }
+
+  balance {
+    #allScalars
+  }
+
+  taskTopics {
+    #allScalars
+
+    level {
+      #allScalars
+    }
+  }
+}
