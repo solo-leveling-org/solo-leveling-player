@@ -32,7 +32,8 @@ class GenerateTasksProducer(
 
 	@Transactional
 	@Retryable(maxAttempts = 3, backoff = Backoff(delay = 1000, multiplier = 2.0))
-	fun send(playerId: Long, forReplace: Boolean = false, replaceOrder: Int = 0) {
+	fun send(playerId: Long, forReplace: Boolean = false, replaceOrders: Set<Int> = setOf()) {
+
 		log.info(">> Start generating tasks for player {}", playerId)
 
 		try {
@@ -45,7 +46,7 @@ class GenerateTasksProducer(
 			}
 
 			val playerTasks = if (forReplace) {
-				listOf(playerTaskService.initialize(playerId, replaceOrder))
+				replaceOrders.map { playerTaskService.initialize(playerId, it) }
 
 			} else {
 				val tasksToGenerateCount = player.maxTasks - playerTaskService.getActiveTasksCount(playerId)

@@ -5,7 +5,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicV
 import org.babyfish.jimmer.spring.repository.KRepository
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Repository
-import java.util.*
+import java.util.UUID
 
 @Repository
 interface PlayerTaskTopicRepository : KRepository<PlayerTaskTopic, UUID> {

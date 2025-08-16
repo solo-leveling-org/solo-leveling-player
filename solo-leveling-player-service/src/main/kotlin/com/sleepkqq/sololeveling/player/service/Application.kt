@@ -5,7 +5,9 @@ import org.babyfish.jimmer.sql.EnableDtoGeneration
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
+import org.springframework.scheduling.annotation.EnableScheduling
 
+@EnableScheduling
 @EnableDtoGeneration
 @EnableJimmerRepositories("com.sleepkqq.sololeveling.player.model.repository")
 @SpringBootApplication(scanBasePackages = ["com.sleepkqq.sololeveling.player"])

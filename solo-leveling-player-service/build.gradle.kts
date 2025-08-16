@@ -40,6 +40,10 @@ dependencies {
 		}
 	}
 
+	// Coroutines
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
+
 	// Mapstruct
 	implementation("org.mapstruct:mapstruct:1.6.3")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")

@@ -14,5 +14,10 @@ interface PlayerTaskStatusService {
 	): Pair<PlayerView, PlayerView>
 
 	fun inProgressTasks(tasks: Collection<PlayerTask>, now: LocalDateTime = LocalDateTime.now())
-	fun generateTasks(playerId: Long, forReplace: Boolean = false, replaceOrder: Int = 0)
+	fun completeTasks(tasks: Collection<PlayerTask>, now: LocalDateTime = LocalDateTime.now())
+	fun generateTasks(
+		playerId: Long,
+		forReplace: Boolean = false,
+		replaceOrders: Set<Int> = setOf()
+	)
 }
