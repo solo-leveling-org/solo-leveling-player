@@ -4,6 +4,7 @@ import com.google.type.Money
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskInput
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Assessment
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
@@ -63,6 +64,12 @@ abstract class ProtoMapper {
 		expression = "java(map(targetOf_balance.getBalance(), targetOf_balance.getCurrencyCode()))"
 	)
 	abstract fun map(input: UserView): com.sleepkqq.sololeveling.proto.user.UserView
+
+	@Mapping(
+		target = "balance.balance",
+		expression = "java(map(targetOf_balance.getBalance(), targetOf_balance.getCurrencyCode()))"
+	)
+	abstract fun map(input: PlayerView): com.sleepkqq.sololeveling.proto.player.PlayerView
 
 	fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskInput): PlayerTaskInput =
 		PlayerTaskInput(

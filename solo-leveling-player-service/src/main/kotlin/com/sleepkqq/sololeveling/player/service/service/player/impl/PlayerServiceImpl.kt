@@ -3,8 +3,8 @@ package com.sleepkqq.sololeveling.player.service.service.player.impl
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerFetcherDsl
 import com.sleepkqq.sololeveling.player.model.entity.player.by
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerRepository
-import com.sleepkqq.sololeveling.player.service.exception.ModelNotFoundException
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.babyfish.jimmer.sql.kt.fetcher.newFetcher
@@ -23,8 +23,9 @@ class PlayerServiceImpl(
 		playerRepository.findNullable(id, newFetcher(Player::class).by(block))
 
 	@Transactional(readOnly = true)
-	override fun get(id: Long, block: PlayerFetcherDsl.() -> Unit): Player = find(id, block)
-		?: throw ModelNotFoundException(Player::class, id)
+	override fun findView(id: Long): PlayerView? =
+		playerRepository.viewer(PlayerView::class)
+			.findNullable(id)
 
 	@Transactional
 	override fun insert(player: Player): Player =

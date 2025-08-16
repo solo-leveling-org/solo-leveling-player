@@ -126,16 +126,22 @@ class PlayerApi(
 
 	override fun completeTask(
 		request: CompleteTaskRequest,
-		responseObserver: StreamObserver<Empty>
+		responseObserver: StreamObserver<CompleteTaskResponse>
 	) {
 		log.info(">> completeTask task={} called by user={}", request.playerTask.id, request.playerId)
 
 		try {
 			val playerTask = protoMapper.map(request.playerTask)
 				.toEntity()
-			playerTaskStatusService.pendingCompleteTask(playerTask, request.playerId)
 
-			responseObserver.onNext(Empty.newBuilder().build())
+			val playerStates = playerTaskStatusService.pendingCompleteTask(playerTask, request.playerId)
+
+			val response = CompleteTaskResponse.newBuilder()
+				.setPlayerBefore(protoMapper.map(playerStates.first))
+				.setPlayerAfter(protoMapper.map(playerStates.second))
+				.build()
+
+			responseObserver.onNext(response)
 			responseObserver.onCompleted()
 
 		} catch (e: Exception) {

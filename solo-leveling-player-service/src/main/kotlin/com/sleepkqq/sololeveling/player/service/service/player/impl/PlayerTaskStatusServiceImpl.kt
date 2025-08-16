@@ -2,6 +2,7 @@ package com.sleepkqq.sololeveling.player.service.service.player.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
@@ -34,18 +35,17 @@ class PlayerTaskStatusServiceImpl(
 	}
 
 	@Transactional
-	override fun pendingCompleteTask(playerTask: PlayerTask, playerId: Long, now: LocalDateTime) {
+	override fun pendingCompleteTask(
+		playerTask: PlayerTask,
+		playerId: Long,
+		now: LocalDateTime
+	): Pair<PlayerView, PlayerView> {
+
 		setStatus(listOf(playerTask), PlayerTaskStatus.PENDING_COMPLETION, now)
 
-		val player = playerService.get(playerId) {
-			allScalarFields()
-			balance { allScalarFields() }
-			level { allScalarFields() }
-			taskTopics {
-				allScalarFields()
-				level { allScalarFields() }
-			}
-		}
+		val playerView = playerService.getView(playerId)
+		val player = playerView.toEntity()
+
 		val task = playerTask.task
 
 		val updatedBalance = playerBalanceService.deposit(
@@ -60,7 +60,7 @@ class PlayerTaskStatusServiceImpl(
 			task.experience!!
 		)
 
-		playerService.update(
+		val updatedPlayer = playerService.update(
 			Player(gainedExperiencePlayer) {
 				agility = player.agility + task.agility!!
 				strength = player.strength + task.strength!!
@@ -69,6 +69,8 @@ class PlayerTaskStatusServiceImpl(
 			},
 			now
 		)
+
+		return playerView to PlayerView(updatedPlayer)
 	}
 
 	@Transactional
