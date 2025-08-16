@@ -2,6 +2,7 @@ package com.sleepkqq.sololeveling.player.service.service.player.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalance
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerBalanceRepository
@@ -26,6 +27,7 @@ class PlayerBalanceServiceImpl(
 	override fun initializePlayerBalance(): PlayerBalance = PlayerBalance {
 		id = UUID.randomUUID()
 		balance = INITIAL_BALANCE
+		currencyCode = CurrencyCode.SLCN
 	}
 
 	override fun deposit(

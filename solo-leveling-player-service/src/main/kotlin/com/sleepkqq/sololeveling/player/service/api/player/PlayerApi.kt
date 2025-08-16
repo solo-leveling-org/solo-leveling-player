@@ -35,8 +35,7 @@ class PlayerApi(
 			val activeTasks = playerTaskService.getActiveTasks(request.playerId)
 				.map { protoMapper.map(it) }
 
-			val tasksCount = playerTaskService.getTasksCount(request.playerId)
-			val isFirstTime = tasksCount == 0L
+			val isFirstTime = activeTasks.isEmpty()
 
 			val response = GetActiveTasksResponse.newBuilder()
 				.addAllTasks(activeTasks)

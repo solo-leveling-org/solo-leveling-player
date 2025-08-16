@@ -39,10 +39,10 @@ class GenerateTasksProducer(
 
 		try {
 			val player = playerService.get(playerId) {
-				allScalarFields()
+				maxTasks()
 				taskTopics {
-					allScalarFields()
-					level { allScalarFields() }
+					taskTopic()
+					level { level() }
 				}
 			}
 			val tasksToGenerateCount = player.maxTasks - playerTaskService.getActiveTasksCount(playerId)

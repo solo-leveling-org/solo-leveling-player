@@ -5,6 +5,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskInput
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Assessment
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
@@ -49,18 +50,17 @@ abstract class ProtoMapper {
 	fun map(input: com.sleepkqq.sololeveling.proto.user.UserRole): UserRole =
 		UserRole.valueOf(input.name)
 
-	@Named("toSoulCoins")
-	fun map(input: BigDecimal): Money = input.toMoney("SLCN")
 
 	abstract fun map(input: PlayerTaskTopicView): com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicView
 
 	@Mapping(target = "task.topicsList", source = "input.task.topics")
 	abstract fun map(input: PlayerTaskView): com.sleepkqq.sololeveling.proto.player.PlayerTaskView
 
+	fun map(balance: BigDecimal, currencyCode: CurrencyCode): Money = balance.toMoney(currencyCode)
+
 	@Mapping(
 		target = "player.balance.balance",
-		source = "input.player.balance.balance",
-		qualifiedByName = ["toSoulCoins"]
+		expression = "java(map(targetOf_balance.getBalance(), targetOf_balance.getCurrencyCode()))"
 	)
 	abstract fun map(input: UserView): com.sleepkqq.sololeveling.proto.user.UserView
 

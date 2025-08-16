@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.model.entity.player
 
 import com.sleepkqq.sololeveling.player.model.entity.Model
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
 import org.babyfish.jimmer.sql.Entity
 import org.babyfish.jimmer.sql.GeneratedValue
 import org.babyfish.jimmer.sql.Id
@@ -23,6 +24,8 @@ interface PlayerBalance : Model {
 	val id: UUID
 
 	val balance: BigDecimal
+
+	val currencyCode: CurrencyCode
 
 	@OneToOne
 	@JoinColumn(name = "player_id")

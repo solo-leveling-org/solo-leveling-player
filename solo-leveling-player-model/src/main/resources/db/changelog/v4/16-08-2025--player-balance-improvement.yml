@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-player-balance-currency-code
+      author: sleepkqq
+      changes:
+        - addColumn:
+            tableName: player_balances
+            columns:
+              - column:
+                  name: currency_code
+                  type: integer
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
