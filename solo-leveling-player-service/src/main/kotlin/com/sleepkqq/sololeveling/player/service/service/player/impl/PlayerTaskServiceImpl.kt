@@ -3,6 +3,7 @@ package com.sleepkqq.sololeveling.player.service.service.player.impl
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
+import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
@@ -40,6 +41,10 @@ class PlayerTaskServiceImpl(
 			SaveMode.UPDATE_ONLY
 		)
 
+	override fun insertAll(playerTasks: Collection<PlayerTask>) {
+		playerTaskRepository.saveEntities(playerTasks, SaveMode.INSERT_ONLY)
+	}
+
 	@Transactional(readOnly = true)
 	override fun getActiveTasks(playerId: Long): List<PlayerTaskView> =
 		playerTaskRepository.findByPlayerIdAndStatusIn(playerId, ACTIVE_TASKS_STATUSES)
@@ -51,4 +56,15 @@ class PlayerTaskServiceImpl(
 	@Transactional(readOnly = true)
 	override fun getActiveTasksCount(playerId: Long): Long =
 		playerTaskRepository.countByPlayerIdAndStatusIn(playerId, ACTIVE_TASKS_STATUSES)
+
+	override fun initialize(playerId: Long, order: Int): PlayerTask = PlayerTask {
+		id = UUID.randomUUID()
+		status = PlayerTaskStatus.PREPARING
+		this.order = order
+		this.playerId = playerId
+		task = Task {
+			id = UUID.randomUUID()
+			version = 0
+		}
+	}
 }

@@ -13,7 +13,7 @@ class ApiExceptionHandler : GrpcExceptionHandler {
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	override fun handleException(e: Throwable): StatusException {
-		log.error("Unexpected error occurred: {}", e.message, e)
+		log.error("Unexpected error occurred", e)
 
 		val status = when (e) {
 			is ModelNotFoundException -> Status.NOT_FOUND

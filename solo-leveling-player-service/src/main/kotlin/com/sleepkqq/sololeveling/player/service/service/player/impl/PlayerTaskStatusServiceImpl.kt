@@ -31,7 +31,7 @@ class PlayerTaskStatusServiceImpl(
 	override fun skipTask(playerTask: PlayerTask, playerId: Long, now: LocalDateTime) {
 		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED, now)
 
-		generateTasks(playerId)
+		generateTasks(playerId, true, playerTask.order)
 	}
 
 	@Transactional
@@ -80,8 +80,8 @@ class PlayerTaskStatusServiceImpl(
 
 
 	@Transactional
-	override fun generateTasks(playerId: Long) {
-		generateTasksProducer.send(playerId)
+	override fun generateTasks(playerId: Long, forReplace: Boolean, replaceOrder: Int) {
+		generateTasksProducer.send(playerId, forReplace, replaceOrder)
 	}
 
 	private fun setStatus(

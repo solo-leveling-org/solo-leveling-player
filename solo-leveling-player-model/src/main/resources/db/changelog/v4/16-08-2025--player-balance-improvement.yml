@@ -12,3 +12,16 @@ databaseChangeLog:
                   defaultValue: 0
                   constraints:
                     nullable: false
+
+  - changeSet:
+      id: add-player-task-order
+      author: sleepkqq
+      changes:
+        - addColumn:
+            tableName: player_tasks
+            columns:
+              - column:
+                  name: order
+                  type: integer
+                  constraints:
+                    nullable: false

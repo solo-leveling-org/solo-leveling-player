@@ -10,7 +10,6 @@ import com.sleepkqq.sololeveling.player.service.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.service.task.DefineTaskRarityService
 import com.sleepkqq.sololeveling.player.service.service.task.DefineTaskTopicService
-import com.sleepkqq.sololeveling.player.service.service.task.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.retry.annotation.Backoff
@@ -26,7 +25,6 @@ class GenerateTasksProducer(
 	private val defineTaskRarityService: DefineTaskRarityService,
 	private val playerService: PlayerService,
 	private val playerTaskService: PlayerTaskService,
-	private val taskService: TaskService,
 	private val avroMapper: AvroMapper
 ) {
 
@@ -34,7 +32,7 @@ class GenerateTasksProducer(
 
 	@Transactional
 	@Retryable(maxAttempts = 3, backoff = Backoff(delay = 1000, multiplier = 2.0))
-	fun send(playerId: Long) {
+	fun send(playerId: Long, forReplace: Boolean = false, replaceOrder: Int = 0) {
 		log.info(">> Start generating tasks for player {}", playerId)
 
 		try {
@@ -45,22 +43,28 @@ class GenerateTasksProducer(
 					level { level() }
 				}
 			}
-			val tasksToGenerateCount = player.maxTasks - playerTaskService.getActiveTasksCount(playerId)
 
-			require(tasksToGenerateCount >= 1 && tasksToGenerateCount <= player.maxTasks) {
-				"Incorrect tasks to generate count=$tasksToGenerateCount, playerId=$playerId, maxTasks=${player.maxTasks}"
+			val playerTasks = if (forReplace) {
+				listOf(playerTaskService.initialize(playerId, replaceOrder))
+
+			} else {
+				val tasksToGenerateCount = player.maxTasks - playerTaskService.getActiveTasksCount(playerId)
+
+				require(tasksToGenerateCount >= 1 && tasksToGenerateCount <= player.maxTasks) {
+					"Incorrect tasks to generate count=$tasksToGenerateCount, playerId=$playerId, maxTasks=${player.maxTasks}"
+				}
+
+				(0 until tasksToGenerateCount.toInt())
+					.map { index -> playerTaskService.initialize(playerId, index) }
+					.toList()
 			}
 
-			val tasks = generateSequence { taskService.initialize(playerId) }
-				.take(tasksToGenerateCount.toInt())
-				.toList()
+			log.info("Generated {} tasks for player {}", playerTasks.size, playerId)
 
-			log.info("Generated {} tasks for player {}", tasks.size, playerId)
+			playerTaskService.insertAll(playerTasks)
 
-			taskService.insertAll(tasks)
-
-			val generateTasks = tasks.map {
-				generateTask(it, player.taskTopics)
+			val generateTasks = playerTasks.map {
+				generateTask(it.task, player.taskTopics)
 			}
 
 			val event = GenerateTasksEvent.newBuilder()
