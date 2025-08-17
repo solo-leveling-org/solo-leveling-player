@@ -21,7 +21,7 @@ databaseChangeLog:
             tableName: player_tasks
             columns:
               - column:
-                  name: order
+                  name: _order
                   type: integer
                   constraints:
                     nullable: false

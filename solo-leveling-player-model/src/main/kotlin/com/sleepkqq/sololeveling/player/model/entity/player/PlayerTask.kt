@@ -19,6 +19,7 @@ interface PlayerTask : Model {
 
 	val status: PlayerTaskStatus
 
+	@Column(name = "_order")
 	val order: Int
 
 	val closedAt: LocalDateTime?
