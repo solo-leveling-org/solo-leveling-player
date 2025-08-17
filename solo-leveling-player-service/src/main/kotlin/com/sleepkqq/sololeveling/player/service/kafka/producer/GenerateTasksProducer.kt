@@ -41,6 +41,7 @@ class GenerateTasksProducer(
 				maxTasks()
 				taskTopics {
 					taskTopic()
+					isActive()
 					level { level() }
 				}
 			}
