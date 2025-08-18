@@ -51,7 +51,7 @@ dependencies {
 
 	// Project modules
 	implementation(project(":solo-leveling-player-model"))
-	implementation("com.sleepkqq:solo-leveling-proto:4.3.2")
+	implementation("com.sleepkqq:solo-leveling-proto:4.3.3")
 	implementation("com.sleepkqq:solo-leveling-avro:2.1.4")
 
 	// Tests

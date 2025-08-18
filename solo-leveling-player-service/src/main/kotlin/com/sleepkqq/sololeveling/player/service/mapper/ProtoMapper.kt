@@ -75,6 +75,7 @@ abstract class ProtoMapper {
 		target = "balance.balance",
 		expression = "java(map(targetOf_balance.getBalance(), targetOf_balance.getCurrencyCode()))"
 	)
+	@Mapping(target = "taskTopicsList", source = "taskTopics")
 	abstract fun map(input: PlayerView): com.sleepkqq.sololeveling.proto.player.PlayerView
 
 	fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskInput): PlayerTaskInput =
