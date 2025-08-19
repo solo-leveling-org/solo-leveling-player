@@ -37,6 +37,7 @@ abstract class ProtoMapper {
 
 	fun map(input: LocalDateTime): Timestamp = input.toTimestamp()
 
+	@Mapping(target = "isActive", source = "active")
 	abstract fun map(input: PlayerTaskTopicView): com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicView
 
 	@Mapping(target = "task.topicsList", source = "input.task.topics")
