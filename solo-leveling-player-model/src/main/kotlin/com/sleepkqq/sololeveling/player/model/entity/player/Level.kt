@@ -4,7 +4,7 @@ import com.sleepkqq.sololeveling.player.model.entity.Model
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Assessment
 import org.babyfish.jimmer.sql.*
 import org.babyfish.jimmer.sql.meta.UUIDIdGenerator
-import java.util.*
+import java.util.UUID
 
 @Entity
 @Table(name = "levels")

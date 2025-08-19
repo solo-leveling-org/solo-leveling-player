@@ -11,6 +11,12 @@ spring:
   threads:
     virtual:
       enabled: true
+app:
+  scheduling:
+    tasks:
+      completion:
+        enabled: true
+        cron: '0 0 * * * *'
 logging:
   level:
     org.apache.kafka.clients.consumer.ConsumerConfig: WARN
@@ -21,4 +27,4 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: '*'

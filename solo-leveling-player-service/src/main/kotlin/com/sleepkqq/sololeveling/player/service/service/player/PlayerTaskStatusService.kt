@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.service.player
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import java.time.LocalDateTime
 
 interface PlayerTaskStatusService {
@@ -10,8 +11,13 @@ interface PlayerTaskStatusService {
 		playerTask: PlayerTask,
 		playerId: Long,
 		now: LocalDateTime = LocalDateTime.now()
-	)
+	): Pair<PlayerView, PlayerView>
 
 	fun inProgressTasks(tasks: Collection<PlayerTask>, now: LocalDateTime = LocalDateTime.now())
-	fun generateTasks(playerId: Long)
+	fun completeTasks(tasks: Collection<PlayerTask>, now: LocalDateTime = LocalDateTime.now())
+	fun generateTasks(
+		playerId: Long,
+		forReplace: Boolean = false,
+		replaceOrders: Set<Int> = setOf()
+	)
 }

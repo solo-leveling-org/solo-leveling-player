@@ -40,6 +40,10 @@ dependencies {
 		}
 	}
 
+	// Coroutines
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
+
 	// Mapstruct
 	implementation("org.mapstruct:mapstruct:1.6.3")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
@@ -47,7 +51,7 @@ dependencies {
 
 	// Project modules
 	implementation(project(":solo-leveling-player-model"))
-	implementation("com.sleepkqq:solo-leveling-proto:4.2.3")
+	implementation("com.sleepkqq:solo-leveling-proto:4.4.0")
 	implementation("com.sleepkqq:solo-leveling-avro:2.1.4")
 
 	// Tests

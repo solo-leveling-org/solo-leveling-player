@@ -1,11 +1,12 @@
 package com.sleepkqq.sololeveling.player.service.extenstions
 
 import com.google.type.Money
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
 
-fun BigDecimal.toMoney(currencyCode: String): Money {
+fun BigDecimal.toMoney(currencyCode: CurrencyCode): Money {
 	require(this.scale() <= 9) { "Scale cannot exceed 9 digits" }
 
 	// Нормализуем к 9 знакам
@@ -24,7 +25,7 @@ fun BigDecimal.toMoney(currencyCode: String): Money {
 	}
 
 	return Money.newBuilder()
-		.setCurrencyCode(currencyCode)
+		.setCurrencyCode(currencyCode.name)
 		.setUnits(units.toLong())
 		.setNanos(nanos.toInt())
 		.build()

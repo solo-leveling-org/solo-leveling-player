@@ -1,6 +1,22 @@
 export com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
   -> package com.sleepkqq.sololeveling.player.model.entity.player.dto
 
+input PlayerTaskTopicInput {
+  #allScalars
+  
+  -updatedAt
+
+  -createdAt
+
+  level {
+    #allScalars
+
+    -updatedAt
+
+    -createdAt
+  }
+}
+
 PlayerTaskTopicView {
   #allScalars
 

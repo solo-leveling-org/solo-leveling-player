@@ -6,7 +6,7 @@ import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import org.babyfish.jimmer.sql.*
 import org.babyfish.jimmer.sql.meta.UUIDIdGenerator
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @Entity
 @Table(name = "player_tasks")
@@ -18,6 +18,9 @@ interface PlayerTask : Model {
 	val id: UUID
 
 	val status: PlayerTaskStatus
+
+	@Column(name = "_order")
+	val order: Int
 
 	val closedAt: LocalDateTime?
 

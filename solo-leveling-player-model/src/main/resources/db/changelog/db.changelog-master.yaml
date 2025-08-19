@@ -12,3 +12,7 @@ databaseChangeLog:
   # v3
   - include:
       file: db/changelog/v3/10-08-2025--player-tasks-completion.yml
+
+  # v4
+  - include:
+      file: db/changelog/v4/16-08-2025--player-balance-improvement.yml

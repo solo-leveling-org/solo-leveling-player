@@ -26,7 +26,7 @@ class PlayerTaskTopicServiceImpl(
 			this.taskTopic = taskTopic
 			this.playerId = playerId
 			level = levelService.initializeLevel(LevelType.TASK_TOPIC)
-			isActive = true
+			isActive = false
 		}
 
 	@Transactional
@@ -34,8 +34,8 @@ class PlayerTaskTopicServiceImpl(
 		playerTaskTopicRepository.save(topic, SaveMode.INSERT_ONLY)
 
 	@Transactional
-	override fun saveAll(topics: Collection<PlayerTaskTopic>) =
-		playerTaskTopicRepository.upsertAll(topics)
+	override fun updateAll(topics: Collection<PlayerTaskTopic>) =
+		playerTaskTopicRepository.updateAll(topics)
 
 	@Transactional
 	override fun update(playerTaskTopic: PlayerTaskTopic, now: LocalDateTime): PlayerTaskTopic =
@@ -45,10 +45,6 @@ class PlayerTaskTopicServiceImpl(
 		)
 
 	@Transactional(readOnly = true)
-	override fun getActiveTopics(playerId: Long): List<PlayerTaskTopicView> =
-		playerTaskTopicRepository.findByPlayerIdAndIsActiveTrue(playerId)
-
-	@Transactional(readOnly = true)
-	override fun getTopics(playerId: Long): List<PlayerTaskTopic> =
+	override fun getByPlayerId(playerId: Long): List<PlayerTaskTopicView> =
 		playerTaskTopicRepository.findByPlayerId(playerId)
 }

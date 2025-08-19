@@ -1,8 +1,10 @@
 package com.sleepkqq.sololeveling.player.service.service.player.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerCompletionTask
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
+import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
@@ -27,7 +29,7 @@ class PlayerTaskServiceImpl(
 
 	@Transactional(readOnly = true)
 	override fun find(playerId: Long, taskIds: Collection<UUID>): List<PlayerTask> =
-		playerTaskRepository.findByPlayerIdAndTaskIdsIn(playerId, taskIds)
+		playerTaskRepository.findByPlayerIdAndTaskIdIn(playerId, taskIds)
 
 	@Transactional
 	override fun insert(playerTask: PlayerTask): PlayerTask =
@@ -40,15 +42,38 @@ class PlayerTaskServiceImpl(
 			SaveMode.UPDATE_ONLY
 		)
 
-	@Transactional(readOnly = true)
-	override fun getActiveTasks(playerId: Long): List<PlayerTaskView> =
-		playerTaskRepository.findByPlayerIdAndStatusIn(playerId, ACTIVE_TASKS_STATUSES)
+	@Transactional
+	override fun insertAll(playerTasks: Collection<PlayerTask>) {
+		playerTaskRepository.saveEntities(playerTasks, SaveMode.INSERT_ONLY)
+	}
 
 	@Transactional(readOnly = true)
-	override fun getTasksCount(playerId: Long): Long =
-		playerTaskRepository.getTasksCountByPlayerId(playerId)
+	override fun getActiveTasks(playerId: Long): List<PlayerTaskView> =
+		playerTaskRepository.findByPlayerIdAndStatusIn(
+			playerId,
+			ACTIVE_TASKS_STATUSES,
+			PlayerTaskView::class
+		)
+
+	@Transactional(readOnly = true)
+	override fun getPendingCompletionTasks(): List<PlayerCompletionTask> =
+		playerTaskRepository.findByStatus(
+			PlayerTaskStatus.PENDING_COMPLETION,
+			PlayerCompletionTask::class
+		)
 
 	@Transactional(readOnly = true)
 	override fun getActiveTasksCount(playerId: Long): Long =
 		playerTaskRepository.countByPlayerIdAndStatusIn(playerId, ACTIVE_TASKS_STATUSES)
+
+	override fun initialize(playerId: Long, order: Int): PlayerTask = PlayerTask {
+		id = UUID.randomUUID()
+		status = PlayerTaskStatus.PREPARING
+		this.order = order
+		this.playerId = playerId
+		task = Task {
+			id = UUID.randomUUID()
+			version = 0
+		}
+	}
 }

@@ -5,13 +5,12 @@ import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicV
 import org.babyfish.jimmer.spring.repository.KRepository
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Repository
-import java.util.*
+import java.util.UUID
 
 @Repository
 interface PlayerTaskTopicRepository : KRepository<PlayerTaskTopic, UUID> {
 
-	fun findByPlayerIdAndIsActiveTrue(playerId: Long): List<PlayerTaskTopicView>
-	fun findByPlayerId(playerId: Long): List<PlayerTaskTopic>
-	fun upsertAll(entities: Collection<PlayerTaskTopic>) =
-		saveEntities(entities, SaveMode.UPSERT)
+	fun findByPlayerId(playerId: Long): List<PlayerTaskTopicView>
+	fun updateAll(entities: Collection<PlayerTaskTopic>) =
+		saveEntities(entities, SaveMode.UPDATE_ONLY)
 }

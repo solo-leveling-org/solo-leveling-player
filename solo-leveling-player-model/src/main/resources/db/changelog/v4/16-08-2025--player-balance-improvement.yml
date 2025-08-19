@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-player-balance-currency-code
+      author: sleepkqq
+      changes:
+        - addColumn:
+            tableName: player_balances
+            columns:
+              - column:
+                  name: currency_code
+                  type: integer
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: add-player-task-order
+      author: sleepkqq
+      changes:
+        - addColumn:
+            tableName: player_tasks
+            columns:
+              - column:
+                  name: _order
+                  type: integer
+                  constraints:
+                    nullable: false

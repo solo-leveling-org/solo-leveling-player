@@ -10,7 +10,5 @@ interface TaskService {
 	fun find(id: UUID): Task?
 	fun updateAll(tasks: Collection<Task>, now: LocalDateTime = LocalDateTime.now())
 	fun insert(task: Task): Task
-	fun insertAll(tasks: Collection<Task>)
 	fun update(task: Task, now: LocalDateTime = LocalDateTime.now()): Task
-	fun initialize(playerId: Long): Task
 }
