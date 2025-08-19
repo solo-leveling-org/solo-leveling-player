@@ -35,33 +35,11 @@ import java.util.UUID
 )
 abstract class ProtoMapper {
 
-	@Named("toEntityTaskTopic")
-	fun map(input: com.sleepkqq.sololeveling.proto.player.TaskTopic): TaskTopic =
-		TaskTopic.valueOf(input.name)
-
-	@Named("toEntityAssessment")
-	fun map(input: com.sleepkqq.sololeveling.proto.player.Assessment): Assessment =
-		Assessment.valueOf(input.name)
-
-	@Named("toEntityPlayerTaskStatus")
-	fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus): PlayerTaskStatus =
-		PlayerTaskStatus.valueOf(input.name)
-
-	@Named("toEntityTaskRarity")
-	fun map(input: com.sleepkqq.sololeveling.proto.player.TaskRarity): TaskRarity =
-		TaskRarity.valueOf(input.name)
-
-	@Named("toEntityUserRole")
-	fun map(input: com.sleepkqq.sololeveling.proto.user.UserRole): UserRole =
-		UserRole.valueOf(input.name)
-
-	@Named("toTimestamp")
 	fun map(input: LocalDateTime): Timestamp = input.toTimestamp()
 
 	abstract fun map(input: PlayerTaskTopicView): com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicView
 
 	@Mapping(target = "task.topicsList", source = "input.task.topics")
-	@Mapping(target = "closedAt", source = "closedAt", qualifiedByName = ["toTimestamp"])
 	abstract fun map(input: PlayerTaskView): com.sleepkqq.sololeveling.proto.player.PlayerTaskView
 
 	fun map(balance: BigDecimal, currencyCode: CurrencyCode): Money = balance.toMoney(currencyCode)
