@@ -3,6 +3,7 @@ package com.sleepkqq.sololeveling.player.service.mapper
 import com.google.protobuf.Timestamp
 import com.google.type.Money
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskInput
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicInput
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
@@ -111,5 +112,25 @@ abstract class ProtoMapper {
 			photoUrl = input.photoUrl,
 			locale = input.locale,
 			roles = input.rolesList.map { UserRole.valueOf(it.name) }
+		)
+
+	fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicInput): PlayerTaskTopicInput =
+		PlayerTaskTopicInput(
+			id = UUID.fromString(input.id),
+			version = input.version,
+			taskTopic = TaskTopic.valueOf(input.taskTopic.name),
+			isActive = input.isActive,
+			level = map(input.level)
+		)
+
+	fun map(input: com.sleepkqq.sololeveling.proto.player.LevelInput): PlayerTaskTopicInput.TargetOf_level =
+		PlayerTaskTopicInput.TargetOf_level(
+			id = UUID.fromString(input.id),
+			version = input.version,
+			level = input.level,
+			totalExperience = input.totalExperience,
+			currentExperience = input.currentExperience,
+			experienceToNextLevel = input.experienceToNextLevel,
+			assessment = Assessment.valueOf(input.assessment.name),
 		)
 }

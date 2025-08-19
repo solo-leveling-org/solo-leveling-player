@@ -1,7 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.api.player
 
 import com.google.protobuf.Empty
-import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
 import com.sleepkqq.sololeveling.player.service.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
@@ -51,7 +50,7 @@ class PlayerApi(
 	) {
 		log.info(">> getPlayerTopics called by user={}", request.playerId)
 
-		val topics = playerTaskTopicService.getActiveTopics(request.playerId)
+		val topics = playerTaskTopicService.getByPlayerId(request.playerId)
 			.map { protoMapper.map(it) }
 
 		val response = GetPlayerTopicsResponse.newBuilder()
@@ -68,21 +67,11 @@ class PlayerApi(
 	) {
 		log.info(">> savePlayerTopics called by user={}", request.playerId)
 
-		val receivedEnumTopics = request.topicsList.map(protoMapper::map)
+		val receivedTopics = request.playerTaskTopicsList
+			.map(protoMapper::map)
+			.map { it.toEntity() }
 
-		val initialTopics = playerTaskTopicService.getTopics(request.playerId)
-
-		val restoredTopics = initialTopics.map {
-			PlayerTaskTopic(it)
-			{ isActive = it.taskTopic in receivedEnumTopics }
-		}
-
-		val initialEnumTopics = initialTopics.map { it.taskTopic }
-		val newTopics = receivedEnumTopics
-			.filter { it !in initialEnumTopics }
-			.map { playerTaskTopicService.initialize(request.playerId, it) }
-
-		playerTaskTopicService.saveAll(restoredTopics + newTopics)
+		playerTaskTopicService.updateAll(receivedTopics)
 
 		responseObserver.onNext(Empty.newBuilder().build())
 		responseObserver.onCompleted()
