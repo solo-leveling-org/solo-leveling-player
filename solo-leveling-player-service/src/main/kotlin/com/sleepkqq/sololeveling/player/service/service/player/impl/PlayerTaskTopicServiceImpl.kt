@@ -26,7 +26,7 @@ class PlayerTaskTopicServiceImpl(
 			this.taskTopic = taskTopic
 			this.playerId = playerId
 			level = levelService.initializeLevel(LevelType.TASK_TOPIC)
-			isActive = true
+			isActive = false
 		}
 
 	@Transactional
