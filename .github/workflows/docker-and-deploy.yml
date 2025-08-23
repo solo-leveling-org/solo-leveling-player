@@ -2,6 +2,15 @@ name: Docker build, Push and Deploy to Kubernetes
 
 on:
   workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type: jvm or native'
+        required: true
+        default: 'jvm'
+        type: choice
+        options:
+          - jvm
+          - native
 
 jobs:
   docker-and-deploy:
@@ -34,10 +43,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set Dockerfile name
+        id: set-dockerfile
+        run: |
+          echo "DOCKERFILE=Dockerfile.${{ inputs.build_type }}" >> $GITHUB_ENV
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ${{ env.DOCKERFILE }}
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USER }}/solo-leveling-player:latest

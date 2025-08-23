@@ -1,16 +1,29 @@
 plugins {
 	id("buildsrc.convention.kotlin-jvm")
-	id("org.springframework.boot") version "3.5.0"
+	id("org.springframework.boot") version "3.5.4"
 	id("io.spring.dependency-management") version "1.1.4"
 	kotlin("plugin.spring") version "2.2.0"
 	kotlin("jvm")
 	alias(libs.plugins.kotlinPluginSerialization)
 	kotlin("kapt")
+	id("org.graalvm.buildtools.native") version "0.11.0"
 }
 
 dependencyManagement {
 	imports {
 		mavenBom("org.testcontainers:testcontainers-bom:1.21.3")
+	}
+}
+
+graalvmNative {
+	binaries {
+		named("main") {
+			imageName.set("solo-leveling-player-service")
+			buildArgs.add("--no-fallback")
+			buildArgs.add("-H:Class=com.sleepkqq.sololeveling.player.service.Application")
+			buildArgs.add("-H:+ReportExceptionStackTraces")
+			buildArgs.add("-H:NameMappingFile=build/resources/main/META-INF/native-image/reflect-config.json")
+		}
 	}
 }
 
