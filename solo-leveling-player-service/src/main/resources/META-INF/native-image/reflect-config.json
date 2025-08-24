@@ -1,0 +1,10 @@
+[
+  {
+    "name": "kotlin.jvm.functions.Function1",
+    "allDeclaredMethods": true
+  },
+  {
+    "name": "kotlin.jvm.functions.Function2",
+    "allDeclaredMethods": true
+  }
+]
