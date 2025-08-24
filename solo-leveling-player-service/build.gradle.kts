@@ -22,7 +22,6 @@ graalvmNative {
 			buildArgs.add("--no-fallback")
 			buildArgs.add("-H:Class=com.sleepkqq.sololeveling.player.service.Application")
 			buildArgs.add("-H:+ReportExceptionStackTraces")
-			buildArgs.add("-H:ReflectionConfigurationFiles=src/main/META-INF/native-image/reflect-config.json")
 			buildArgs.add("-H:EnableURLProtocols=http,https")
 			buildArgs.add("--initialize-at-run-time=kotlin.reflect.jvm.ReflectJvmMapping,kotlin.reflect.jvm.internal.ReflectionFactoryImpl,kotlin.reflect.jvm.internal.KotlinReflectionInternalError")
 		}
