@@ -80,11 +80,6 @@ dependencies {
 	testImplementation(libs.bundles.testcontainers)
 }
 
-// Отключаем AOT для JVM сборки
-tasks.matching { it.name.contains("processAot") }.configureEach {
-	enabled = false
-}
-
 // Отключаем configuration cache для нативных задач
 tasks.matching { it.name.contains("native") || it.name.contains("generateResourcesConfigFile") }.configureEach {
 	notCompatibleWithConfigurationCache("Native build tasks are not compatible with configuration cache")
