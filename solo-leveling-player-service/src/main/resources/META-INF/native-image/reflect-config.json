@@ -1,10 +1,44 @@
 [
   {
+    "name": "kotlin.jvm.functions.Function0",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true
+  },
+  {
     "name": "kotlin.jvm.functions.Function1",
-    "allDeclaredMethods": true
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true
   },
   {
     "name": "kotlin.jvm.functions.Function2",
-    "allDeclaredMethods": true
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "kotlin.reflect.jvm.internal.ReflectProperties$Val",
+    "methods": [
+      {
+        "name": "getValue",
+        "parameterTypes": [
+          "java.lang.Object",
+          "kotlin.reflect.KProperty"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "kotlin.reflect.jvm.internal.KClassImpl",
+    "methods": [
+      {
+        "name": "getMembers",
+        "parameterTypes": []
+      }
+    ]
   }
 ]

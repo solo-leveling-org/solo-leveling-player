@@ -22,7 +22,7 @@ graalvmNative {
 			buildArgs.add("--no-fallback")
 			buildArgs.add("-H:Class=com.sleepkqq.sololeveling.player.service.Application")
 			buildArgs.add("-H:+ReportExceptionStackTraces")
-			buildArgs.add("-H:NameMappingFile=build/resources/main/META-INF/native-image/reflect-config.json")
+			buildArgs.add("-H:ReflectionConfigurationFiles=src/main/META-INF/native-image/reflect-config.json")
 		}
 	}
 }
