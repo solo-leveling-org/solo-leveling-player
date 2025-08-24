@@ -41,6 +41,14 @@ graalvmNative {
 			buildArgs.add("--enable-all-security-services")
 			buildArgs.add("--report-unsupported-elements-at-runtime")
 			buildArgs.add("--allow-incomplete-classpath")
+			
+			// Добавляем флаг для совместимости с разными CPU архитектурами
+			buildArgs.add("-march=compatibility")
+			
+			// Дополнительные флаги для совместимости
+			buildArgs.add("-mtune=generic")
+			buildArgs.add("-mfpmath=sse")
+			buildArgs.add("-msse2")
 		}
 	}
 }
