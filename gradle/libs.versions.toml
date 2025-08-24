@@ -10,11 +10,12 @@ kotlinxSerializationJSON = "1.9.0"
 kotlinxCoroutines = "1.10.2"
 
 # Spring ecosystem
-springBoot = "3.5.4"
+springBoot = "3.5.5"
 springDependencyManagement = "1.1.7"
-springFramework = "6.2.0"
-springGrpc = "0.10.0-SNAPSHOT"
+springFramework = "6.2.10"
+springGrpc = "0.10.0"
 springRetry = "2.0.12"
+springKafka = "3.3.9"
 
 # Database
 postgresql = "42.7.7"
@@ -24,9 +25,6 @@ jimmer = "0.9.99"
 # Build tools
 ksp = "2.2.10-2.0.2"
 graalvmNative = "0.11.0"
-
-# Messaging
-kafka = "3.1.0"
 
 # Serialization & Mapping
 mapstruct = "1.6.3"
@@ -58,7 +56,7 @@ springBootTestcontainers = { module = "org.springframework.boot:spring-boot-test
 springContext = { module = "org.springframework:spring-context", version.ref = "springFramework" }
 springRetry = { module = "org.springframework.retry:spring-retry", version.ref = "springRetry" }
 springAspects = { module = "org.springframework:spring-aspects", version.ref = "springFramework" }
-springKafka = { module = "org.springframework.kafka:spring-kafka", version.ref = "kafka" }
+springKafka = { module = "org.springframework.kafka:spring-kafka", version.ref = "springKafka" }
 springBootStarterDataRedis = { module = "org.springframework.boot:spring-boot-starter-data-redis", version.ref = "springBoot" }
 
 # Database
