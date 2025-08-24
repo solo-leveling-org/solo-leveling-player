@@ -23,7 +23,6 @@ graalvmNative {
 			buildArgs.add("-H:Class=com.sleepkqq.sololeveling.player.service.Application")
 			buildArgs.add("-H:+ReportExceptionStackTraces")
 			buildArgs.add("-H:ReflectionConfigurationFiles=src/main/META-INF/native-image/reflect-config.json")
-			buildArgs.add("-Dspring.native.remove-yaml-support=true")
 			buildArgs.add("-Dspring.aot.enabled=true")
 		}
 	}
