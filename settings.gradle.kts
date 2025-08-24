@@ -12,6 +12,8 @@ dependencyResolutionManagement {
 		mavenCentral()
 		gradlePluginPortal()
 		maven { url = uri("https://packages.confluent.io/maven/") }
+		maven { url = uri("https://repo.spring.io/milestone") }
+		maven { url = uri("https://repo.spring.io/snapshot") }
 		maven {
 			url = uri("https://maven.pkg.github.com/solo-leveling-org/solo-leveling-proto")
 			credentials {
@@ -26,7 +28,5 @@ dependencyResolutionManagement {
 				password = githubToken
 			}
 		}
-		maven { url = uri("https://repo.spring.io/milestone") }
-		maven { url = uri("https://repo.spring.io/snapshot") }
 	}
 }

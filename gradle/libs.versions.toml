@@ -3,20 +3,105 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
-kotlin = "2.2.0"
-kotlinxDatetime = "0.6.1"
-kotlinxSerializationJSON = "1.7.3"
-kotlinxCoroutines = "1.9.0"
+# Kotlin ecosystem
+kotlin = "2.2.10"
+kotlinxDatetime = "0.7.1"
+kotlinxSerializationJSON = "1.9.0"
+kotlinxCoroutines = "1.10.2"
+
+# Spring ecosystem
+springBoot = "3.5.4"
+springDependencyManagement = "1.1.7"
+springFramework = "6.2.0"
+springGrpc = "0.10.0-SNAPSHOT"
+springRetry = "2.0.12"
+
+# Database
+postgresql = "42.7.7"
+liquibase = "4.33.0"
+jimmer = "0.9.99"
+
+# Build tools
+ksp = "2.2.10-2.0.2"
+graalvmNative = "0.11.0"
+
+# Messaging
+kafka = "3.1.0"
+
+# Serialization & Mapping
+mapstruct = "1.6.3"
+
+# Testing
+testcontainers = "1.21.3"
+
+# Project dependencies
+soloLevelingProto = "4.4.0"
+soloLevelingAvro = "2.1.4"
 
 [libraries]
+# Kotlin ecosystem
 kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinxSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJSON" }
 kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinxCoroutinesJdk8 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8", version.ref = "kotlinxCoroutines" }
+kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+
+# Spring ecosystem
+springBootGradlePlugin = { module = "org.springframework.boot:spring-boot-gradle-plugin", version.ref = "springBoot" }
+springDependencyManagement = { module = "io.spring.dependency-management:io.spring.dependency-management.gradle.plugin", version.ref = "springDependencyManagement" }
+springBootStarter = { module = "org.springframework.boot:spring-boot-starter", version.ref = "springBoot" }
+springBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "springBoot" }
+springBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "springBoot" }
+springBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "springBoot" }
+springBootTestcontainers = { module = "org.springframework.boot:spring-boot-testcontainers", version.ref = "springBoot" }
+springContext = { module = "org.springframework:spring-context", version.ref = "springFramework" }
+springRetry = { module = "org.springframework.retry:spring-retry", version.ref = "springRetry" }
+springAspects = { module = "org.springframework:spring-aspects", version.ref = "springFramework" }
+springKafka = { module = "org.springframework.kafka:spring-kafka", version.ref = "kafka" }
+springBootStarterDataRedis = { module = "org.springframework.boot:spring-boot-starter-data-redis", version.ref = "springBoot" }
+
+# Database
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+liquibaseCore = { module = "org.liquibase:liquibase-core", version.ref = "liquibase" }
+jimmerSpringBootStarter = { module = "org.babyfish.jimmer:jimmer-spring-boot-starter", version.ref = "jimmer" }
+jimmerKsp = { module = "org.babyfish.jimmer:jimmer-ksp", version.ref = "jimmer" }
+jimmerMapstructApt = { module = "org.babyfish.jimmer:jimmer-mapstruct-apt", version.ref = "jimmer" }
+
+# Build tools
+kspGradlePlugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+graalvmNativeGradlePlugin = { module = "org.graalvm.buildtools.native:org.graalvm.buildtools.native.gradle.plugin", version.ref = "graalvmNative" }
+
+# GRPC
+springGrpcDependencies = { module = "org.springframework.grpc:spring-grpc-dependencies", version.ref = "springGrpc" }
+springGrpcSpringBootStarter = { module = "org.springframework.grpc:spring-grpc-spring-boot-starter", version.ref = "springGrpc" }
+
+# Serialization & Mapping
+mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
+mapstructProcessor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
+
+# Testing
+testcontainersBom = { module = "org.testcontainers:testcontainers-bom", version.ref = "testcontainers" }
+testcontainersKafka = { module = "org.testcontainers:kafka", version.ref = "testcontainers" }
+testcontainersPostgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
+testcontainersJunitJupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
+
+# Project dependencies
+soloLevelingProto = { module = "com.sleepkqq:solo-leveling-proto", version.ref = "soloLevelingProto" }
+soloLevelingAvro = { module = "com.sleepkqq:solo-leveling-avro", version.ref = "soloLevelingAvro" }
 
 # Libraries can be bundled together for easier import
 [bundles]
 kotlinxEcosystem = ["kotlinxDatetime", "kotlinxSerialization", "kotlinxCoroutines"]
+kotlinxCoroutines = ["kotlinxCoroutines", "kotlinxCoroutinesJdk8"]
+springBootStarters = ["springBootStarter", "springBootStarterWeb", "springBootStarterActuator"]
+springBootTest = ["springBootStarterTest", "springBootTestcontainers"]
+testcontainers = ["testcontainersKafka", "testcontainersPostgresql", "testcontainersJunitJupiter"]
 
 [plugins]
 kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlinPluginSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
+springDependencyManagement = { id = "io.spring.dependency-management", version.ref = "springDependencyManagement" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+graalvmNative = { id = "org.graalvm.buildtools.native", version.ref = "graalvmNative" }

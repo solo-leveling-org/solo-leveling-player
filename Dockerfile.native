@@ -14,7 +14,7 @@ COPY --chown=myuser:myuser . .
 
 # Делаем gradlew исполняемым и собираем native-бинарник для модуля сервиса
 RUN chmod +x ./gradlew && \
-    ./gradlew :solo-leveling-player-service:clean :solo-leveling-player-service:nativeCompile -x test
+    ./gradlew buildNative -x test
 
 # Stage 2: Запуск без JVM
 FROM alpine:3.21 AS run
