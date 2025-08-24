@@ -40,7 +40,8 @@ import org.springframework.context.annotation.Configuration
 		ConfigUpdateRequest::class,
 		ModeUpdateRequest::class,
 		CompatibilityCheckResponse::class,
-		Mode::class
+		Mode::class,
+		Function1::class
 	]
 )
 @Configuration
