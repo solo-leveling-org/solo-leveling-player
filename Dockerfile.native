@@ -13,8 +13,9 @@ USER myuser
 COPY --chown=myuser:myuser . .
 
 # Делаем gradlew исполняемым и собираем native-бинарник для модуля сервиса
+# Отключаем configuration cache для нативной сборки
 RUN chmod +x ./gradlew && \
-    ./gradlew buildNative -x test
+    ./gradlew buildNative -x test --no-configuration-cache
 
 # Stage 2: Запуск без JVM
 FROM alpine:3.21 AS run

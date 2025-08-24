@@ -1,5 +1,5 @@
 # Build stage
-FROM gradle:8.14.2-jdk24-alpine AS build
+FROM amazoncorretto:24-alpine3.21-jdk AS build
 
 # Создаём пользователя для безопасности
 RUN adduser -D myuser && \
@@ -12,8 +12,9 @@ USER myuser
 # Копируем исходники
 COPY --chown=myuser:myuser . .
 
-# Собираем проект (JVM версия)
-RUN gradle buildJvm --no-daemon -x test
+# Делаем gradlew исполняемым и собираем проект (JVM версия)
+RUN chmod +x ./gradlew && \
+    ./gradlew buildJvm --no-daemon -x test
 
 # Run stage
 FROM amazoncorretto:24-alpine3.21-jdk

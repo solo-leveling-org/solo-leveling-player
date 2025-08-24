@@ -29,6 +29,8 @@ tasks.register("buildJvm") {
 tasks.register("buildNative") {
 	group = "build"
 	description = "Собирает нативную версию проекта"
+	// Отключаем configuration cache для нативной сборки
+	notCompatibleWithConfigurationCache("Native build tasks are not compatible with configuration cache")
 	dependsOn(":solo-leveling-player-model:build")
 	dependsOn(":solo-leveling-player-service:nativeCompile")
 }

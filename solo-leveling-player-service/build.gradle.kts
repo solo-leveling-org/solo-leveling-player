@@ -29,6 +29,10 @@ graalvmNative {
 			buildArgs.add("--initialize-at-run-time=org.springframework.grpc.server.service.GrpcService")
 			buildArgs.add("--initialize-at-run-time=io.grpc.stub.StreamObserver")
 			buildArgs.add("--initialize-at-run-time=com.google.protobuf.Empty")
+			// Добавляем настройки для улучшения производительности
+			buildArgs.add("-H:+OptimizeStringConcat")
+			buildArgs.add("-H:+AllowIncompleteClasspath")
+			buildArgs.add("-H:+ReportExceptionStackTraces")
 		}
 	}
 }
@@ -72,4 +76,9 @@ dependencies {
 // Отключаем AOT для JVM сборки
 tasks.matching { it.name.contains("processAot") }.configureEach {
 	enabled = false
+}
+
+// Отключаем configuration cache для нативных задач
+tasks.matching { it.name.contains("native") || it.name.contains("generateResourcesConfigFile") }.configureEach {
+	notCompatibleWithConfigurationCache("Native build tasks are not compatible with configuration cache")
 }
