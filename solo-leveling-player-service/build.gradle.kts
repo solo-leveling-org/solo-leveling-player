@@ -23,13 +23,15 @@ graalvmNative {
 			buildArgs.add("-H:Class=com.sleepkqq.sololeveling.player.service.Application")
 			buildArgs.add("-H:+ReportExceptionStackTraces")
 			buildArgs.add("-H:ReflectionConfigurationFiles=src/main/META-INF/native-image/reflect-config.json")
-			buildArgs.add("-Dspring.aot.enabled=true")
+			buildArgs.add("-H:EnableURLProtocols=http,https")
+			buildArgs.add("--initialize-at-run-time=kotlin.reflect.jvm.ReflectJvmMapping,kotlin.reflect.jvm.internal.ReflectionFactoryImpl,kotlin.reflect.jvm.internal.KotlinReflectionInternalError")
 		}
 	}
 }
 
 dependencies {
 	implementation(libs.bundles.kotlinxEcosystem)
+	implementation("org.jetbrains.kotlin:kotlin-reflect:2.2.0")
 	// Spring Boot
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.springframework.boot:spring-boot-starter-web")

@@ -8,10 +8,12 @@
   },
   {
     "name": "kotlin.jvm.functions.Function1",
-    "allDeclaredConstructors": true,
-    "allPublicConstructors": true,
-    "allDeclaredMethods": true,
-    "allPublicMethods": true
+    "methods": [
+      {
+        "name": "invoke",
+        "parameterTypes": ["java.lang.Object"]
+      }
+    ]
   },
   {
     "name": "kotlin.jvm.functions.Function2",
@@ -38,6 +40,15 @@
       {
         "name": "getMembers",
         "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "kotlin.reflect.jvm.internal.FunctionCaller",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": ["kotlin.reflect.KCallable", "java.lang.reflect.Method"]
       }
     ]
   }
