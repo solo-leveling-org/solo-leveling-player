@@ -29,10 +29,18 @@ graalvmNative {
 			buildArgs.add("--initialize-at-run-time=org.springframework.grpc.server.service.GrpcService")
 			buildArgs.add("--initialize-at-run-time=io.grpc.stub.StreamObserver")
 			buildArgs.add("--initialize-at-run-time=com.google.protobuf.Empty")
-			// Добавляем настройки для улучшения производительности
-			buildArgs.add("-H:+OptimizeStringConcat")
-			buildArgs.add("-H:+AllowIncompleteClasspath")
-			buildArgs.add("-H:+ReportExceptionStackTraces")
+			// Добавляем флаг для экспериментальных опций
+			buildArgs.add("-H:+UnlockExperimentalVMOptions")
+			// Убираем неподдерживаемые опции
+			// buildArgs.add("-H:+OptimizeStringConcat")
+			// buildArgs.add("-H:+AllowIncompleteClasspath")
+			
+			// Дополнительные настройки для улучшения совместимости
+			buildArgs.add("--enable-http")
+			buildArgs.add("--enable-https")
+			buildArgs.add("--enable-all-security-services")
+			buildArgs.add("--report-unsupported-elements-at-runtime")
+			buildArgs.add("--allow-incomplete-classpath")
 		}
 	}
 }
