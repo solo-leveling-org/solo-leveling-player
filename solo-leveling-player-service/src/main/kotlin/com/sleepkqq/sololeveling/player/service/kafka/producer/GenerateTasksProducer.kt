@@ -92,7 +92,7 @@ class GenerateTasksProducer(
 
 	private fun generateTask(task: Task, playerTaskTopics: List<PlayerTaskTopic>): GenerateTask {
 		val playerTaskTopicsMap = playerTaskTopics
-			.filter { it.isActive }
+			.filter { it.isActive() }
 			.associateBy { it.taskTopic() }
 
 		val definedTopics = defineTaskTopicService.define(playerTaskTopicsMap.keys)
