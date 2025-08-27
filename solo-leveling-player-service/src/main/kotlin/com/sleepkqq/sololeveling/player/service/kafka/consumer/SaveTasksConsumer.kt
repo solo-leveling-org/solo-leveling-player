@@ -83,7 +83,7 @@ class SaveTasksConsumer(
 		log.info("Updating {} tasks for player {}", tasks.size, event.playerId)
 		taskService.updateAll(tasks)
 
-		val taskIds = tasks.map { it.id }
+		val taskIds = tasks.map { it.id() }
 		val playerTasks = playerTaskService.find(event.playerId, taskIds)
 
 		if (playerTasks.isNotEmpty()) {

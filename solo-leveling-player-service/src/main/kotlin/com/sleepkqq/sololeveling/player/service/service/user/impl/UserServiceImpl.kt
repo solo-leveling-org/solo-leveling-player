@@ -1,5 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.service.user.impl
 
+import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.user.User
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.player.model.repository.user.UserRepository
@@ -24,7 +25,7 @@ class UserServiceImpl(
 
 	@Transactional(readOnly = true)
 	override fun find(id: Long): UserView? = userRepository
-		.viewer(UserView::class)
+		.viewer(UserView::class.java)
 		.findNullable(id)
 
 	@Transactional(readOnly = true)
@@ -36,19 +37,21 @@ class UserServiceImpl(
 	@Transactional
 	override fun update(user: User, now: LocalDateTime): User =
 		userRepository.save(
-			User(user) { updatedAt = now },
+			Immutables.createUser(user) {
+				it.setUpdatedAt(now)
+			},
 			SaveMode.UPDATE_ONLY
 		)
 
 	@Transactional
 	override fun upsert(user: User): User {
 		val now = LocalDateTime.now()
-		return findVersion(user.id)
+		return findVersion(user.id())
 			?.let {
 				update(
-					User(user) {
-						version = it
-						lastLoginAt = now
+					Immutables.createUser(user) { u ->
+						u.setVersion(it)
+						u.setLastLoginAt(now)
 					},
 					now
 				)

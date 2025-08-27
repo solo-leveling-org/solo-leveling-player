@@ -27,7 +27,7 @@ class DefineTaskTopicService {
 		}
 
 		return topics.firstNotNullOfOrNull {
-			it.getCompatibleTopics()
+			it.compatibleTopics
 				.firstOrNull { c -> topics.contains(c) }
 				?.let { c -> listOf(it, c) }
 		}

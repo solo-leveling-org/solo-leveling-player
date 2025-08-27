@@ -15,6 +15,7 @@ import io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.babyfish.jimmer.spring.repository.JRepository
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding
 import org.springframework.context.annotation.Configuration
 
@@ -40,7 +41,9 @@ import org.springframework.context.annotation.Configuration
 		ConfigUpdateRequest::class,
 		ModeUpdateRequest::class,
 		CompatibilityCheckResponse::class,
-		Mode::class
+		Mode::class,
+		Function1::class,
+		JRepository::class
 	]
 )
 @Configuration

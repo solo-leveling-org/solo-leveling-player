@@ -29,7 +29,7 @@ abstract class BaseTestClass {
 
 		@JvmStatic
 		@Container
-		@ServiceConnection
+		@ServiceConnection(name = "redis")
 		val redisContainer = GenericContainer("redis:7.2.4")
 			.apply {
 				withExposedPorts(6379)
@@ -46,7 +46,7 @@ abstract class BaseTestClass {
 
 		@JvmStatic
 		@Container
-		@ServiceConnection
+		@ServiceConnection(name = "postgresql")
 		val postgresContainer = PostgreSQLContainer<Nothing>("postgres:16.2")
 			.apply {
 				withDatabaseName("sololeveling_test")

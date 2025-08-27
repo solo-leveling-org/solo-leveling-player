@@ -1,7 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.service.player.impl
 
+import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalance
-import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType
@@ -24,10 +24,10 @@ class PlayerBalanceServiceImpl(
 		val INITIAL_BALANCE: BigDecimal = BigDecimal.ZERO
 	}
 
-	override fun initializePlayerBalance(): PlayerBalance = PlayerBalance {
-		id = UUID.randomUUID()
-		balance = INITIAL_BALANCE
-		currencyCode = CurrencyCode.SLCN
+	override fun initializePlayerBalance(): PlayerBalance = Immutables.createPlayerBalance {
+		it.setId(UUID.randomUUID())
+		it.setBalance(INITIAL_BALANCE)
+		it.setCurrencyCode(CurrencyCode.SLCN)
 	}
 
 	override fun deposit(
@@ -42,21 +42,21 @@ class PlayerBalanceServiceImpl(
 		}
 
 		playerBalanceTransactionService.insert(
-			PlayerBalanceTransaction {
-				this.amount = amount
-				type = PlayerBalanceTransactionType.IN
-				this.cause = cause
-				balanceId = playerBalance.id
-				createdAt = now
-				updatedAt = now
+			Immutables.createPlayerBalanceTransaction {
+				it.setAmount(amount)
+				it.setType(PlayerBalanceTransactionType.IN)
+				it.setCause(cause)
+				it.setBalanceId(playerBalance.id())
+				it.setCreatedAt(now)
+				it.setUpdatedAt(now)
 			}
 		)
 
-		val currentBalance = playerBalance.balance
+		val currentBalance = playerBalance.balance()
 
-		return PlayerBalance(playerBalance) {
-			balance = currentBalance.plus(amount)
-			updatedAt = now
+		return Immutables.createPlayerBalance(playerBalance) {
+			it.setBalance(currentBalance.plus(amount))
+			it.setUpdatedAt(now)
 		}
 	}
 
@@ -71,28 +71,28 @@ class PlayerBalanceServiceImpl(
 			"Withdraw amount=$amount cannot be negative or zero"
 		}
 
-		val currentBalance = playerBalance.balance
+		val currentBalance = playerBalance.balance()
 		val newBalance = currentBalance.minus(amount)
 
 		require(newBalance >= BigDecimal.ZERO) {
-			"Insufficient funds for playerBalance=${playerBalance.id}: " +
+			"Insufficient funds for playerBalance=${playerBalance.id()}: " +
 					"current balance is $currentBalance, requested amount is $amount"
 		}
 
 		playerBalanceTransactionService.insert(
-			PlayerBalanceTransaction {
-				this.amount = amount
-				type = PlayerBalanceTransactionType.OUT
-				this.cause = cause
-				balance = playerBalance
-				createdAt = now
-				updatedAt = now
+			Immutables.createPlayerBalanceTransaction {
+				it.setAmount(amount)
+				it.setType(PlayerBalanceTransactionType.OUT)
+				it.setCause(cause)
+				it.setBalance(playerBalance)
+				it.setCreatedAt(now)
+				it.setUpdatedAt(now)
 			}
 		)
 
-		return PlayerBalance(playerBalance) {
-			balance = newBalance
-			updatedAt = now
+		return Immutables.createPlayerBalance(playerBalance) {
+			it.setBalance(newBalance)
+			it.setUpdatedAt(now)
 		}
 	}
 }

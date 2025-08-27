@@ -7,7 +7,6 @@ liquibase:
   enabled: true
   default-schema: public
 jimmer:
-  language: kotlin
   default-enum-strategy: ORDINAL
   show-sql: false
   dialect: org.babyfish.jimmer.sql.dialect.PostgresDialect

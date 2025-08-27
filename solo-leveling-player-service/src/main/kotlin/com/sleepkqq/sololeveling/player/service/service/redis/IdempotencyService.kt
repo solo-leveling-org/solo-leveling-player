@@ -17,20 +17,25 @@ class IdempotencyService(
 		const val TTL_HOURS = 1L
 	}
 
-	fun isProcessed(transactionId: String): Boolean {
-		val redisKey = "$ID_KEY_PREFIX$transactionId"
+	fun isProcessed(txId: String): Boolean {
+		val redisKey = "$ID_KEY_PREFIX$txId"
 
 		val isNewTransaction = redisTemplate.opsForValue()
 			.setIfAbsent(redisKey, "processed", TTL_HOURS, TimeUnit.HOURS)
 
 		return when (isNewTransaction) {
 			true -> {
-				log.info("New transaction processed and stored in Redis | transactionId={}", transactionId)
+				log.info("New transaction processed and stored in Redis | txId={}", txId)
 				false
 			}
 			false -> {
-				log.warn("Transaction already exists in Redis | transactionId={}", transactionId)
+				log.warn("Transaction already exists in Redis | txId={}", txId)
 				true
+			}
+
+			null -> {
+				log.error("Failed to get info about transaction | txId={}", txId)
+				false
 			}
 		}
 	}

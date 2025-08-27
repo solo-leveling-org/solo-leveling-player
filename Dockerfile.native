@@ -1,8 +1,8 @@
-# Stage 1: Сборка нативного бинарника
+# Вариант 1: Использование официального образа с уже установленным native-image
 FROM ghcr.io/graalvm/native-image-community:24 AS build
 
 # Создаём системного пользователя
-RUN useradd -r -m -u 1001 -U -d /home/myuser -s /bin/bash myuser && \
+RUN useradd -D myuser && \
     mkdir -p /usr/src/app && \
     chown myuser:myuser /usr/src/app
 
@@ -12,11 +12,11 @@ USER myuser
 # Копируем исходники
 COPY --chown=myuser:myuser . .
 
-# Делаем gradlew исполняемым и собираем native-бинарник для модуля сервиса
-RUN chmod +x ./gradlew && \
-    ./gradlew :solo-leveling-player-service:clean :solo-leveling-player-service:nativeCompile -x test
+# Собираем native-бинарник
+RUN chmod +x ./mvnw && \
+    ./mvnw clean package -Pnative -DskipTests --settings settings.xml
 
-# Stage 2: Запуск без JVM
+# Run stage: запуск без JVM
 FROM alpine:3.21 AS run
 
 # Устанавливаем системные библиотеки
@@ -30,8 +30,8 @@ RUN addgroup -S myuser && adduser -S -G myuser myuser && \
 USER myuser
 WORKDIR /app
 
-# Копируем native-бинарник из модуля сервиса
-COPY --from=build --chown=myuser:myuser /usr/src/app/solo-leveling-player-service/build/native/nativeCompile/solo-leveling-player-service /app/app
+# Копируем native-бинарник
+COPY --from=build --chown=myuser:myuser /usr/src/app/solo-leveling-player-service/target/solo-leveling-player-service /app/app
 
 EXPOSE 8080 9090
 CMD ["./app", "-Dspring.profiles.active=prod"]
