@@ -39,11 +39,6 @@
       <artifactId>jimmer-spring-boot-starter</artifactId>
       <version>${jimmer.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.babyfish.jimmer</groupId>
-      <artifactId>jimmer-sql</artifactId>
-      <version>${jimmer.version}</version>
-    </dependency>
 
     <!-- utils -->
     <dependency>

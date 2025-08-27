@@ -12,6 +12,7 @@ import io.confluent.kafka.serializers.context.strategy.ContextNameStrategy
 import io.confluent.kafka.serializers.subject.RecordNameStrategy
 import io.confluent.kafka.serializers.subject.TopicNameStrategy
 import io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
+import liquibase.ui.LoggerUIService
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -44,7 +45,10 @@ import org.springframework.context.annotation.Configuration
 		Mode::class,
 
 		// Jimmer
-		PostgresDialect::class
+		PostgresDialect::class,
+
+		// Liquibase
+		LoggerUIService::class
 	]
 )
 @Configuration
