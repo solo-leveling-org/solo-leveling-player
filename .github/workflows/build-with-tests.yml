@@ -14,17 +14,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create gradle.properties
+      - name: Generate settings.xml in project root
+        run: |
+          cat <<EOF > ./settings.xml
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings>
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${GITHUB_USER}</username>
+                <password>${GITHUB_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
         env:
           GITHUB_USER: ${{ secrets.GITHUB_USER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          cat <<EOL > gradle.properties
-          org.gradle.caching=true
-          org.gradle.configuration-cache=true
-          github.user=${GITHUB_USER}
-          github.token=${GITHUB_TOKEN}
-          EOL
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -32,15 +37,10 @@ jobs:
           java-version: '24'
           distribution: 'temurin'
 
-      - name: Start Docker daemon
+      - name: Build project with Maven
         run: |
-          sudo systemctl start docker
-          docker info
-
-      - name: Build project with Gradle
-        run: |
-          ./gradlew clean build
+          ./mvnw clean install -s ./settings.xml
 
       - name: Clean up temporary files (security)
         run: |
-          rm -f gradle.properties
+          rm -f settings.xml

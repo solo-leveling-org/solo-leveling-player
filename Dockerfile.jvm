@@ -1,5 +1,5 @@
 # Build stage
-FROM amazoncorretto:24-alpine3.21-jdk AS build
+FROM eclipse-temurin:24-jdk-alpine AS build
 
 # Создаём пользователя для безопасности
 RUN adduser -D myuser && \
@@ -12,15 +12,14 @@ USER myuser
 # Копируем исходники
 COPY --chown=myuser:myuser . .
 
-# Делаем gradlew исполняемым и собираем проект (JVM версия)
-RUN chmod +x ./gradlew && \
-    ./gradlew buildJvm --no-daemon -x test
+# Собираем проект
+RUN ./mvnw clean package -DskipTests -Pproduction --settings settings.xml
 
 # Run stage
-FROM amazoncorretto:24-alpine3.21-jdk
+FROM eclipse-temurin:24-jre-alpine
 
 # Копируем собранный JAR
-COPY --from=build /usr/src/app/solo-leveling-player-service/build/libs/*.jar /app/solo-leveling-player.jar
+COPY --from=build /usr/src/app/solo-leveling-player-service/target/*.jar /app/solo-leveling-player.jar
 
 # Безопасность: создаём пользователя
 RUN adduser -D myuser && \
@@ -30,10 +29,7 @@ RUN adduser -D myuser && \
 USER myuser
 WORKDIR /app
 
-# Открываем порты
 EXPOSE 8080 9090
-
-# Запускаем приложение
 CMD ["java", \
     "--enable-native-access=ALL-UNNAMED", \
     "--add-opens", "java.base/java.lang=ALL-UNNAMED", \
