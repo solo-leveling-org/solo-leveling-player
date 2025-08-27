@@ -231,7 +231,7 @@
             <configuration>
               <buildArgs>
                 <arg>-march=compatibility</arg>
-                <arg>--initialize-at-build-time=com.sleepkqq.sololeveling.player.model</arg>
+                <arg>--initialize-at-build-time=com.sleepkqq.sololeveling.player.model.repository</arg>
               </buildArgs>
             </configuration>
           </plugin>
