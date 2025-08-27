@@ -12,6 +12,25 @@ import io.confluent.kafka.serializers.context.strategy.ContextNameStrategy
 import io.confluent.kafka.serializers.subject.RecordNameStrategy
 import io.confluent.kafka.serializers.subject.TopicNameStrategy
 import io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
+import liquibase.changelog.ChangeLogParameters
+import liquibase.changelog.ChangeSet
+import liquibase.changelog.DatabaseChangeLog
+import liquibase.changelog.filter.ShouldRunChangeSetFilter
+import liquibase.changelog.visitor.ChangeExecListener
+import liquibase.changelog.visitor.UpdateVisitor
+import liquibase.database.DatabaseFactory
+import liquibase.database.LiquibaseTableNamesFactory
+import liquibase.database.core.PostgresDatabase
+import liquibase.database.jvm.JdbcConnection
+import liquibase.executor.ExecutorService
+import liquibase.lockservice.LockServiceFactory
+import liquibase.parser.ChangeLogParserFactory
+import liquibase.parser.core.xml.LiquibaseEntityResolver
+import liquibase.parser.core.yaml.YamlChangeLogParser
+import liquibase.sqlgenerator.SqlGeneratorFactory
+import liquibase.statement.SqlStatement
+import liquibase.structure.core.Column
+import liquibase.structure.core.Table
 import liquibase.ui.LoggerUIService
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -48,7 +67,27 @@ import org.springframework.context.annotation.Configuration
 		PostgresDialect::class,
 
 		// Liquibase
-		LoggerUIService::class
+		LoggerUIService::class,
+		LiquibaseTableNamesFactory::class,
+		ChangeLogParserFactory::class,
+		DatabaseFactory::class,
+		ChangeExecListener::class,
+		PostgresDatabase::class,
+		JdbcConnection::class,
+		LiquibaseEntityResolver::class,
+		YamlChangeLogParser::class,
+		ChangeSet::class,
+		DatabaseChangeLog::class,
+		ChangeLogParameters::class,
+		ExecutorService::class,
+		LockServiceFactory::class,
+		UpdateVisitor::class,
+		ShouldRunChangeSetFilter::class,
+		SqlGeneratorFactory::class,
+		SqlStatement::class,
+		liquibase.structure.core.Schema::class,
+		Table::class,
+		Column::class
 	]
 )
 @Configuration
