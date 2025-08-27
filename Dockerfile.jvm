@@ -13,7 +13,8 @@ USER myuser
 COPY --chown=myuser:myuser . .
 
 # Собираем проект
-RUN ./mvnw clean package -DskipTests -Pproduction --settings settings.xml
+RUN chmod +x ./mvnw && \
+    ./mvnw clean package -DskipTests -Pproduction --settings settings.xml
 
 # Run stage
 FROM eclipse-temurin:24-jre-alpine

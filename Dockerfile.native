@@ -13,7 +13,8 @@ USER myuser
 COPY --chown=myuser:myuser . .
 
 # Собираем native-бинарник
-RUN ./mvnw clean package -Pnative -DskipTests --settings settings.xml
+RUN chmod +x ./mvnw && \
+    ./mvnw clean package -Pnative -DskipTests --settings settings.xml
 
 # Run stage: запуск без JVM
 FROM alpine:3.21 AS run
