@@ -20,13 +20,14 @@ springKafka = "3.3.9"
 # Database
 postgresql = "42.7.7"
 liquibase = "4.33.0"
-jimmer = "0.9.99"
+jimmer = "0.9.106"
+lettuce = "6.8.0.RELEASE"
 
 # Build tools
 ksp = "2.2.10-2.0.2"
 graalvmNative = "0.11.0"
 
-# Serialization & Mapping
+# Mapping
 mapstruct = "1.6.3"
 
 # Testing
@@ -65,6 +66,7 @@ liquibaseCore = { module = "org.liquibase:liquibase-core", version.ref = "liquib
 jimmerSpringBootStarter = { module = "org.babyfish.jimmer:jimmer-spring-boot-starter", version.ref = "jimmer" }
 jimmerKsp = { module = "org.babyfish.jimmer:jimmer-ksp", version.ref = "jimmer" }
 jimmerMapstructApt = { module = "org.babyfish.jimmer:jimmer-mapstruct-apt", version.ref = "jimmer" }
+lettuce = { module = "io.lettuce:lettuce-core", version.ref = "lettuce" }
 
 # Build tools
 kspGradlePlugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
@@ -90,11 +92,9 @@ soloLevelingAvro = { module = "com.sleepkqq:solo-leveling-avro", version.ref = "
 
 # Libraries can be bundled together for easier import
 [bundles]
-kotlinxEcosystem = ["kotlinxDatetime", "kotlinxSerialization", "kotlinxCoroutines"]
-kotlinxCoroutines = ["kotlinxCoroutines", "kotlinxCoroutinesJdk8"]
+kotlinxEcosystem = ["kotlinxDatetime", "kotlinxSerialization", "kotlinxCoroutines", "kotlinxCoroutinesJdk8", "kotlinReflect"]
 springBootStarters = ["springBootStarter", "springBootStarterWeb", "springBootStarterActuator"]
-springBootTest = ["springBootStarterTest", "springBootTestcontainers"]
-testcontainers = ["testcontainersKafka", "testcontainersPostgresql", "testcontainersJunitJupiter"]
+testcontainers = ["springBootTestcontainers", "testcontainersKafka", "testcontainersPostgresql", "testcontainersJunitJupiter"]
 
 [plugins]
 kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
