@@ -5,7 +5,6 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalance
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType
-import com.sleepkqq.sololeveling.player.model.repository.player.PlayerBalanceRepository
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerBalanceTransactionService
 import org.springframework.stereotype.Service
@@ -16,7 +15,6 @@ import java.util.UUID
 @Suppress("unused")
 @Service
 class PlayerBalanceServiceImpl(
-	private val playerBalanceRepository: PlayerBalanceRepository,
 	private val playerBalanceTransactionService: PlayerBalanceTransactionService
 ) : PlayerBalanceService {
 
