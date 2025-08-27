@@ -29,9 +29,9 @@ class DefineTaskRarityService {
 	fun define(topics: List<PlayerTaskTopic>): TaskRarity {
 		require(topics.isNotEmpty()) { "topics size must be > 0" }
 		val avgLevel = topics.map {
-			val level = it.level
+			val level = it.level()
 			require(level != null) { "level" }
-			level.level
+			level.level()
 		}
 			.average()
 

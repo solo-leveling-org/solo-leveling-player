@@ -21,7 +21,6 @@ import org.mapstruct.*
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.time.LocalDateTime
-import java.util.UUID
 
 @Suppress("unused")
 @Component
@@ -34,6 +33,21 @@ import java.util.UUID
 	nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS
 )
 abstract class ProtoMapper {
+
+	fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus): PlayerTaskStatus =
+		PlayerTaskStatus.valueOf(input.name)
+
+	fun map(input: com.sleepkqq.sololeveling.proto.player.TaskRarity): TaskRarity =
+		TaskRarity.valueOf(input.name)
+
+	fun map(input: com.sleepkqq.sololeveling.proto.player.TaskTopic): TaskTopic =
+		TaskTopic.valueOf(input.name)
+
+	fun map(input: com.sleepkqq.sololeveling.proto.user.UserRole): UserRole =
+		UserRole.valueOf(input.name)
+
+	fun map(input: com.sleepkqq.sololeveling.proto.player.Assessment): Assessment =
+		Assessment.valueOf(input.name)
 
 	fun map(input: LocalDateTime): Timestamp = input.toTimestamp()
 
@@ -58,58 +72,9 @@ abstract class ProtoMapper {
 	@Mapping(target = "taskTopicsList", source = "taskTopics")
 	abstract fun map(input: PlayerView): com.sleepkqq.sololeveling.proto.player.PlayerView
 
-	fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskInput): PlayerTaskInput =
-		PlayerTaskInput(
-			id = UUID.fromString(input.id),
-			version = input.version,
-			order = input.order,
-			status = PlayerTaskStatus.valueOf(input.status.name),
-			task = map(input.task)
-		)
+	abstract fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskInput): PlayerTaskInput
 
-	fun map(input: com.sleepkqq.sololeveling.proto.player.TaskInput): PlayerTaskInput.TargetOf_task =
-		PlayerTaskInput.TargetOf_task(
-			id = UUID.fromString(input.id),
-			version = input.version,
-			title = input.title,
-			description = input.description,
-			experience = input.experience,
-			currencyReward = input.currencyReward,
-			rarity = TaskRarity.valueOf(input.rarity.name),
-			topics = input.topicsList.map { TaskTopic.valueOf(it.name) }.toSet(),
-			agility = input.agility,
-			strength = input.strength,
-			intelligence = input.intelligence
-		)
+	abstract fun map(input: com.sleepkqq.sololeveling.proto.user.UserInput): UserInput
 
-	fun map(input: com.sleepkqq.sololeveling.proto.user.UserInput): UserInput =
-		UserInput(
-			id = input.id,
-			username = input.username,
-			firstName = input.firstName,
-			lastName = input.lastName,
-			photoUrl = input.photoUrl,
-			locale = input.locale,
-			roles = input.rolesList.map { UserRole.valueOf(it.name) }
-		)
-
-	fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicInput): PlayerTaskTopicInput =
-		PlayerTaskTopicInput(
-			id = UUID.fromString(input.id),
-			version = input.version,
-			taskTopic = TaskTopic.valueOf(input.taskTopic.name),
-			isActive = input.isActive,
-			level = map(input.level)
-		)
-
-	fun map(input: com.sleepkqq.sololeveling.proto.player.LevelInput): PlayerTaskTopicInput.TargetOf_level =
-		PlayerTaskTopicInput.TargetOf_level(
-			id = UUID.fromString(input.id),
-			version = input.version,
-			level = input.level,
-			totalExperience = input.totalExperience,
-			currentExperience = input.currentExperience,
-			experienceToNextLevel = input.experienceToNextLevel,
-			assessment = Assessment.valueOf(input.assessment.name),
-		)
+	abstract fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicInput): PlayerTaskTopicInput
 }

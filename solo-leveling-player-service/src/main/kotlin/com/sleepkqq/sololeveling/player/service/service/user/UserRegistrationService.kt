@@ -1,6 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.service.user
 
-import com.sleepkqq.sololeveling.player.model.entity.player.Player
+import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.LevelType
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.user.User
@@ -20,13 +20,20 @@ class UserRegistrationService(
 		const val INITIAL_PLAYER_MAX_TASKS = 5
 	}
 
-	fun register(user: User): User = User(user) {
-		player = Player {
-			id = user.id
-			maxTasks = INITIAL_PLAYER_MAX_TASKS
-			level = levelService.initializeLevel(LevelType.PLAYER)
-			balance = playerBalanceService.initializePlayerBalance()
-			taskTopics = TaskTopic.entries.map { playerTaskTopicService.initialize(user.id, it) }
-		}
+	fun register(user: User): User = Immutables.createUser(user) {
+		it.setPlayer(Immutables.createPlayer { p ->
+			p.setId(user.id())
+			p.setMaxTasks(INITIAL_PLAYER_MAX_TASKS)
+			p.setLevel(levelService.initializeLevel(LevelType.PLAYER))
+			p.setBalance(playerBalanceService.initializePlayerBalance())
+			p.setTaskTopics(
+				TaskTopic.entries.map { t ->
+					playerTaskTopicService.initialize(
+						user.id(),
+						t
+					)
+				}
+			)
+		})
 	}
 }

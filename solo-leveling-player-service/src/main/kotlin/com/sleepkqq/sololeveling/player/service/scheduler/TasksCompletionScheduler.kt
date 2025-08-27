@@ -1,6 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.scheduler
 
-import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
+import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.service.config.properties.TasksCompletionSchedulerProperties
 import com.sleepkqq.sololeveling.player.service.coroutine.TaskGenerationScope
@@ -35,7 +35,11 @@ class TasksCompletionScheduler(
 		}
 
 		val playerTasks = playerTaskService.getPendingCompletionTasks()
-			.map { PlayerTask(it.toEntity()) { status = PlayerTaskStatus.COMPLETED } }
+			.map {
+				Immutables.createPlayerTask(it.toEntity()) { p ->
+					p.setStatus(PlayerTaskStatus.COMPLETED)
+				}
+			}
 
 		log.info("Found {} tasks to complete", playerTasks.size)
 
@@ -43,7 +47,7 @@ class TasksCompletionScheduler(
 
 		log.info("Tasks updated successfully")
 
-		val tasksByPlayerId = playerTasks.groupBy { it.player.id }
+		val tasksByPlayerId = playerTasks.groupBy { it.player().id() }
 
 		log.info("Found {} players for tasks generation", tasksByPlayerId.size)
 
@@ -53,7 +57,7 @@ class TasksCompletionScheduler(
 					playerTaskStatusService.generateTasks(
 						playerId = playerId,
 						forReplace = true,
-						replaceOrders = tasks.map { it.order }.toSet()
+						replaceOrders = tasks.map { it.order() }.toSet()
 					)
 					log.info("Successfully generated tasks for player $playerId")
 				} catch (e: Exception) {

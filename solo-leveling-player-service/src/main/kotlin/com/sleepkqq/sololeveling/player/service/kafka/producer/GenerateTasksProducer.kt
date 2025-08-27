@@ -3,6 +3,7 @@ package com.sleepkqq.sololeveling.player.service.kafka.producer
 import com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics
 import com.sleepkqq.sololeveling.avro.task.GenerateTask
 import com.sleepkqq.sololeveling.avro.task.GenerateTasksEvent
+import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.service.mapper.AvroMapper
@@ -37,23 +38,29 @@ class GenerateTasksProducer(
 		log.info(">> Start generating tasks for player {}", playerId)
 
 		try {
-			val player = playerService.get(playerId) {
-				maxTasks()
-				taskTopics {
-					taskTopic()
-					isActive()
-					level { level() }
-				}
-			}
+			val player = playerService.get(
+				playerId,
+				Fetchers.PLAYER_FETCHER.maxTasks()
+					.taskTopics(
+						Fetchers.PLAYER_TASK_TOPIC_FETCHER
+							.taskTopic()
+							.active()
+							.level(
+								Fetchers.LEVEL_FETCHER
+									.level()
+							)
+					)
+			)
 
 			val playerTasks = if (forReplace) {
 				replaceOrders.map { playerTaskService.initialize(playerId, it) }
 
 			} else {
-				val tasksToGenerateCount = player.maxTasks - playerTaskService.getActiveTasksCount(playerId)
+				val tasksToGenerateCount =
+					player.maxTasks() - playerTaskService.getActiveTasksCount(playerId)
 
-				require(tasksToGenerateCount >= 1 && tasksToGenerateCount <= player.maxTasks) {
-					"Incorrect tasks to generate count=$tasksToGenerateCount, playerId=$playerId, maxTasks=${player.maxTasks}"
+				require(tasksToGenerateCount >= 1 && tasksToGenerateCount <= player.maxTasks()) {
+					"Incorrect tasks to generate count=$tasksToGenerateCount, playerId=$playerId, maxTasks=${player.maxTasks()}"
 				}
 
 				(0 until tasksToGenerateCount.toInt())
@@ -66,7 +73,7 @@ class GenerateTasksProducer(
 			playerTaskService.insertAll(playerTasks)
 
 			val generateTasks = playerTasks.map {
-				generateTask(it.task, player.taskTopics)
+				generateTask(it.task(), player.taskTopics())
 			}
 
 			val event = GenerateTasksEvent.newBuilder()
@@ -86,7 +93,7 @@ class GenerateTasksProducer(
 	private fun generateTask(task: Task, playerTaskTopics: List<PlayerTaskTopic>): GenerateTask {
 		val playerTaskTopicsMap = playerTaskTopics
 			.filter { it.isActive }
-			.associateBy { it.taskTopic }
+			.associateBy { it.taskTopic() }
 
 		val definedTopics = defineTaskTopicService.define(playerTaskTopicsMap.keys)
 		val chosenTopics = definedTopics.map(playerTaskTopicsMap::getValue)

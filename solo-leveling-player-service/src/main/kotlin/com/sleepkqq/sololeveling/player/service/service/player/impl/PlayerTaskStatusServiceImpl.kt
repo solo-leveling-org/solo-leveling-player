@@ -1,6 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.service.player.impl
 
-import com.sleepkqq.sololeveling.player.model.entity.player.Player
+import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
@@ -31,7 +31,7 @@ class PlayerTaskStatusServiceImpl(
 	override fun skipTask(playerTask: PlayerTask, playerId: Long, now: LocalDateTime) {
 		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED, now)
 
-		generateTasks(playerId, true, setOf(playerTask.order))
+		generateTasks(playerId, true, setOf(playerTask.order()))
 	}
 
 	@Transactional
@@ -46,26 +46,26 @@ class PlayerTaskStatusServiceImpl(
 		val playerView = playerService.getView(playerId)
 		val player = playerView.toEntity()
 
-		val task = playerTask.task
+		val task = playerTask.task()
 
 		val updatedBalance = playerBalanceService.deposit(
-			player.balance!!,
-			BigDecimal(task.currencyReward!!),
+			player.balance()!!,
+			BigDecimal(task.currencyReward()!!),
 			PlayerBalanceTransactionCause.TASK_COMPLETION
 		)
 
 		val gainedExperiencePlayer = levelService.gainExperience(
 			player,
-			task.topics!!,
-			task.experience!!
+			task.topics()!!,
+			task.experience()!!
 		)
 
 		val updatedPlayer = playerService.update(
-			Player(gainedExperiencePlayer) {
-				agility = player.agility + task.agility!!
-				strength = player.strength + task.strength!!
-				intelligence = player.intelligence + task.intelligence!!
-				balance = updatedBalance
+			Immutables.createPlayer(gainedExperiencePlayer) {
+				it.setAgility(player.agility() + task.agility()!!)
+				it.setStrength(player.strength() + task.strength()!!)
+				it.setIntelligence(player.intelligence() + task.intelligence()!!)
+				it.setBalance(updatedBalance)
 			},
 			now
 		)
@@ -95,9 +95,9 @@ class PlayerTaskStatusServiceImpl(
 	) {
 		playerTaskRepository.saveEntities(
 			playerTasks.map {
-				PlayerTask(it) {
-					this.status = status
-					updatedAt = now
+				Immutables.createPlayerTask(it) { p ->
+					p.setStatus(status)
+					p.setUpdatedAt(now)
 				}
 			},
 			SaveMode.UPDATE_ONLY

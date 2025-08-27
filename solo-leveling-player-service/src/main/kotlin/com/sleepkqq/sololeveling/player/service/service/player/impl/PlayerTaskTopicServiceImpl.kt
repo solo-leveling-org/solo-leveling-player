@@ -1,5 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.service.player.impl
 
+import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.LevelType
@@ -21,12 +22,12 @@ class PlayerTaskTopicServiceImpl(
 ) : PlayerTaskTopicService {
 
 	override fun initialize(playerId: Long, taskTopic: TaskTopic): PlayerTaskTopic =
-		PlayerTaskTopic {
-			id = UUID.randomUUID()
-			this.taskTopic = taskTopic
-			this.playerId = playerId
-			level = levelService.initializeLevel(LevelType.TASK_TOPIC)
-			isActive = false
+		Immutables.createPlayerTaskTopic {
+			it.setId(UUID.randomUUID())
+			it.setTaskTopic(taskTopic)
+			it.setPlayerId(playerId)
+			it.setLevel(levelService.initializeLevel(LevelType.TASK_TOPIC))
+			it.setActive(false)
 		}
 
 	@Transactional
@@ -34,13 +35,15 @@ class PlayerTaskTopicServiceImpl(
 		playerTaskTopicRepository.save(topic, SaveMode.INSERT_ONLY)
 
 	@Transactional
-	override fun updateAll(topics: Collection<PlayerTaskTopic>) =
+	override fun updateAll(topics: Collection<PlayerTaskTopic>): List<PlayerTaskTopic> =
 		playerTaskTopicRepository.updateAll(topics)
 
 	@Transactional
 	override fun update(playerTaskTopic: PlayerTaskTopic, now: LocalDateTime): PlayerTaskTopic =
 		playerTaskTopicRepository.save(
-			PlayerTaskTopic(playerTaskTopic) { updatedAt = now },
+			Immutables.createPlayerTaskTopic(playerTaskTopic) {
+				it.setUpdatedAt(now)
+			},
 			SaveMode.UPDATE_ONLY
 		)
 

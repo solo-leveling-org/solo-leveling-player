@@ -1,5 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.service.task.impl
 
+import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.repository.task.TaskRepository
 import com.sleepkqq.sololeveling.player.service.exception.ModelNotFoundException
@@ -30,7 +31,11 @@ class TaskServiceImpl(
 	@Transactional
 	override fun updateAll(tasks: Collection<Task>, now: LocalDateTime) {
 		taskRepository.saveEntities(
-			tasks.map { Task(it) { updatedAt = now } },
+			tasks.map {
+				Immutables.createTask(it) { t ->
+					t.setUpdatedAt(now)
+				}
+			},
 			SaveMode.UPDATE_ONLY
 		)
 	}
@@ -41,7 +46,9 @@ class TaskServiceImpl(
 
 	@Transactional
 	override fun update(task: Task, now: LocalDateTime): Task = taskRepository.save(
-		Task(task) { updatedAt = now },
+		Immutables.createTask(task) {
+			it.setUpdatedAt(now)
+		},
 		SaveMode.UPDATE_ONLY
 	)
 }
