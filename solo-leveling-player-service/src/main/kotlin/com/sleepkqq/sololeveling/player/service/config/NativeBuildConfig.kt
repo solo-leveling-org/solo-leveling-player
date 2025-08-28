@@ -15,6 +15,7 @@ import io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
 import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
+import liquibase.changelog.FastCheckService
 import liquibase.changelog.filter.ShouldRunChangeSetFilter
 import liquibase.changelog.visitor.ChangeExecListener
 import liquibase.changelog.visitor.UpdateVisitor
@@ -89,7 +90,8 @@ import org.springframework.context.annotation.Configuration
 		liquibase.structure.core.Schema::class,
 		Table::class,
 		Column::class,
-		ValidatingVisitorGeneratorFactory::class
+		ValidatingVisitorGeneratorFactory::class,
+		FastCheckService::class
 	]
 )
 @Configuration
