@@ -12,6 +12,10 @@ import io.confluent.kafka.serializers.context.strategy.ContextNameStrategy
 import io.confluent.kafka.serializers.subject.RecordNameStrategy
 import io.confluent.kafka.serializers.subject.TopicNameStrategy
 import io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
+import liquibase.analytics.AnalyticsFactory
+import liquibase.analytics.configuration.AnalyticsConfigurationFactory
+import liquibase.change.ChangeFactory
+import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
@@ -20,20 +24,35 @@ import liquibase.changelog.filter.ShouldRunChangeSetFilter
 import liquibase.changelog.visitor.ChangeExecListener
 import liquibase.changelog.visitor.UpdateVisitor
 import liquibase.changelog.visitor.ValidatingVisitorGeneratorFactory
+import liquibase.changeset.ChangeSetServiceFactory
+import liquibase.command.CommandFactory
+import liquibase.command.copy.ProjectCopierFactory
+import liquibase.configuration.ConfiguredValueModifierFactory
+import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.DatabaseFactory
 import liquibase.database.LiquibaseTableNamesFactory
 import liquibase.database.core.PostgresDatabase
 import liquibase.database.jvm.JdbcConnection
 import liquibase.executor.ExecutorService
+import liquibase.io.OutputFileHandlerFactory
+import liquibase.license.LicenseServiceFactory
+import liquibase.license.LicenseTrackingFactory
 import liquibase.lockservice.LockServiceFactory
+import liquibase.logging.LogFactory
+import liquibase.logging.core.LogServiceFactory
+import liquibase.logging.mdc.MdcManagerFactory
 import liquibase.parser.ChangeLogParserFactory
+import liquibase.parser.SqlParserFactory
 import liquibase.parser.core.xml.LiquibaseEntityResolver
 import liquibase.parser.core.yaml.YamlChangeLogParser
+import liquibase.report.ShowSummaryGeneratorFactory
+import liquibase.resource.PathHandlerFactory
 import liquibase.sqlgenerator.SqlGeneratorFactory
 import liquibase.statement.SqlStatement
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
 import liquibase.ui.LoggerUIService
+import liquibase.ui.UIServiceFactory
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -91,7 +110,28 @@ import org.springframework.context.annotation.Configuration
 		Table::class,
 		Column::class,
 		ValidatingVisitorGeneratorFactory::class,
-		FastCheckService::class
+		FastCheckService::class,
+		ShowSummaryGeneratorFactory::class,
+		AnalyticsConfigurationFactory::class,
+		AnalyticsFactory::class,
+		ChangeFactory::class,
+		ChangeLogHistoryServiceFactory::class,
+		ChangeSetServiceFactory::class,
+		CommandFactory::class,
+		ConfiguredValueModifierFactory::class,
+		FastCheckService::class,
+		LicenseServiceFactory::class,
+		LicenseTrackingFactory::class,
+		LiquibaseConfiguration::class,
+		LiquibaseTableNamesFactory::class,
+		LogFactory::class,
+		LogServiceFactory::class,
+		MdcManagerFactory::class,
+		OutputFileHandlerFactory::class,
+		PathHandlerFactory::class,
+		ProjectCopierFactory::class,
+		SqlParserFactory::class,
+		UIServiceFactory::class
 	]
 )
 @Configuration
