@@ -18,6 +18,7 @@ import liquibase.changelog.DatabaseChangeLog
 import liquibase.changelog.filter.ShouldRunChangeSetFilter
 import liquibase.changelog.visitor.ChangeExecListener
 import liquibase.changelog.visitor.UpdateVisitor
+import liquibase.changelog.visitor.ValidatingVisitorGeneratorFactory
 import liquibase.database.DatabaseFactory
 import liquibase.database.LiquibaseTableNamesFactory
 import liquibase.database.core.PostgresDatabase
@@ -87,7 +88,8 @@ import org.springframework.context.annotation.Configuration
 		SqlStatement::class,
 		liquibase.structure.core.Schema::class,
 		Table::class,
-		Column::class
+		Column::class,
+		ValidatingVisitorGeneratorFactory::class
 	]
 )
 @Configuration
