@@ -48,28 +48,34 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set Dockerfile name
-        id: set-dockerfile
+      - name: Determine image tag
+        id: image-tag
         run: |
-          echo "DOCKERFILE=Dockerfile.${{ inputs.build_type }}" >> $GITHUB_ENV
+          COMMIT_SHA="${{ github.sha }}"
+          if [ "${{ inputs.build_type }}" = "native" ]; then
+            TAG="${COMMIT_SHA}-native"
+          else
+            TAG="${COMMIT_SHA}"
+          fi
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+          echo "FULL_IMAGE=${{ secrets.DOCKERHUB_USER }}/solo-leveling-player:$TAG" >> $GITHUB_ENV
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ${{ env.DOCKERFILE }}
+          file: ./Dockerfile.${{ inputs.build_type }}
           push: true
           tags: |
+            ${{ secrets.DOCKERHUB_USER }}/solo-leveling-player:${{ env.IMAGE_TAG }}
             ${{ secrets.DOCKERHUB_USER }}/solo-leveling-player:latest
-            ${{ secrets.DOCKERHUB_USER }}/solo-leveling-player:${{ github.sha }}
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
 
       - name: Set environment variables for deployment
         run: |
-          echo "GIT_COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
-          echo "DOCKERHUB_USER=${{ secrets.DOCKERHUB_USER }}" >> $GITHUB_ENV
+          echo "DEPLOY_IMAGE=${{ secrets.DOCKERHUB_USER }}/solo-leveling-player:${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> $GITHUB_ENV
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> $GITHUB_ENV
 

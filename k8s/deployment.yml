@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: solo-leveling-player
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: solo-leveling-player
