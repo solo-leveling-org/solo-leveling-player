@@ -77,5 +77,6 @@ abstract class ProtoMapper {
 	@Mapping(target = "roles", source = "rolesList")
 	abstract fun map(input: com.sleepkqq.sololeveling.proto.user.UserInput): UserInput
 
+	@Mapping(target = "active", source = "isActive")
 	abstract fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicInput): PlayerTaskTopicInput
 }
