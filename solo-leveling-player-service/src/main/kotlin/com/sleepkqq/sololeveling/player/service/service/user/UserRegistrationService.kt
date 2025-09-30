@@ -4,6 +4,7 @@ import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.LevelType
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.user.User
+import com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole
 import com.sleepkqq.sololeveling.player.service.service.player.LevelService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskTopicService
@@ -21,6 +22,7 @@ class UserRegistrationService(
 	}
 
 	fun register(user: User): User = Immutables.createUser(user) {
+		it.setRoles(setOf(UserRole.USER))
 		it.setPlayer(Immutables.createPlayer { p ->
 			p.setId(user.id())
 			p.setMaxTasks(INITIAL_PLAYER_MAX_TASKS)

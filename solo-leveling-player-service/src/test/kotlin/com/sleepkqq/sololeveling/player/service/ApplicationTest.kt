@@ -94,7 +94,7 @@ class ApplicationTest : BaseTestClass() {
 				it.setLastLoginAt(now)
 				it.setUpdatedAt(now)
 				it.setCreatedAt(now)
-				it.setRoles(listOf(UserRole.USER))
+				it.setRoles(setOf(UserRole.USER))
 			}
 		)
 
