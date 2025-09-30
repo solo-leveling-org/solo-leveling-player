@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: $DOCKERHUB_USER/solo-leveling-player:$DEPLOY_IMAGE
+          image: $DEPLOY_IMAGE
           ports:
             - containerPort: 8080
               name: http
