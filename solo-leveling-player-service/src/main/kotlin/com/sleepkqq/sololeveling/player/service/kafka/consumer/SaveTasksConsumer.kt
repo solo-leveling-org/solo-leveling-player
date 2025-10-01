@@ -4,6 +4,7 @@ import com.sleepkqq.sololeveling.avro.constants.KafkaGroupIds
 import com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics
 import com.sleepkqq.sololeveling.avro.notification.Notification
 import com.sleepkqq.sololeveling.avro.notification.NotificationPriority
+import com.sleepkqq.sololeveling.avro.notification.NotificationType
 import com.sleepkqq.sololeveling.avro.notification.SendNotificationEvent
 import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent
 import com.sleepkqq.sololeveling.player.service.kafka.producer.SendNotificationProducer
@@ -112,7 +113,8 @@ class SaveTasksConsumer(
 				event.transactionId,
 				event.playerId,
 				NotificationPriority.LOW,
-				Notification("Your tasks have been successfully generated!")
+				// todo: move message to localization file
+				Notification("Your tasks have been successfully generated!", NotificationType.INFO)
 			)
 			sendNotificationProducer.send(sendNotificationEvent)
 			log.info("Success notification sent for transaction {}", event.transactionId)

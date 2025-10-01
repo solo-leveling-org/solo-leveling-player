@@ -11,6 +11,11 @@ on:
         options:
           - jvm
           - native
+      replicas:
+        description: 'Number of replicas (pods) to deploy'
+        required: true
+        default: 1
+        type: number
 
 jobs:
   docker-and-deploy:
@@ -78,6 +83,7 @@ jobs:
           echo "DEPLOY_IMAGE=${{ secrets.DOCKERHUB_USER }}/solo-leveling-player:${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> $GITHUB_ENV
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> $GITHUB_ENV
+          echo "REPLICAS=${{ inputs.replicas }}" >> $GITHUB_ENV
 
       - name: Install gettext for envsubst
         run: |
