@@ -1,20 +1,43 @@
 package com.sleepkqq.sololeveling.player.model.repository.player;
 
+import static com.sleepkqq.sololeveling.player.model.entity.Tables.PLAYER_TASK_TOPIC_TABLE;
+
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic;
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
-import org.babyfish.jimmer.spring.repository.JRepository;
+import lombok.RequiredArgsConstructor;
+import org.babyfish.jimmer.View;
+import org.babyfish.jimmer.sql.JSqlClient;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PlayerTaskTopicRepository extends JRepository<PlayerTaskTopic, UUID> {
+@RequiredArgsConstructor
+public class PlayerTaskTopicRepository {
 
-  List<PlayerTaskTopicView> findByPlayerId(long playerId);
+  private final JSqlClient sql;
 
-  default List<PlayerTaskTopic> updateAll(Collection<PlayerTaskTopic> entities) {
-    return saveEntities(entities, SaveMode.UPDATE_ONLY);
+  public <V extends View<PlayerTaskTopic>> List<V> findViewByPlayerId(
+      long playerId,
+      Class<V> viewType
+  ) {
+    var table = PLAYER_TASK_TOPIC_TABLE;
+    return sql.createQuery(table)
+        .where(table.playerId().eq(playerId))
+        .select(table.fetch(viewType))
+        .execute();
+  }
+
+  public void saveEntities(Collection<PlayerTaskTopic> entities, SaveMode saveMode) {
+    sql.saveEntitiesCommand(entities)
+        .setMode(saveMode)
+        .execute();
+  }
+
+  public PlayerTaskTopic save(PlayerTaskTopic playerTaskTopic, SaveMode saveMode) {
+    return sql.saveCommand(playerTaskTopic)
+        .setMode(saveMode)
+        .execute()
+        .getModifiedEntity();
   }
 }

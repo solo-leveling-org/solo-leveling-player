@@ -9,7 +9,7 @@ interface PlayerTaskTopicService {
 
 	fun initialize(playerId: Long, taskTopic: TaskTopic): PlayerTaskTopic
 	fun insert(topic: PlayerTaskTopic): PlayerTaskTopic
-	fun updateAll(topics: Collection<PlayerTaskTopic>): List<PlayerTaskTopic>
+	fun updateAll(topics: Collection<PlayerTaskTopic>)
 	fun update(
 		playerTaskTopic: PlayerTaskTopic,
 		now: LocalDateTime = LocalDateTime.now()

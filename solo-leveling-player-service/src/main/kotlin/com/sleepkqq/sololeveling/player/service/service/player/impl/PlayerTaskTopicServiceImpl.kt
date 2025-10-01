@@ -35,8 +35,9 @@ class PlayerTaskTopicServiceImpl(
 		playerTaskTopicRepository.save(topic, SaveMode.INSERT_ONLY)
 
 	@Transactional
-	override fun updateAll(topics: Collection<PlayerTaskTopic>): List<PlayerTaskTopic> =
-		playerTaskTopicRepository.updateAll(topics)
+	override fun updateAll(topics: Collection<PlayerTaskTopic>) {
+		playerTaskTopicRepository.saveEntities(topics, SaveMode.UPDATE_ONLY)
+	}
 
 	@Transactional
 	override fun update(playerTaskTopic: PlayerTaskTopic, now: LocalDateTime): PlayerTaskTopic =
@@ -49,5 +50,5 @@ class PlayerTaskTopicServiceImpl(
 
 	@Transactional(readOnly = true)
 	override fun getByPlayerId(playerId: Long): List<PlayerTaskTopicView> =
-		playerTaskTopicRepository.findByPlayerId(playerId)
+		playerTaskTopicRepository.findViewByPlayerId(playerId, PlayerTaskTopicView::class.java)
 }

@@ -32,10 +32,18 @@
       <artifactId>liquibase-core</artifactId>
       <version>${liquibase.version}</version>
     </dependency>
+
+    <!-- jimmer -->
     <dependency>
       <groupId>org.babyfish.jimmer</groupId>
       <artifactId>jimmer-spring-boot-starter</artifactId>
       <version>${jimmer.version}</version>
+    </dependency>
+
+    <!-- utils -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
   </dependencies>
 
@@ -49,6 +57,10 @@
           <source>${maven.compiler.source}</source>
           <target>${maven.compiler.target}</target>
           <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+            </path>
             <path>
               <groupId>org.babyfish.jimmer</groupId>
               <artifactId>jimmer-apt</artifactId>

@@ -24,9 +24,7 @@ class UserServiceImpl(
 		?: throw ModelNotFoundException(User::class, id)
 
 	@Transactional(readOnly = true)
-	override fun find(id: Long): UserView? = userRepository
-		.viewer(UserView::class.java)
-		.findNullable(id)
+	override fun find(id: Long): UserView? = userRepository.findView(id, UserView::class.java)
 
 	@Transactional(readOnly = true)
 	override fun findVersion(id: Long): Int? = userRepository.findVersionById(id)

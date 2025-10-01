@@ -3,17 +3,41 @@ package com.sleepkqq.sololeveling.player.model.repository.user;
 import static com.sleepkqq.sololeveling.player.model.entity.Tables.USER_TABLE;
 
 import com.sleepkqq.sololeveling.player.model.entity.user.User;
-import org.babyfish.jimmer.spring.repository.JRepository;
+import lombok.RequiredArgsConstructor;
+import org.babyfish.jimmer.View;
+import org.babyfish.jimmer.sql.JSqlClient;
+import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends JRepository<User, Long> {
+@RequiredArgsConstructor
+public class UserRepository {
 
-  default Integer findVersionById(long id) {
+  private final JSqlClient sql;
+
+  public User save(User user, SaveMode saveMode) {
+    return sql.saveCommand(user)
+        .setMode(saveMode)
+        .execute()
+        .getModifiedEntity();
+  }
+
+  @Nullable
+  public Integer findVersionById(long id) {
     var table = USER_TABLE;
-    return sql().createQuery(table)
+    return sql.createQuery(table)
         .where(table.id().eq(id))
         .select(table.version())
+        .fetchFirstOrNull();
+  }
+
+  @Nullable
+  public <V extends View<User>> V findView(long id, Class<V> viewType) {
+    var table = USER_TABLE;
+    return sql.createQuery(table)
+        .where(table.id().eq(id))
+        .select(table.fetch(viewType))
         .fetchFirstOrNull();
   }
 }

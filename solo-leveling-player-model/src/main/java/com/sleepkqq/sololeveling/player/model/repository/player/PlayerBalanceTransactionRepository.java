@@ -1,12 +1,21 @@
 package com.sleepkqq.sololeveling.player.model.repository.player;
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction;
-import java.util.UUID;
-import org.babyfish.jimmer.spring.repository.JRepository;
+import lombok.RequiredArgsConstructor;
+import org.babyfish.jimmer.sql.JSqlClient;
+import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PlayerBalanceTransactionRepository extends
-    JRepository<PlayerBalanceTransaction, UUID> {
+@RequiredArgsConstructor
+public class PlayerBalanceTransactionRepository {
 
+  private final JSqlClient sql;
+
+  public PlayerBalanceTransaction save(PlayerBalanceTransaction transaction, SaveMode saveMode) {
+    return sql.saveCommand(transaction)
+        .setMode(saveMode)
+        .execute()
+        .getModifiedEntity();
+  }
 }

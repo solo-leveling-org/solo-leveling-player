@@ -14,7 +14,6 @@ import com.sleepkqq.sololeveling.player.service.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.service.task.TaskService
 import com.sleepkqq.sololeveling.player.service.service.user.UserService
 import org.assertj.core.api.Assertions.assertThat
-import org.babyfish.jimmer.sql.ast.mutation.AssociatedSaveMode
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -95,7 +94,7 @@ class ApplicationTest : BaseTestClass() {
 				it.setLastLoginAt(now)
 				it.setUpdatedAt(now)
 				it.setCreatedAt(now)
-				it.setRoles(listOf(UserRole.USER))
+				it.setRoles(setOf(UserRole.USER))
 			}
 		)
 
@@ -132,8 +131,7 @@ class ApplicationTest : BaseTestClass() {
 			Immutables.createPlayer(dbPlayer) {
 				it.setBalance(updatedBalance)
 			},
-			SaveMode.UPDATE_ONLY,
-			AssociatedSaveMode.MERGE
+			SaveMode.UPDATE_ONLY
 		)
 
 		val playerWithTransactions = playerService.get(

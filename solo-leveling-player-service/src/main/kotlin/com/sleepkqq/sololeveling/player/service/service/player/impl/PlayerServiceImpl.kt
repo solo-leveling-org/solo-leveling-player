@@ -23,8 +23,7 @@ class PlayerServiceImpl(
 
 	@Transactional(readOnly = true)
 	override fun findView(id: Long): PlayerView? =
-		playerRepository.viewer(PlayerView::class.java)
-			.findNullable(id)
+		playerRepository.findView(id, PlayerView::class.java)
 
 	@Transactional
 	override fun insert(player: Player): Player =
