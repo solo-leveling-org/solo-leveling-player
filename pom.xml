@@ -61,7 +61,7 @@
     <mapstruct.version>1.6.3</mapstruct.version>
 
     <!-- solo leveling -->
-    <solo-leveling-avro.version>2.2.0</solo-leveling-avro.version>
+    <solo-leveling-avro.version>2.3.0</solo-leveling-avro.version>
     <solo-leveling-proto.version>4.4.0</solo-leveling-proto.version>
 
     <!-- tests -->
