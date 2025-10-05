@@ -11,6 +11,11 @@ spring:
   threads:
     virtual:
       enabled: true
+  messages:
+    basename: messages
+    encoding: UTF-8
+    cache-duration: -1
+    fallback-to-system-locale: false
 app:
   scheduling:
     tasks:
