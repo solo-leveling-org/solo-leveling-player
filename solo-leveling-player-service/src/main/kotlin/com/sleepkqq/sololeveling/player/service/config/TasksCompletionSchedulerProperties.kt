@@ -1,4 +1,4 @@
-package com.sleepkqq.sololeveling.player.service.config.properties
+package com.sleepkqq.sololeveling.player.service.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
