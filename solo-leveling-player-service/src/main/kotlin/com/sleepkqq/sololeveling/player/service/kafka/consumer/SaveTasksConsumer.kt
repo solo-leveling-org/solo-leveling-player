@@ -4,15 +4,20 @@ import com.sleepkqq.sololeveling.avro.constants.KafkaGroupIds
 import com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics
 import com.sleepkqq.sololeveling.avro.notification.Notification
 import com.sleepkqq.sololeveling.avro.notification.NotificationPriority
+import com.sleepkqq.sololeveling.avro.notification.NotificationSource
+import com.sleepkqq.sololeveling.avro.notification.NotificationType
 import com.sleepkqq.sololeveling.avro.notification.SendNotificationEvent
 import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent
 import com.sleepkqq.sololeveling.player.service.kafka.producer.SendNotificationProducer
+import com.sleepkqq.sololeveling.player.service.lozalization.LocalizationCodes.TASKS_GENERATION_SUCCESS
 import com.sleepkqq.sololeveling.player.service.mapper.AvroMapper
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskStatusService
 import com.sleepkqq.sololeveling.player.service.service.redis.IdempotencyService
 import com.sleepkqq.sololeveling.player.service.service.task.TaskService
 import org.slf4j.LoggerFactory
+import org.springframework.context.MessageSource
+import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
@@ -27,7 +32,8 @@ class SaveTasksConsumer(
 	private val playerTaskStatusService: PlayerTaskStatusService,
 	private val sendNotificationProducer: SendNotificationProducer,
 	private val avroMapper: AvroMapper,
-	private val idempotencyService: IdempotencyService
+	private val idempotencyService: IdempotencyService,
+	private val messageSource: MessageSource
 ) {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -112,10 +118,20 @@ class SaveTasksConsumer(
 				event.transactionId,
 				event.playerId,
 				NotificationPriority.LOW,
-				Notification("Your tasks have been successfully generated!")
+				Notification(
+					messageSource.getMessage(
+						TASKS_GENERATION_SUCCESS,
+						null,
+						LocaleContextHolder.getLocale()
+					),
+					NotificationType.INFO,
+					NotificationSource.TASKS
+				)
 			)
+
 			sendNotificationProducer.send(sendNotificationEvent)
 			log.info("Success notification sent for transaction {}", event.transactionId)
+
 		} catch (e: Exception) {
 			log.error(
 				"Failed to send success notification for transaction {}: {}",

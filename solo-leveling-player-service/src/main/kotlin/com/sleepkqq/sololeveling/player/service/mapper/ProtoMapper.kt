@@ -18,12 +18,10 @@ import com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole
 import com.sleepkqq.sololeveling.player.service.extenstions.toMoney
 import com.sleepkqq.sololeveling.player.service.extenstions.toTimestamp
 import org.mapstruct.*
-import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @Suppress("unused")
-@Component
 @Mapper(
 	componentModel = "spring",
 	unmappedTargetPolicy = ReportingPolicy.IGNORE,

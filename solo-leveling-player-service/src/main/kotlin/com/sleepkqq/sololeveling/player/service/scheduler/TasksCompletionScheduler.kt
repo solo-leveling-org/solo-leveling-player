@@ -2,7 +2,7 @@ package com.sleepkqq.sololeveling.player.service.scheduler
 
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
-import com.sleepkqq.sololeveling.player.service.config.properties.TasksCompletionSchedulerProperties
+import com.sleepkqq.sololeveling.player.service.config.TasksCompletionSchedulerProperties
 import com.sleepkqq.sololeveling.player.service.coroutine.TaskGenerationScope
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskStatusService
