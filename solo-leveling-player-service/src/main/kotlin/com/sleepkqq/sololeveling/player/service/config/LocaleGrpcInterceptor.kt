@@ -1,12 +1,18 @@
 package com.sleepkqq.sololeveling.player.service.config
 
-import io.grpc.*
+import io.grpc.ForwardingServerCallListener
+import io.grpc.Metadata
+import io.grpc.ServerCall
+import io.grpc.ServerCallHandler
+import io.grpc.ServerInterceptor
+import org.slf4j.LoggerFactory
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.core.annotation.Order
 import org.springframework.grpc.server.GlobalServerInterceptor
 import org.springframework.stereotype.Component
 import java.util.Locale
 
+@Suppress("unused")
 @Component
 @Order(100)
 @GlobalServerInterceptor
@@ -17,6 +23,8 @@ class LocaleGrpcInterceptor : ServerInterceptor {
 		val SUPPORTED_LOCALES = setOf("ru", "en")
 	}
 
+	private val log = LoggerFactory.getLogger(javaClass)
+
 	override fun <ReqT, RespT> interceptCall(
 		call: ServerCall<ReqT, RespT>,
 		headers: Metadata,
@@ -24,6 +32,8 @@ class LocaleGrpcInterceptor : ServerInterceptor {
 	): ServerCall.Listener<ReqT> {
 		val locale = extractLocaleFromMetadata(headers)
 		LocaleContextHolder.setLocale(locale)
+
+		log.info("Current locale: {}", locale.toString())
 
 		return object : ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT>(
 			next.startCall(call, headers)
