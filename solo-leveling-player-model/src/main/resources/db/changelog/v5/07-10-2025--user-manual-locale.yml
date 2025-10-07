@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-user-manual-locale
+      author: sleepkqq
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: manual_locale
+                  type: varchar(255)
+                  constraints:
+                    nullable: true

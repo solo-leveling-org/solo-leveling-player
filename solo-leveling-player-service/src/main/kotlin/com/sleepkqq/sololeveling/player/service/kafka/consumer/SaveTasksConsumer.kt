@@ -45,10 +45,9 @@ class SaveTasksConsumer(
 	)
 	@Transactional
 	fun listen(event: SaveTasksEvent, ack: Acknowledgment) {
-		val startTime = System.currentTimeMillis()
 		val txId = event.transactionId
 
-		log.info(">> Start processing SaveTasksEvent | transactionId={}", txId)
+		log.info(">> Start processing SaveTasksEvent | txId={}", txId)
 
 		try {
 			if (idempotencyService.isProcessed(txId)) {
@@ -60,21 +59,12 @@ class SaveTasksConsumer(
 
 			sendSuccessNotification(event)
 
-			val processingTime = System.currentTimeMillis() - startTime
-			log.info(
-				"<< Successfully processed SaveTasksEvent | transactionId={}, processingTime={}ms",
-				txId, processingTime
-			)
+			log.info("Successfully processed SaveTasksEvent | txId={}", txId)
 
 			ack.acknowledge()
 
 		} catch (e: Exception) {
-			val processingTime = System.currentTimeMillis() - startTime
-			log.error(
-				"Failed to process SaveTasksEvent | transactionId={}, processingTime={}ms, error={}",
-				txId, processingTime, e.message, e
-			)
-
+			log.error("Failed to process SaveTasksEvent | txId={}", txId, e)
 			throw e
 		}
 	}
@@ -95,20 +85,19 @@ class SaveTasksConsumer(
 		if (playerTasks.isNotEmpty()) {
 			log.info(
 				"Setting {} player tasks to IN_PROGRESS for player {}",
-				playerTasks.size,
-				event.playerId
+				playerTasks.size, event.playerId
 			)
 			playerTaskStatusService.inProgressTasks(playerTasks)
 		}
 	}
 
 	private fun validateSaveTasksEvent(event: SaveTasksEvent) {
-		Assert.hasText(event.transactionId, "Transaction ID cannot be blank")
-		Assert.notEmpty(event.tasks, "Tasks list cannot be empty")
-		Assert.isTrue(event.playerId > 0, "Player ID must be positive")
+		Assert.hasText(event.transactionId, "txId cannot be blank")
+		Assert.notEmpty(event.tasks, "tasks list cannot be empty")
+		Assert.isTrue(event.playerId > 0, "playerId must be positive")
 
 		event.tasks.forEach {
-			Assert.hasText(it.taskId, "Task ID cannot be blank")
+			Assert.hasText(it.taskId, "taskId cannot be blank")
 		}
 	}
 
@@ -125,19 +114,16 @@ class SaveTasksConsumer(
 						LocaleContextHolder.getLocale()
 					),
 					NotificationType.INFO,
-					NotificationSource.TASKS
+					NotificationSource.TASKS,
+					true
 				)
 			)
 
 			sendNotificationProducer.send(sendNotificationEvent)
-			log.info("Success notification sent for transaction {}", event.transactionId)
+			log.info("<< Success notification sent | txId={}", event.transactionId)
 
 		} catch (e: Exception) {
-			log.error(
-				"Failed to send success notification for transaction {}: {}",
-				event.transactionId,
-				e.message
-			)
+			log.error("Failed to send success notification | txId={}", event.transactionId, e)
 		}
 	}
 }

@@ -85,7 +85,7 @@ class GenerateTasksProducer(
 			kafkaTemplate.send(KafkaTaskTopics.GENERATE_TASKS_TOPIC, event.transactionId, event)
 
 		} catch (e: Exception) {
-			log.error("Failed to generate tasks for player {}: {}", playerId, e.message, e)
+			log.error("Failed to generate tasks for player {}", playerId, e)
 			throw e
 		}
 	}
