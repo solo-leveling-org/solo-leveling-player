@@ -17,19 +17,15 @@ class SendNotificationProducer(
 
 	@Retryable(maxAttempts = 3, backoff = Backoff(delay = 1000, multiplier = 2.0))
 	fun send(event: SendNotificationEvent) {
-		log.info(
-			">> Sending notification event | transactionId={}, priority={}",
-			event.transactionId, event.priority
-		)
+		val txId = event.transactionId
+		log.info("Sending notification event | txId={}", txId)
 
 		try {
-			kafkaTemplate.send(KafkaTaskTopics.SEND_NOTIFICATION_TOPIC, event.transactionId, event)
-			log.info("<< Notification event sent successfully | transactionId={}", event.transactionId)
+			kafkaTemplate.send(KafkaTaskTopics.SEND_NOTIFICATION_TOPIC, txId, event)
+			log.info("<< Notification event sent successfully | txId={}", txId)
+
 		} catch (e: Exception) {
-			log.error(
-				"Failed to send notification event | transactionId={}, error={}",
-				event.transactionId, e.message, e
-			)
+			log.error("Failed to send notification event | txId={}", txId, e)
 			throw e
 		}
 	}
