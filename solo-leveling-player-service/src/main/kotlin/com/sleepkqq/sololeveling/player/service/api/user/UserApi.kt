@@ -62,11 +62,11 @@ class UserApi(
 		log.info(">> getUserLocale called by user={}", request.userId)
 
 		val user = userService.get(request.userId, USER_FETCHER.locale().manualLocale())
-		val locale = Locale.forLanguageTag(user.manualLocale() ?: user.locale())
+		val locale = user.manualLocale() ?: user.locale()
 		val isManual = user.manualLocale() != null
 
 		val response = UserLocaleResponse.newBuilder()
-			.setLocale(locale.language)
+			.setLocale(locale)
 			.setIsManual(isManual)
 			.build()
 
