@@ -62,7 +62,7 @@
 
     <!-- solo leveling -->
     <solo-leveling-avro.version>2.4.1</solo-leveling-avro.version>
-    <solo-leveling-proto.version>4.6.2</solo-leveling-proto.version>
+    <solo-leveling-proto.version>4.6.3</solo-leveling-proto.version>
 
     <!-- tests -->
     <test-containers.version>1.21.3</test-containers.version>

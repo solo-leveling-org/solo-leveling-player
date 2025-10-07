@@ -7,11 +7,10 @@ import com.sleepkqq.sololeveling.player.service.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.service.service.user.UserService
 import com.sleepkqq.sololeveling.proto.user.AuthUserRequest
 import com.sleepkqq.sololeveling.proto.user.GetUserLocaleRequest
-import com.sleepkqq.sololeveling.proto.user.GetUserLocaleResponse
 import com.sleepkqq.sololeveling.proto.user.GetUserRequest
 import com.sleepkqq.sololeveling.proto.user.GetUserResponse
 import com.sleepkqq.sololeveling.proto.user.UpdateUserLocaleRequest
-import com.sleepkqq.sololeveling.proto.user.UpdateUserLocaleResponse
+import com.sleepkqq.sololeveling.proto.user.UserLocaleResponse
 import com.sleepkqq.sololeveling.proto.user.UserServiceGrpc.UserServiceImplBase
 import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
@@ -58,15 +57,17 @@ class UserApi(
 
 	override fun getUserLocale(
 		request: GetUserLocaleRequest,
-		responseObserver: StreamObserver<GetUserLocaleResponse>
+		responseObserver: StreamObserver<UserLocaleResponse>
 	) {
 		log.info(">> getUserLocale called by user={}", request.userId)
 
 		val user = userService.get(request.userId, USER_FETCHER.locale().manualLocale())
 		val locale = Locale.forLanguageTag(user.manualLocale() ?: user.locale())
-		val response = GetUserLocaleResponse.newBuilder()
+		val isManual = user.manualLocale() != null
+
+		val response = UserLocaleResponse.newBuilder()
 			.setLocale(locale.language)
-			.setIsManual(true)
+			.setIsManual(isManual)
 			.build()
 
 		responseObserver.onNext(response)
@@ -75,12 +76,12 @@ class UserApi(
 
 	override fun updateUserLocale(
 		request: UpdateUserLocaleRequest,
-		responseObserver: StreamObserver<UpdateUserLocaleResponse>
+		responseObserver: StreamObserver<UserLocaleResponse>
 	) {
 		log.info(">> updateUserLocale called by user={}", request.userId)
 
 		userService.updateLocale(request.userId, Locale.forLanguageTag(request.locale))
-		val response = UpdateUserLocaleResponse.newBuilder()
+		val response = UserLocaleResponse.newBuilder()
 			.setLocale(request.locale)
 			.setIsManual(true)
 			.build()
