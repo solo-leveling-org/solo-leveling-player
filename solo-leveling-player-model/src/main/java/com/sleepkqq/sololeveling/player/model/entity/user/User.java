@@ -31,6 +31,9 @@ public interface User extends Model {
 
   String locale();
 
+  @Nullable
+  String manualLocale();
+
   LocalDateTime lastLoginAt();
 
   @Serialized

@@ -2,15 +2,17 @@ package com.sleepkqq.sololeveling.player.service.service.user.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.user.User
-import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
+import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher
 import com.sleepkqq.sololeveling.player.model.repository.user.UserRepository
-import com.sleepkqq.sololeveling.player.service.exception.ModelNotFoundException
 import com.sleepkqq.sololeveling.player.service.service.user.UserRegistrationService
 import com.sleepkqq.sololeveling.player.service.service.user.UserService
+import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.util.*
+import kotlin.reflect.KClass
 
 @Suppress("unused")
 @Service
@@ -19,12 +21,11 @@ class UserServiceImpl(
 	private val userRegistrationService: UserRegistrationService
 ) : UserService {
 
-	@Transactional(readOnly = true)
-	override fun get(id: Long): UserView = find(id)
-		?: throw ModelNotFoundException(User::class, id)
+	override fun find(id: Long, fetcher: UserFetcher): User? =
+		userRepository.findNullable(id, fetcher)
 
-	@Transactional(readOnly = true)
-	override fun find(id: Long): UserView? = userRepository.findView(id, UserView::class.java)
+	override fun <V : View<User>> findView(id: Long, viewType: KClass<V>): V? =
+		userRepository.findView(id, viewType.java)
 
 	@Transactional(readOnly = true)
 	override fun findVersion(id: Long): Int? = userRepository.findVersionById(id)
@@ -55,5 +56,10 @@ class UserServiceImpl(
 				)
 			}
 			?: insert(userRegistrationService.register(user))
+	}
+
+	@Transactional
+	override fun updateLocale(id: Long, locale: Locale) {
+		userRepository.updateLocale(id, locale)
 	}
 }

@@ -1,15 +1,27 @@
 package com.sleepkqq.sololeveling.player.service.service.user
 
+import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.user.User
-import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
+import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher
+import com.sleepkqq.sololeveling.player.service.exception.ModelNotFoundException
+import org.babyfish.jimmer.View
 import java.time.LocalDateTime
+import java.util.*
+import kotlin.reflect.KClass
 
 interface UserService {
 
-	fun get(id: Long): UserView
-	fun find(id: Long): UserView?
+	fun find(id: Long, fetcher: UserFetcher = Fetchers.USER_FETCHER.allScalarFields()): User?
+	fun get(id: Long, fetcher: UserFetcher = Fetchers.USER_FETCHER.allScalarFields()): User =
+		find(id, fetcher) ?: throw ModelNotFoundException(User::class, id)
+
+	fun <V : View<User>> findView(id: Long, viewType: KClass<V>): V?
+	fun <V : View<User>> getView(id: Long, viewType: KClass<V>): V = findView(id, viewType)
+		?: throw ModelNotFoundException(User::class, id)
+
 	fun findVersion(id: Long): Int?
 	fun insert(user: User): User
 	fun update(user: User, now: LocalDateTime = LocalDateTime.now()): User
 	fun upsert(user: User): User
+	fun updateLocale(id: Long, locale: Locale)
 }

@@ -4,6 +4,8 @@ export com.sleepkqq.sololeveling.player.model.entity.user.User
 input UserInput {
   #allScalars
 
+  -manualLocale
+
   -createdAt
 
   -updatedAt

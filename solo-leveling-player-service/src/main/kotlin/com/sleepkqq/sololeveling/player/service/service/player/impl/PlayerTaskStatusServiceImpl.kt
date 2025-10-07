@@ -43,7 +43,7 @@ class PlayerTaskStatusServiceImpl(
 
 		setStatus(listOf(playerTask), PlayerTaskStatus.PENDING_COMPLETION, now)
 
-		val playerView = playerService.getView(playerId)
+		val playerView = playerService.getView(playerId, PlayerView::class)
 		val player = playerView.toEntity()
 
 		val task = playerTask.task()
