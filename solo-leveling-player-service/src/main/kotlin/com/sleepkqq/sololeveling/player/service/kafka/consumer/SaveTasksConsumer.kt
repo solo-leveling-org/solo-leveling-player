@@ -2,22 +2,15 @@ package com.sleepkqq.sololeveling.player.service.kafka.consumer
 
 import com.sleepkqq.sololeveling.avro.constants.KafkaGroupIds
 import com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics
-import com.sleepkqq.sololeveling.avro.notification.Notification
-import com.sleepkqq.sololeveling.avro.notification.NotificationPriority
-import com.sleepkqq.sololeveling.avro.notification.NotificationSource
-import com.sleepkqq.sololeveling.avro.notification.NotificationType
-import com.sleepkqq.sololeveling.avro.notification.SendNotificationEvent
 import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent
-import com.sleepkqq.sololeveling.player.service.kafka.producer.SendNotificationProducer
-import com.sleepkqq.sololeveling.player.service.lozalization.LocalizationCodes.TASKS_GENERATION_SUCCESS
 import com.sleepkqq.sololeveling.player.service.mapper.AvroMapper
+import com.sleepkqq.sololeveling.player.service.service.notification.NotificationCommand
+import com.sleepkqq.sololeveling.player.service.service.notification.NotificationService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskStatusService
 import com.sleepkqq.sololeveling.player.service.service.redis.IdempotencyService
 import com.sleepkqq.sololeveling.player.service.service.task.TaskService
 import org.slf4j.LoggerFactory
-import org.springframework.context.MessageSource
-import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
@@ -30,10 +23,9 @@ class SaveTasksConsumer(
 	private val taskService: TaskService,
 	private val playerTaskService: PlayerTaskService,
 	private val playerTaskStatusService: PlayerTaskStatusService,
-	private val sendNotificationProducer: SendNotificationProducer,
 	private val avroMapper: AvroMapper,
 	private val idempotencyService: IdempotencyService,
-	private val messageSource: MessageSource
+	private val notificationService: NotificationService
 ) {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -57,7 +49,7 @@ class SaveTasksConsumer(
 
 			processSaveTasksEvent(event)
 
-			sendSuccessNotification(event)
+			notificationService.send(NotificationCommand.SaveTasks(event))
 
 			log.info("Successfully processed SaveTasksEvent | txId={}", txId)
 
@@ -98,32 +90,6 @@ class SaveTasksConsumer(
 
 		event.tasks.forEach {
 			Assert.hasText(it.taskId, "taskId cannot be blank")
-		}
-	}
-
-	private fun sendSuccessNotification(event: SaveTasksEvent) {
-		try {
-			val sendNotificationEvent = SendNotificationEvent(
-				event.transactionId,
-				event.playerId,
-				NotificationPriority.LOW,
-				Notification(
-					messageSource.getMessage(
-						TASKS_GENERATION_SUCCESS,
-						null,
-						LocaleContextHolder.getLocale()
-					),
-					NotificationType.INFO,
-					NotificationSource.TASKS,
-					true
-				)
-			)
-
-			sendNotificationProducer.send(sendNotificationEvent)
-			log.info("<< Success notification sent | txId={}", event.transactionId)
-
-		} catch (e: Exception) {
-			log.error("Failed to send success notification | txId={}", event.transactionId, e)
 		}
 	}
 }
