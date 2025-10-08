@@ -1,10 +1,5 @@
 package com.sleepkqq.sololeveling.player.service.service.player.impl
 
-import com.sleepkqq.sololeveling.avro.notification.Notification
-import com.sleepkqq.sololeveling.avro.notification.NotificationPriority
-import com.sleepkqq.sololeveling.avro.notification.NotificationSource
-import com.sleepkqq.sololeveling.avro.notification.NotificationType
-import com.sleepkqq.sololeveling.avro.notification.SendNotificationEvent
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
@@ -12,7 +7,8 @@ import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceT
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
 import com.sleepkqq.sololeveling.player.service.kafka.producer.GenerateTasksProducer
-import com.sleepkqq.sololeveling.player.service.kafka.producer.SendNotificationProducer
+import com.sleepkqq.sololeveling.player.service.service.notification.NotificationCommand
+import com.sleepkqq.sololeveling.player.service.service.notification.NotificationService
 import com.sleepkqq.sololeveling.player.service.service.player.LevelService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerService
@@ -23,7 +19,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDateTime
-import java.util.UUID
 
 @Suppress("unused")
 @Service
@@ -33,7 +28,7 @@ class PlayerTaskStatusServiceImpl(
 	private val playerBalanceService: PlayerBalanceService,
 	private val playerService: PlayerService,
 	private val levelService: LevelService,
-	private val sendNotificationProducer: SendNotificationProducer
+	private val notificationService: NotificationService
 ) : PlayerTaskStatusService {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -43,6 +38,8 @@ class PlayerTaskStatusServiceImpl(
 		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED, now)
 
 		generateTasks(playerId, true, setOf(playerTask.order()))
+
+		notificationService.send(NotificationCommand.SilentTasksUpdate(playerId))
 	}
 
 	@Transactional
@@ -81,32 +78,9 @@ class PlayerTaskStatusServiceImpl(
 			now
 		)
 
-		sendCompleteTaskNotification(playerId)
+		notificationService.send(NotificationCommand.SilentTasksUpdate(playerId))
 
 		return playerView to PlayerView(updatedPlayer)
-	}
-
-	private fun sendCompleteTaskNotification(userId: Long) {
-		val txId = UUID.randomUUID().toString()
-		try {
-			val sendNotificationEvent = SendNotificationEvent(
-				txId,
-				userId,
-				NotificationPriority.LOW,
-				Notification(
-					null,
-					NotificationType.INFO,
-					NotificationSource.TASKS,
-					false
-				)
-			)
-
-			sendNotificationProducer.send(sendNotificationEvent)
-			log.info("<< Task completion notification sent | txId={}", txId)
-
-		} catch (e: Exception) {
-			log.error("Failed to send task completion notification | txId={}", txId, e)
-		}
 	}
 
 	@Transactional
