@@ -61,8 +61,12 @@
     <mapstruct.version>1.6.3</mapstruct.version>
 
     <!-- solo leveling -->
-    <solo-leveling-avro.version>2.4.4</solo-leveling-avro.version>
-    <solo-leveling-proto.version>4.6.3</solo-leveling-proto.version>
+    <solo-leveling-avro.version>1.0.0</solo-leveling-avro.version>
+    <solo-leveling-jimmer.version>1.0.0</solo-leveling-jimmer.version>
+    <solo-leveling-proto.version>1.0.0</solo-leveling-proto.version>
+
+    <!-- utils -->
+    <streamex.version>0.8.3</streamex.version>
 
     <!-- tests -->
     <test-containers.version>1.21.3</test-containers.version>
@@ -72,7 +76,7 @@
   <repositories>
     <repository>
       <id>github</id>
-      <url>https://maven.pkg.github.com/solo-leveling-org/solo-leveling-proto</url>
+      <url>https://maven.pkg.github.com/solo-leveling-org/solo-leveling-lib</url>
     </repository>
     <repository>
       <id>spring-milestones</id>
