@@ -2,6 +2,7 @@ package com.sleepkqq.sololeveling.player.service.mapper
 
 import com.google.protobuf.Timestamp
 import com.google.type.Money
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskInput
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicInput
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
@@ -17,6 +18,8 @@ import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole
 import com.sleepkqq.sololeveling.player.service.extenstions.toMoney
 import com.sleepkqq.sololeveling.player.service.extenstions.toTimestamp
+import com.sleepkqq.sololeveling.proto.player.SearchPlayerBalanceTransactionsResponse
+import org.babyfish.jimmer.Page
 import org.mapstruct.*
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -78,4 +81,13 @@ abstract class ProtoMapper {
 
 	@Mapping(target = "active", source = "isActive")
 	abstract fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicInput): PlayerTaskTopicInput
+
+	@Mapping(target = "transactionsList", source = "rows")
+	@Mapping(
+		target = "transactionsList.amount",
+		expression = "java(map(playerBalanceTransactionView.getAmount(), playerBalanceTransactionView.getCurrencyCode()))"
+	)
+	@Mapping(target = "pagination.totalRowCount", source = "totalRowCount")
+	@Mapping(target = "pagination.totalPageCount", source = "totalPageCount")
+	abstract fun map(input: Page<PlayerBalanceTransactionView>): SearchPlayerBalanceTransactionsResponse
 }

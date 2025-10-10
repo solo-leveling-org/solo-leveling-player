@@ -1,8 +1,18 @@
 package com.sleepkqq.sololeveling.player.service.service.player
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction
+import com.sleepkqq.sololeveling.proto.player.QueryOptions
+import org.babyfish.jimmer.Page
+import org.babyfish.jimmer.View
+import kotlin.reflect.KClass
 
 interface PlayerBalanceTransactionService {
 
 	fun insert(playerBalanceTransaction: PlayerBalanceTransaction): PlayerBalanceTransaction
+
+	fun <V : View<PlayerBalanceTransaction>> searchView(
+		playerId: Long,
+		options: QueryOptions,
+		viewType: KClass<V>
+	) : Page<V>
 }

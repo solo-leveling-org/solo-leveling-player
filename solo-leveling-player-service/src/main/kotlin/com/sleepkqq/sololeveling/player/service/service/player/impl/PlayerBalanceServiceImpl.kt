@@ -22,15 +22,17 @@ class PlayerBalanceServiceImpl(
 		val INITIAL_BALANCE: BigDecimal = BigDecimal.ZERO
 	}
 
-	override fun initializePlayerBalance(): PlayerBalance = Immutables.createPlayerBalance {
-		it.setId(UUID.randomUUID())
-		it.setBalance(INITIAL_BALANCE)
-		it.setCurrencyCode(CurrencyCode.SLCN)
-	}
+	override fun initializePlayerBalance(currencyCode: CurrencyCode): PlayerBalance =
+		Immutables.createPlayerBalance {
+			it.setId(UUID.randomUUID())
+			it.setBalance(INITIAL_BALANCE)
+			it.setCurrencyCode(currencyCode)
+		}
 
 	override fun deposit(
 		playerBalance: PlayerBalance,
 		amount: BigDecimal,
+		currencyCode: CurrencyCode,
 		cause: PlayerBalanceTransactionCause,
 		now: LocalDateTime
 	): PlayerBalance {
@@ -42,6 +44,7 @@ class PlayerBalanceServiceImpl(
 		playerBalanceTransactionService.insert(
 			Immutables.createPlayerBalanceTransaction {
 				it.setAmount(amount)
+				it.setCurrencyCode(currencyCode)
 				it.setType(PlayerBalanceTransactionType.IN)
 				it.setCause(cause)
 				it.setBalanceId(playerBalance.id())

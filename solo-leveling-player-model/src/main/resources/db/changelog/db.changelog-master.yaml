@@ -20,3 +20,7 @@ databaseChangeLog:
   # v5
   - include:
       file: db/changelog/v5/07-10-2025--user-manual-locale.yml
+
+  # v6
+  - include:
+      file: db/changelog/v5/10-10-2025--transaction-currency-code.yml

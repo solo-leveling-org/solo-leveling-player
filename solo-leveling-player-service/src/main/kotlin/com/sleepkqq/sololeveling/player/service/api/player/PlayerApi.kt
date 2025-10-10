@@ -1,7 +1,9 @@
 package com.sleepkqq.sololeveling.player.service.api.player
 
 import com.google.protobuf.Empty
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.service.mapper.ProtoMapper
+import com.sleepkqq.sololeveling.player.service.service.player.PlayerBalanceTransactionService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerTaskStatusService
@@ -19,7 +21,8 @@ class PlayerApi(
 	private val playerTaskService: PlayerTaskService,
 	private val playerTaskStatusService: PlayerTaskStatusService,
 	private val playerTaskTopicService: PlayerTaskTopicService,
-	private val protoMapper: ProtoMapper
+	private val protoMapper: ProtoMapper,
+	private val playerBalanceTransactionService: PlayerBalanceTransactionService
 ) : PlayerServiceImplBase() {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -120,6 +123,22 @@ class PlayerApi(
 		playerTaskStatusService.skipTask(playerTask, request.playerId)
 
 		responseObserver.onNext(Empty.newBuilder().build())
+		responseObserver.onCompleted()
+	}
+
+	override fun searchPlayerBalanceTransactions(
+		request: SearchPlayerBalanceTransactionsRequest,
+		responseObserver: StreamObserver<SearchPlayerBalanceTransactionsResponse>
+	) {
+		log.info(">> searchPlayerBalanceTransactions called by user={}", request.playerId)
+
+		val transactionsPage = playerBalanceTransactionService.searchView(
+			request.playerId,
+			request.options,
+			PlayerBalanceTransactionView::class
+		)
+
+		responseObserver.onNext(protoMapper.map(transactionsPage))
 		responseObserver.onCompleted()
 	}
 }
