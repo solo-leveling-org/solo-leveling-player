@@ -23,4 +23,4 @@ databaseChangeLog:
 
   # v6
   - include:
-      file: db/changelog/v5/10-10-2025--transaction-currency-code.yml
+      file: db/changelog/v6/10-10-2025--transaction-currency-code.yml
