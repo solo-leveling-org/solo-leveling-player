@@ -1,6 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.config
 
-import com.sleepkqq.sololeveling.proto.config.LocaleServerInterceptor
+import com.sleepkqq.sololeveling.proto.config.interceptor.LocaleServerInterceptor
 import io.grpc.ServerInterceptor
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

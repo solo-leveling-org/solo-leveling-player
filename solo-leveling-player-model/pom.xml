@@ -44,6 +44,19 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- solo leveling -->
+    <dependency>
+      <groupId>com.sleepkqq</groupId>
+      <artifactId>solo-leveling-jimmer</artifactId>
+      <version>${solo-leveling-lib.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sleepkqq</groupId>
+      <artifactId>solo-leveling-proto</artifactId>
+      <version>${solo-leveling-lib.version}</version>
     </dependency>
   </dependencies>
 

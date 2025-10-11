@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.model.entity.player;
 
 import com.sleepkqq.sololeveling.player.model.entity.Model;
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType;
 import java.math.BigDecimal;
@@ -24,6 +25,8 @@ public interface PlayerBalanceTransaction extends Model {
   UUID id();
 
   BigDecimal amount();
+
+  CurrencyCode currencyCode();
 
   PlayerBalanceTransactionType type();
 

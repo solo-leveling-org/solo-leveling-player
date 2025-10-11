@@ -24,9 +24,5 @@ UserView {
     level {
       #allScalars
     }
-
-    balance {
-      #allScalars
-    }
   }
 }
