@@ -1,8 +1,11 @@
 package com.sleepkqq.sololeveling.player.service.api
 
 import com.google.protobuf.Empty
+import com.sleepkqq.sololeveling.jimmer.enums.EnumLocalizer
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType
 import com.sleepkqq.sololeveling.player.service.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerBalanceTransactionService
@@ -37,7 +40,8 @@ class PlayerApi(
 	private val playerTaskTopicService: PlayerTaskTopicService,
 	private val protoMapper: ProtoMapper,
 	private val playerBalanceTransactionService: PlayerBalanceTransactionService,
-	private val playerBalanceService: PlayerBalanceService
+	private val playerBalanceService: PlayerBalanceService,
+	private val enumLocalizer: EnumLocalizer
 ) : PlayerServiceGrpc.PlayerServiceImplBase() {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -167,8 +171,18 @@ class PlayerApi(
 			request.options,
 			PlayerBalanceTransactionView::class
 		)
+		val response = protoMapper.map(transactionsPage)
+			.addAllFilters(
+				enumLocalizer.localize(
+					mapOf(
+						"type" to PlayerBalanceTransactionType::class.java,
+						"cause" to PlayerBalanceTransactionCause::class.java
+					)
+				)
+			)
+			.build()
 
-		responseObserver.onNext(protoMapper.map(transactionsPage))
+		responseObserver.onNext(response)
 		responseObserver.onCompleted()
 	}
 }

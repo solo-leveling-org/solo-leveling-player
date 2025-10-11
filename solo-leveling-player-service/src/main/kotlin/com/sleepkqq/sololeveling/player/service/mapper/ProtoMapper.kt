@@ -92,5 +92,5 @@ abstract class ProtoMapper {
 	)
 	@Mapping(target = "pagination.totalRowCount", source = "totalRowCount")
 	@Mapping(target = "pagination.totalPageCount", source = "totalPageCount")
-	abstract fun map(input: Page<PlayerBalanceTransactionView>): SearchPlayerBalanceTransactionsResponse
+	abstract fun map(input: Page<PlayerBalanceTransactionView>): SearchPlayerBalanceTransactionsResponse.Builder
 }
