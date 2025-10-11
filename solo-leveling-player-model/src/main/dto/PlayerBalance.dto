@@ -1,0 +1,10 @@
+export com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalance
+  -> package com.sleepkqq.sololeveling.player.model.entity.player.dto
+
+PlayerBalanceView {
+  #allScalars
+
+  -updatedAt
+
+  -createdAt
+}

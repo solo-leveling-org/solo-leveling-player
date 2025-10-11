@@ -5,22 +5,31 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalance
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType
+import com.sleepkqq.sololeveling.player.model.repository.player.PlayerBalanceRepository
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.service.player.PlayerBalanceTransactionService
+import org.babyfish.jimmer.View
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.reflect.KClass
 
 @Suppress("unused")
 @Service
 class PlayerBalanceServiceImpl(
-	private val playerBalanceTransactionService: PlayerBalanceTransactionService
+	private val playerBalanceTransactionService: PlayerBalanceTransactionService,
+	private val playerBalanceRepository: PlayerBalanceRepository
 ) : PlayerBalanceService {
 
 	private companion object {
 		val INITIAL_BALANCE: BigDecimal = BigDecimal.ZERO
 	}
+
+	@Transactional(readOnly = true)
+	override fun <V : View<PlayerBalance>> findView(id: Long, viewType: KClass<V>): V? =
+		playerBalanceRepository.findView(id, viewType.java)
 
 	override fun initializePlayerBalance(currencyCode: CurrencyCode): PlayerBalance =
 		Immutables.createPlayerBalance {
@@ -29,6 +38,7 @@ class PlayerBalanceServiceImpl(
 			it.setCurrencyCode(currencyCode)
 		}
 
+	@Transactional
 	override fun deposit(
 		playerBalance: PlayerBalance,
 		amount: BigDecimal,
@@ -61,6 +71,7 @@ class PlayerBalanceServiceImpl(
 		}
 	}
 
+	@Transactional
 	override fun withdraw(
 		playerBalance: PlayerBalance,
 		amount: BigDecimal,

@@ -3,6 +3,7 @@ package com.sleepkqq.sololeveling.player.service.mapper
 import com.google.protobuf.Timestamp
 import com.google.type.Money
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskInput
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicInput
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
@@ -60,11 +61,13 @@ abstract class ProtoMapper {
 
 	fun map(balance: BigDecimal, currencyCode: CurrencyCode): Money = balance.toMoney(currencyCode)
 
-	@Mapping(
-		target = "player.balance.balance",
-		expression = "java(map(targetOf_balance.getBalance(), targetOf_balance.getCurrencyCode()))"
-	)
 	abstract fun map(input: UserView): com.sleepkqq.sololeveling.proto.user.UserView
+
+	@Mapping(
+		target = "balance",
+		expression = "java(map(input.getBalance(), input.getCurrencyCode()))"
+	)
+	abstract fun map(input: PlayerBalanceView): com.sleepkqq.sololeveling.proto.player.PlayerBalanceView
 
 	@Mapping(
 		target = "balance.balance",

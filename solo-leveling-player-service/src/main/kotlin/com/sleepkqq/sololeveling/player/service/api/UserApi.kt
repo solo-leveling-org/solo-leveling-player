@@ -1,7 +1,7 @@
-package com.sleepkqq.sololeveling.player.service.api.user
+package com.sleepkqq.sololeveling.player.service.api
 
 import com.google.protobuf.Empty
-import com.sleepkqq.sololeveling.player.model.entity.Fetchers.USER_FETCHER
+import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.player.service.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.service.service.user.UserService
@@ -11,7 +11,7 @@ import com.sleepkqq.sololeveling.proto.user.GetUserRequest
 import com.sleepkqq.sololeveling.proto.user.GetUserResponse
 import com.sleepkqq.sololeveling.proto.user.UpdateUserLocaleRequest
 import com.sleepkqq.sololeveling.proto.user.UserLocaleResponse
-import com.sleepkqq.sololeveling.proto.user.UserServiceGrpc.UserServiceImplBase
+import com.sleepkqq.sololeveling.proto.user.UserServiceGrpc
 import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
 import org.springframework.grpc.server.service.GrpcService
@@ -22,7 +22,7 @@ import java.util.Locale
 class UserApi(
 	private val userService: UserService,
 	private val protoMapper: ProtoMapper
-) : UserServiceImplBase() {
+) : UserServiceGrpc.UserServiceImplBase() {
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
@@ -61,7 +61,7 @@ class UserApi(
 	) {
 		log.info(">> getUserLocale called by user={}", request.userId)
 
-		val user = userService.get(request.userId, USER_FETCHER.locale().manualLocale())
+		val user = userService.get(request.userId, Fetchers.USER_FETCHER.locale().manualLocale())
 		val locale = user.manualLocale() ?: user.locale()
 		val isManual = user.manualLocale() != null
 
