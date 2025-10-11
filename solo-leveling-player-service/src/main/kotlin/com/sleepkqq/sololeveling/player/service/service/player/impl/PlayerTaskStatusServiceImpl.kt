@@ -108,6 +108,10 @@ class PlayerTaskStatusServiceImpl(
 				Immutables.createPlayerTask(it) { p ->
 					p.setStatus(status)
 					p.setUpdatedAt(now)
+
+					if (status == PlayerTaskStatus.PENDING_COMPLETION || status == PlayerTaskStatus.SKIPPED) {
+						p.setClosedAt(now)
+					}
 				}
 			},
 			SaveMode.UPDATE_ONLY

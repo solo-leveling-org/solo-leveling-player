@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.5</version>
+    <version>3.5.6</version>
   </parent>
 
   <groupId>com.sleepkqq</groupId>
@@ -55,7 +55,7 @@
     <native-maven-plugin.version>0.11.0</native-maven-plugin.version>
 
     <!-- grpc -->
-    <spring-grpc.version>0.10.0</spring-grpc.version>
+    <spring-grpc.version>0.11.0</spring-grpc.version>
 
     <!-- mapstruct -->
     <mapstruct.version>1.6.3</mapstruct.version>
