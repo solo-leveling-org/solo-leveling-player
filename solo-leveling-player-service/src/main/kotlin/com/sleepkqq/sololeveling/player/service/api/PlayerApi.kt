@@ -171,16 +171,16 @@ class PlayerApi(
 			request.options,
 			PlayerBalanceTransactionView::class
 		)
-		val response = protoMapper.map(transactionsPage)
-			.addAllFilters(
-				enumLocalizer.localize(
-					mapOf(
-						"type" to PlayerBalanceTransactionType::class.java,
-						"cause" to PlayerBalanceTransactionCause::class.java
-					)
+		val response = protoMapper.map(
+			transactionsPage,
+			enumLocalizer.localize(
+				mapOf(
+					"type" to PlayerBalanceTransactionType::class.java,
+					"cause" to PlayerBalanceTransactionCause::class.java
 				)
-			)
-			.build()
+			),
+			setOf("amount")
+		)
 
 		responseObserver.onNext(response)
 		responseObserver.onCompleted()

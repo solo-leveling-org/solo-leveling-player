@@ -4,7 +4,7 @@ import static com.sleepkqq.sololeveling.player.model.entity.Tables.PLAYER_BALANC
 
 import com.sleepkqq.sololeveling.jimmer.fetcher.PageFetcher;
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction;
-import com.sleepkqq.sololeveling.proto.player.QueryOptions;
+import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions;
 import org.babyfish.jimmer.Page;
 import org.babyfish.jimmer.View;
 import org.babyfish.jimmer.sql.JSqlClient;
@@ -30,7 +30,7 @@ public class PlayerBalanceTransactionRepository extends PageFetcher {
 
   public <V extends View<PlayerBalanceTransaction>> Page<V> searchView(
       long playerId,
-      QueryOptions options,
+      RequestQueryOptions options,
       Class<V> viewType
   ) {
     var table = PLAYER_BALANCE_TRANSACTION_TABLE;

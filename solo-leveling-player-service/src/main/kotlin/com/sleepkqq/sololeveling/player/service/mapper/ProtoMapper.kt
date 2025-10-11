@@ -19,6 +19,8 @@ import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole
 import com.sleepkqq.sololeveling.player.service.extenstions.toMoney
 import com.sleepkqq.sololeveling.player.service.extenstions.toTimestamp
+import com.sleepkqq.sololeveling.proto.player.LocalizedField
+import com.sleepkqq.sololeveling.proto.player.ResponseQueryOptions
 import com.sleepkqq.sololeveling.proto.player.SearchPlayerBalanceTransactionsResponse
 import org.babyfish.jimmer.Page
 import org.mapstruct.*
@@ -85,12 +87,27 @@ abstract class ProtoMapper {
 	@Mapping(target = "active", source = "isActive")
 	abstract fun map(input: com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicInput): PlayerTaskTopicInput
 
-	@Mapping(target = "transactionsList", source = "rows")
+	@Mapping(target = "transactionsList", source = "page.rows")
 	@Mapping(
 		target = "transactionsList.amount",
 		expression = "java(map(playerBalanceTransactionView.getAmount(), playerBalanceTransactionView.getCurrencyCode()))"
 	)
-	@Mapping(target = "pagination.totalRowCount", source = "totalRowCount")
-	@Mapping(target = "pagination.totalPageCount", source = "totalPageCount")
-	abstract fun map(input: Page<PlayerBalanceTransactionView>): SearchPlayerBalanceTransactionsResponse.Builder
+	@Mapping(
+		target = "options",
+		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), filters, sorts))"
+	)
+	abstract fun map(
+		page: Page<PlayerBalanceTransactionView>,
+		filters: List<LocalizedField>,
+		sorts: Set<String>
+	): SearchPlayerBalanceTransactionsResponse
+
+	@Mapping(target = "filtersList", source = "filters")
+	@Mapping(target = "sortsList", source = "sorts")
+	abstract fun map(
+		totalRowCount: Long,
+		totalPageCount: Long,
+		filters: List<LocalizedField>,
+		sorts: Set<String>
+	): ResponseQueryOptions
 }
