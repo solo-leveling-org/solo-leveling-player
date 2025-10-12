@@ -1,8 +1,12 @@
 package com.sleepkqq.sololeveling.player.model.entity.task.enums;
 
+import com.sleepkqq.sololeveling.jimmer.enums.EnumPathGenerator;
+import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
+import lombok.Getter;
 import org.babyfish.jimmer.sql.EnumItem;
 
-public enum TaskRarity {
+@Getter
+public enum TaskRarity implements LocalizableEnum {
   @EnumItem(ordinal = 0)
   COMMON,
 
@@ -16,5 +20,7 @@ public enum TaskRarity {
   EPIC,
 
   @EnumItem(ordinal = 4)
-  LEGENDARY
+  LEGENDARY;
+
+  private final String path = EnumPathGenerator.generatePath(this);
 }

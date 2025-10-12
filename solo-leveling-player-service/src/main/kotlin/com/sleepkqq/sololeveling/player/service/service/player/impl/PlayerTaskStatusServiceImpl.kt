@@ -57,9 +57,9 @@ class PlayerTaskStatusServiceImpl(
 		val task = playerTask.task()
 
 		val updatedBalance = playerBalanceService.deposit(
-			player.balance()!!,
-			BigDecimal(task.currencyReward()!!),
-			PlayerBalanceTransactionCause.TASK_COMPLETION
+			playerBalance = player.balance()!!,
+			amount = BigDecimal(task.currencyReward()!!),
+			cause = PlayerBalanceTransactionCause.TASK_COMPLETION
 		)
 
 		val gainedExperiencePlayer = levelService.gainExperience(
@@ -108,6 +108,10 @@ class PlayerTaskStatusServiceImpl(
 				Immutables.createPlayerTask(it) { p ->
 					p.setStatus(status)
 					p.setUpdatedAt(now)
+
+					if (status == PlayerTaskStatus.PENDING_COMPLETION || status == PlayerTaskStatus.SKIPPED) {
+						p.setClosedAt(now)
+					}
 				}
 			},
 			SaveMode.UPDATE_ONLY

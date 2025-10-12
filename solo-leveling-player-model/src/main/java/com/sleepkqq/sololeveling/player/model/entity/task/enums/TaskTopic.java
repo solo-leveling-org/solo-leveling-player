@@ -1,10 +1,14 @@
 package com.sleepkqq.sololeveling.player.model.entity.task.enums;
 
+import com.sleepkqq.sololeveling.jimmer.enums.EnumPathGenerator;
+import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
 import java.util.Map;
 import java.util.Set;
+import lombok.Getter;
 import org.babyfish.jimmer.sql.EnumItem;
 
-public enum TaskTopic {
+@Getter
+public enum TaskTopic implements LocalizableEnum {
   @EnumItem(ordinal = 0)
   PHYSICAL_ACTIVITY,
 
@@ -47,6 +51,8 @@ public enum TaskTopic {
       ECOLOGY, Set.of(PHYSICAL_ACTIVITY, HEALTHY_EATING, EXPERIMENTS),
       TEAMWORK, Set.of(SOCIAL_SKILLS, PRODUCTIVITY)
   );
+
+  private final String path = EnumPathGenerator.generatePath(this);
 
   public Set<TaskTopic> getCompatibleTopics() {
     return COMPATIBLE_TOPICS.getOrDefault(this, Set.of());

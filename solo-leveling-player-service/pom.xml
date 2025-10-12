@@ -66,12 +66,12 @@
     <dependency>
       <groupId>com.sleepkqq</groupId>
       <artifactId>solo-leveling-proto</artifactId>
-      <version>${solo-leveling-proto.version}</version>
+      <version>${solo-leveling-lib.version}</version>
     </dependency>
     <dependency>
       <groupId>com.sleepkqq</groupId>
       <artifactId>solo-leveling-avro</artifactId>
-      <version>${solo-leveling-avro.version}</version>
+      <version>${solo-leveling-lib.version}</version>
     </dependency>
     <dependency>
       <groupId>com.sleepkqq</groupId>

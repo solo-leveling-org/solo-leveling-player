@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.5</version>
+    <version>3.5.6</version>
   </parent>
 
   <groupId>com.sleepkqq</groupId>
@@ -55,14 +55,16 @@
     <native-maven-plugin.version>0.11.0</native-maven-plugin.version>
 
     <!-- grpc -->
-    <spring-grpc.version>0.10.0</spring-grpc.version>
+    <spring-grpc.version>0.11.0</spring-grpc.version>
 
     <!-- mapstruct -->
     <mapstruct.version>1.6.3</mapstruct.version>
 
     <!-- solo leveling -->
-    <solo-leveling-avro.version>2.4.4</solo-leveling-avro.version>
-    <solo-leveling-proto.version>4.6.3</solo-leveling-proto.version>
+    <solo-leveling-lib.version>1.0.28</solo-leveling-lib.version>
+
+    <!-- utils -->
+    <streamex.version>0.8.3</streamex.version>
 
     <!-- tests -->
     <test-containers.version>1.21.3</test-containers.version>
@@ -72,7 +74,7 @@
   <repositories>
     <repository>
       <id>github</id>
-      <url>https://maven.pkg.github.com/solo-leveling-org/solo-leveling-proto</url>
+      <url>https://maven.pkg.github.com/solo-leveling-org/solo-leveling-lib</url>
     </repository>
     <repository>
       <id>spring-milestones</id>

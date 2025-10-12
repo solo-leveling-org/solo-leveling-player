@@ -1,8 +1,12 @@
 package com.sleepkqq.sololeveling.player.model.entity.player.enums;
 
+import com.sleepkqq.sololeveling.jimmer.enums.EnumPathGenerator;
+import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
+import lombok.Getter;
 import org.babyfish.jimmer.sql.EnumItem;
 
-public enum PlayerBalanceTransactionCause {
+@Getter
+public enum PlayerBalanceTransactionCause implements LocalizableEnum {
   @EnumItem(ordinal = 0)
   TASK_COMPLETION,
 
@@ -13,5 +17,7 @@ public enum PlayerBalanceTransactionCause {
   DAILY_CHECK_IN,
 
   @EnumItem(ordinal = 3)
-  ITEM_PURCHASE
+  ITEM_PURCHASE;
+
+  private final String path = EnumPathGenerator.generatePath(this);
 }

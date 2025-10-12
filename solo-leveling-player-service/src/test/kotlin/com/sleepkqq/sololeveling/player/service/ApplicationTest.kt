@@ -122,9 +122,9 @@ class ApplicationTest : BaseTestClass() {
 		)
 
 		val updatedBalance = playerBalanceService.deposit(
-			dbPlayer.balance()!!,
-			BigDecimal.TWO,
-			PlayerBalanceTransactionCause.TASK_COMPLETION
+			playerBalance = dbPlayer.balance()!!,
+			amount = BigDecimal.TWO,
+			cause = PlayerBalanceTransactionCause.TASK_COMPLETION
 		)
 
 		playerRepository.save(

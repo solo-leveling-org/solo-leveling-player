@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.model.entity.player;
 
 import com.sleepkqq.sololeveling.player.model.entity.Model;
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType;
 import java.math.BigDecimal;
@@ -25,6 +26,8 @@ public interface PlayerBalanceTransaction extends Model {
 
   BigDecimal amount();
 
+  CurrencyCode currencyCode();
+
   PlayerBalanceTransactionType type();
 
   PlayerBalanceTransactionCause cause();
@@ -32,4 +35,8 @@ public interface PlayerBalanceTransaction extends Model {
   @ManyToOne
   @JoinColumn(name = "balance_id")
   PlayerBalance balance();
+
+  String CAUSE_FIELD = "cause";
+  String TYPE_FIELD = "type";
+  String AMOUNT_FIELD = "amount";
 }
