@@ -2,6 +2,7 @@ package com.sleepkqq.sololeveling.player.service.api
 
 import com.google.protobuf.Empty
 import com.sleepkqq.sololeveling.jimmer.enums.EnumLocalizer
+import com.sleepkqq.sololeveling.player.model.entity.Model.CREATED_AT_FIELD
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.AMOUNT_FIELD
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.CAUSE_FIELD
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.TYPE_FIELD
@@ -182,7 +183,7 @@ class PlayerApi(
 					CAUSE_FIELD to PlayerBalanceTransactionCause::class.java
 				)
 			),
-			setOf(AMOUNT_FIELD)
+			setOf(AMOUNT_FIELD, CREATED_AT_FIELD)
 		)
 
 		responseObserver.onNext(response)
