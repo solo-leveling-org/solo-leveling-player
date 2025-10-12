@@ -35,4 +35,8 @@ public interface PlayerBalanceTransaction extends Model {
   @ManyToOne
   @JoinColumn(name = "balance_id")
   PlayerBalance balance();
+
+  String CAUSE_FIELD = "cause";
+  String TYPE_FIELD = "type";
+  String AMOUNT_FIELD = "amount";
 }

@@ -2,6 +2,9 @@ package com.sleepkqq.sololeveling.player.service.api
 
 import com.google.protobuf.Empty
 import com.sleepkqq.sololeveling.jimmer.enums.EnumLocalizer
+import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.AMOUNT_FIELD
+import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.CAUSE_FIELD
+import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.TYPE_FIELD
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
@@ -175,11 +178,11 @@ class PlayerApi(
 			transactionsPage,
 			enumLocalizer.localize(
 				mapOf(
-					"type" to PlayerBalanceTransactionType::class.java,
-					"cause" to PlayerBalanceTransactionCause::class.java
+					TYPE_FIELD to PlayerBalanceTransactionType::class.java,
+					CAUSE_FIELD to PlayerBalanceTransactionCause::class.java
 				)
 			),
-			setOf("amount")
+			setOf(AMOUNT_FIELD)
 		)
 
 		responseObserver.onNext(response)
