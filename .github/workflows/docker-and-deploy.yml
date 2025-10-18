@@ -27,22 +27,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Generate settings.xml
+      - name: Install gettext for envsubst
         run: |
-          cat <<EOF > ./settings.xml
-          <?xml version="1.0" encoding="UTF-8"?>
-          <settings>
-            <servers>
-              <server>
-                <id>github</id>
-                <username>${GITHUB_USER}</username>
-                <password>${PACKAGES_TOKEN}</password>
-              </server>
-            </servers>
-          </settings>
-        env:
-          GITHUB_USER: ${{ secrets.GITHUB_USER }}
-          PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
+          sudo apt-get update && sudo apt-get install -y gettext-base
+
+      - name: Create settings.xml with environment variables
+        run: |
+          cat << 'EOF' > ./settings-template.xml
+          ${{ secrets.MAVEN_SETTINGS_XML }}
+          EOF
+
+          export GITHUB_USER="${{ secrets.GITHUB_USER }}"
+          export PACKAGES_TOKEN="${{ secrets.PACKAGES_TOKEN }}"
+
+          envsubst < ./settings-template.xml > ./settings.xml
+          rm -f ./settings-template.xml
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -84,10 +83,6 @@ jobs:
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> $GITHUB_ENV
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> $GITHUB_ENV
           echo "REPLICAS=${{ inputs.replicas }}" >> $GITHUB_ENV
-
-      - name: Install gettext for envsubst
-        run: |
-          sudo apt-get update && sudo apt-get install -y gettext-base
 
       - name: Generate final deployment.yml with env vars
         run: |

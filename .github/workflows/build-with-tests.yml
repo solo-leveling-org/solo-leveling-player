@@ -12,22 +12,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate settings.xml in project root
+      - name: Install gettext for envsubst
         run: |
-          cat <<EOF > ./settings.xml
-          <?xml version="1.0" encoding="UTF-8"?>
-          <settings>
-            <servers>
-              <server>
-                <id>github</id>
-                <username>${GITHUB_USER}</username>
-                <password>${PACKAGES_TOKEN}</password>
-              </server>
-            </servers>
-          </settings>
-        env:
-          GITHUB_USER: ${{ secrets.GITHUB_USER }}
-          PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
+          sudo apt-get update && sudo apt-get install -y gettext-base
+
+      - name: Create settings.xml with environment variables
+        run: |
+          cat << 'EOF' > ./settings-template.xml
+          ${{ secrets.MAVEN_SETTINGS_XML }}
+          EOF
+
+          export GITHUB_USER="${{ secrets.GITHUB_USER }}"
+          export PACKAGES_TOKEN="${{ secrets.PACKAGES_TOKEN }}"
+
+          envsubst < ./settings-template.xml > ./settings.xml
+          rm -f ./settings-template.xml
 
       - name: Setup Java
         uses: actions/setup-java@v3

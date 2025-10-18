@@ -1,11 +1,24 @@
 spring:
   application:
     name: solo-leveling-player
+  datasource:
+    url: jdbc:postgresql://localhost:5432/solo_leveling
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  kafka:
+    bootstrap-servers: localhost:29092
+    properties:
+      schema.registry.url: http://localhost:8081
   data:
     redis:
+      host: localhost
+      port: 6379
       lettuce:
         pool:
           max-active: 8
+  grpc:
+    server:
+      port: 11001
   profiles:
     include: jimmer
   threads:
@@ -33,3 +46,5 @@ management:
     web:
       exposure:
         include: '*'
+server:
+  port: 10001
