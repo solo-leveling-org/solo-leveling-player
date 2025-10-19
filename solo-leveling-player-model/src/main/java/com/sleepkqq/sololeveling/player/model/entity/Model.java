@@ -13,6 +13,4 @@ public interface Model {
 
   @Version
   int version();
-
-  String CREATED_AT_FIELD = "createdAt";
 }
