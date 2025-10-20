@@ -50,6 +50,9 @@ class TasksCompletionScheduler(
 		val tasksByPlayerId = playerTasks.groupBy { it.player().id() }
 
 		log.info("Found {} players for tasks generation", tasksByPlayerId.size)
+		if (tasksByPlayerId.isEmpty()) {
+			return
+		}
 
 		tasksByPlayerId.forEach { (playerId, tasks) ->
 			tasksGenerationScope.scope.launch {
