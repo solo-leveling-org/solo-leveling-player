@@ -94,19 +94,22 @@ abstract class ProtoMapper {
 	)
 	@Mapping(
 		target = "options",
-		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), filters, sorts))"
+		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage, filters, sorts))"
 	)
 	abstract fun map(
 		page: Page<PlayerBalanceTransactionView>,
+		currentPage: Int,
 		filters: List<LocalizedField>,
 		sorts: Set<String>
 	): SearchPlayerBalanceTransactionsResponse
 
 	@Mapping(target = "filtersList", source = "filters")
 	@Mapping(target = "sortsList", source = "sorts")
+	@Mapping(target = "hasMore", expression = "java(totalPageCount - 1 != currentPage)")
 	abstract fun map(
 		totalRowCount: Long,
 		totalPageCount: Long,
+		currentPage: Int,
 		filters: List<LocalizedField>,
 		sorts: Set<String>
 	): ResponseQueryOptions

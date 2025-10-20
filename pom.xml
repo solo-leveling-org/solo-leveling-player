@@ -61,7 +61,7 @@
     <mapstruct.version>1.6.3</mapstruct.version>
 
     <!-- solo leveling -->
-    <solo-leveling-lib.version>1.0.28</solo-leveling-lib.version>
+    <solo-leveling-lib.version>1.0.30</solo-leveling-lib.version>
 
     <!-- utils -->
     <streamex.version>0.8.3</streamex.version>
@@ -70,32 +70,4 @@
     <test-containers.version>1.21.3</test-containers.version>
     <mockito-kotlin.version>5.1.0</mockito-kotlin.version>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>github</id>
-      <url>https://maven.pkg.github.com/solo-leveling-org/solo-leveling-lib</url>
-    </repository>
-    <repository>
-      <id>spring-milestones</id>
-      <name>Spring Milestones</name>
-      <url>https://repo.spring.io/milestone</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>spring-snapshots</id>
-      <name>Spring Snapshots</name>
-      <url>https://repo.spring.io/snapshot</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-    <repository>
-      <id>confluent</id>
-      <name>Confluent</name>
-      <url>https://packages.confluent.io/maven</url>
-    </repository>
-  </repositories>
 </project>
