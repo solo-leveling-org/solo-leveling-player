@@ -13,7 +13,7 @@ import org.babyfish.jimmer.sql.Table;
 import org.babyfish.jimmer.sql.meta.UUIDIdGenerator;
 
 @Entity
-@Table(name = "gear_items")
+@Table(name = "player_gear_items")
 @KeyUniqueConstraint
 public interface PlayerGearItem {
 
