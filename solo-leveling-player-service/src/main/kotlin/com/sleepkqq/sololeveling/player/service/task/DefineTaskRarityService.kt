@@ -1,7 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.task
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
-import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity
+import com.sleepkqq.sololeveling.player.model.entity.task.enums.Rarity
 import org.springframework.stereotype.Service
 import java.util.Random
 import kotlin.math.max
@@ -26,7 +26,7 @@ class DefineTaskRarityService {
 		const val LEGENDARY_WEIGHT_MULTIPLIER = 0.1
 	}
 
-	fun define(topics: List<PlayerTaskTopic>): TaskRarity {
+	fun define(topics: List<PlayerTaskTopic>): Rarity {
 		require(topics.isNotEmpty()) { "topics size must be > 0" }
 		val avgLevel = topics.map {
 			val level = it.level()
@@ -38,7 +38,7 @@ class DefineTaskRarityService {
 		return define(avgLevel)
 	}
 
-	private fun define(avgLevel: Double): TaskRarity {
+	private fun define(avgLevel: Double): Rarity {
 		val weights = getWeights(avgLevel)
 		require(weights.isNotEmpty()) { "Weights array cannot be empty" }
 
@@ -53,11 +53,11 @@ class DefineTaskRarityService {
 		for (i in 0..<normalizedWeights.size) {
 			cumulativeWeight += normalizedWeights[i]
 			if (randomValue < cumulativeWeight) {
-				return TaskRarity.entries[i]
+				return Rarity.entries[i]
 			}
 		}
 
-		return TaskRarity.COMMON
+		return Rarity.COMMON
 	}
 
 	private fun getWeights(avgLevel: Double): DoubleArray {

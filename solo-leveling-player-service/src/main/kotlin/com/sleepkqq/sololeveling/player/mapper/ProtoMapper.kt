@@ -10,6 +10,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicV
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
+import com.sleepkqq.sololeveling.player.model.entity.task.enums.Rarity
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.proto.player.Assessment
 import com.sleepkqq.sololeveling.proto.player.LocalizedField
@@ -47,8 +48,8 @@ abstract class ProtoMapper {
 	fun map(input: PlayerTaskStatus): com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus =
 		com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus.valueOf(input.name)
 
-	fun map(input: TaskRarity): com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity =
-		com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity.valueOf(input.name)
+	fun map(input: TaskRarity): Rarity =
+		Rarity.valueOf(input.name)
 
 	fun map(input: TaskTopic): com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic =
 		com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic.valueOf(input.name)

@@ -6,7 +6,7 @@ import lombok.Getter;
 import org.babyfish.jimmer.sql.EnumItem;
 
 @Getter
-public enum TaskRarity implements LocalizableEnum {
+public enum Rarity implements LocalizableEnum {
   @EnumItem(ordinal = 0)
   COMMON,
 

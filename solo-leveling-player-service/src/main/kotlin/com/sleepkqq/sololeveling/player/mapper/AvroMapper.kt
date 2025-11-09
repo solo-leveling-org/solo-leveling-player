@@ -2,9 +2,10 @@ package com.sleepkqq.sololeveling.player.mapper
 
 import com.sleepkqq.sololeveling.avro.task.GenerateTask
 import com.sleepkqq.sololeveling.avro.task.SaveTask
+import com.sleepkqq.sololeveling.avro.task.TaskRarity
+import com.sleepkqq.sololeveling.player.model.entity.task.enums.Rarity
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput
-import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import org.mapstruct.CollectionMappingStrategy
 import org.mapstruct.Mapper
@@ -18,11 +19,11 @@ import org.mapstruct.ReportingPolicy
 )
 abstract class AvroMapper {
 
-	fun map(taskRarity: com.sleepkqq.sololeveling.avro.task.TaskRarity): TaskRarity =
-		TaskRarity.valueOf(taskRarity.name)
+	fun map(taskRarity: TaskRarity): Rarity =
+		Rarity.valueOf(taskRarity.name)
 
-	fun map(taskRarity: TaskRarity): com.sleepkqq.sololeveling.avro.task.TaskRarity =
-		com.sleepkqq.sololeveling.avro.task.TaskRarity.valueOf(taskRarity.name)
+	fun map(rarity: Rarity): TaskRarity =
+		TaskRarity.valueOf(rarity.name)
 
 	fun map(topic: com.sleepkqq.sololeveling.avro.task.TaskTopic): TaskTopic =
 		TaskTopic.valueOf(topic.name)
@@ -35,5 +36,5 @@ abstract class AvroMapper {
 
 	@Mapping(target = "taskId", expression = "java(task.id().toString())")
 	@Mapping(target = "version", expression = "java(task.version())")
-	abstract fun map(task: Task, topics: Collection<TaskTopic>, rarity: TaskRarity): GenerateTask
+	abstract fun map(task: Task, topics: Collection<TaskTopic>, rarity: Rarity): GenerateTask
 }

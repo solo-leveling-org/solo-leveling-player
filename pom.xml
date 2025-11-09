@@ -65,6 +65,7 @@
 
     <!-- utils -->
     <streamex.version>0.8.3</streamex.version>
+    <build-helper-plugin.version>3.3.0</build-helper-plugin.version>
 
     <!-- tests -->
     <test-containers.version>1.21.3</test-containers.version>

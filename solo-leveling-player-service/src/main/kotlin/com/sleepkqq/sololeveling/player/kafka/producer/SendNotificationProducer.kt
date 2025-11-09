@@ -26,7 +26,6 @@ class SendNotificationProducer(
 
 		} catch (e: Exception) {
 			log.error("Failed to send notification event | txId={}", txId, e)
-			throw e
 		}
 	}
 }

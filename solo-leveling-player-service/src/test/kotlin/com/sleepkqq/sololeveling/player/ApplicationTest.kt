@@ -4,7 +4,7 @@ import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType
-import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskRarity
+import com.sleepkqq.sololeveling.player.model.entity.task.enums.Rarity
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerRepository
@@ -49,7 +49,7 @@ class ApplicationTest : BaseTestClass() {
 			it.setDescription("Test Task Description")
 			it.setExperience(100)
 			it.setCurrencyReward(50)
-			it.setRarity(TaskRarity.EPIC)
+			it.setRarity(Rarity.EPIC)
 			it.setAgility(5)
 			it.setStrength(10)
 			it.setIntelligence(3)
