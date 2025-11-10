@@ -8,6 +8,7 @@ import com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import org.mapstruct.CollectionMappingStrategy
 import org.mapstruct.Mapper
+import org.mapstruct.Mapping
 import org.mapstruct.ReportingPolicy
 
 @Mapper(
@@ -29,7 +30,10 @@ abstract class AvroMapper {
 	fun map(topic: TaskTopic): com.sleepkqq.sololeveling.avro.task.TaskTopic =
 		com.sleepkqq.sololeveling.avro.task.TaskTopic.valueOf(topic.name)
 
+	@Mapping(target = "id", source = "taskId")
 	abstract fun map(input: SaveTask): TaskInput
 
+	@Mapping(target = "taskId", expression = "java(task.id().toString())")
+	@Mapping(target = "version", expression = "java(task.version())")
 	abstract fun map(task: Task, topics: Collection<TaskTopic>, rarity: Rarity): GenerateTask
 }
