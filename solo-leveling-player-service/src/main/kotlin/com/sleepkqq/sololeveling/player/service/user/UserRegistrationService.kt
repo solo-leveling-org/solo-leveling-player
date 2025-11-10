@@ -29,11 +29,8 @@ class UserRegistrationService(
 			p.setLevel(levelService.initializeLevel(LevelType.PLAYER))
 			p.setBalance(playerBalanceService.initializePlayerBalance())
 			p.setTaskTopics(
-				TaskTopic.entries.map { t ->
-					playerTaskTopicService.initialize(
-						user.id(),
-						t
-					)
+				TaskTopic.entries.map { topic ->
+					playerTaskTopicService.initialize(user.id(), topic)
 				}
 			)
 		})

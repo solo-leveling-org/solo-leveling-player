@@ -9,7 +9,6 @@ import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Suppress("unused")
@@ -34,13 +33,8 @@ class PlayerTaskServiceImpl(
 		playerTaskRepository.save(playerTask, SaveMode.INSERT_ONLY)
 
 	@Transactional
-	override fun update(playerTask: PlayerTask, now: LocalDateTime): PlayerTask =
-		playerTaskRepository.save(
-			Immutables.createPlayerTask(playerTask) {
-				it.setUpdatedAt(now)
-			},
-			SaveMode.UPDATE_ONLY
-		)
+	override fun update(playerTask: PlayerTask): PlayerTask =
+		playerTaskRepository.save(playerTask, SaveMode.UPDATE_ONLY)
 
 	@Transactional
 	override fun insertAll(playerTasks: Collection<PlayerTask>) {

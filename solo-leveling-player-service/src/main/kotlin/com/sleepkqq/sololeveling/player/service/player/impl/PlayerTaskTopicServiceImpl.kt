@@ -11,7 +11,6 @@ import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Suppress("unused")
@@ -40,13 +39,8 @@ class PlayerTaskTopicServiceImpl(
 	}
 
 	@Transactional
-	override fun update(playerTaskTopic: PlayerTaskTopic, now: LocalDateTime): PlayerTaskTopic =
-		playerTaskTopicRepository.save(
-			Immutables.createPlayerTaskTopic(playerTaskTopic) {
-				it.setUpdatedAt(now)
-			},
-			SaveMode.UPDATE_ONLY
-		)
+	override fun update(playerTaskTopic: PlayerTaskTopic): PlayerTaskTopic =
+		playerTaskTopicRepository.save(playerTaskTopic, SaveMode.UPDATE_ONLY)
 
 	@Transactional(readOnly = true)
 	override fun getByPlayerId(playerId: Long): List<PlayerTaskTopicView> =

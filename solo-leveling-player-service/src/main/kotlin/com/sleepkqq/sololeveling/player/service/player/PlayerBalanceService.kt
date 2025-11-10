@@ -6,7 +6,6 @@ import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceT
 import com.sleepkqq.sololeveling.player.exception.ModelNotFoundException
 import org.babyfish.jimmer.View
 import java.math.BigDecimal
-import java.time.LocalDateTime
 import kotlin.reflect.KClass
 
 interface PlayerBalanceService {
@@ -20,14 +19,12 @@ interface PlayerBalanceService {
 		playerBalance: PlayerBalance,
 		amount: BigDecimal,
 		currencyCode: CurrencyCode = CurrencyCode.SLCN,
-		cause: PlayerBalanceTransactionCause,
-		now: LocalDateTime = LocalDateTime.now()
+		cause: PlayerBalanceTransactionCause
 	): PlayerBalance
 
 	fun withdraw(
 		playerBalance: PlayerBalance,
 		amount: BigDecimal,
-		cause: PlayerBalanceTransactionCause,
-		now: LocalDateTime = LocalDateTime.now()
+		cause: PlayerBalanceTransactionCause
 	): PlayerBalance
 }

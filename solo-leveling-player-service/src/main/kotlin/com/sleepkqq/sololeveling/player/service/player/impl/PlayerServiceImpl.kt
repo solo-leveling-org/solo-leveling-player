@@ -1,6 +1,5 @@
 package com.sleepkqq.sololeveling.player.service.player.impl
 
-import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerFetcher
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerRepository
@@ -9,7 +8,6 @@ import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 import kotlin.reflect.KClass
 
 @Suppress("unused")
@@ -31,11 +29,6 @@ class PlayerServiceImpl(
 		playerRepository.save(player, SaveMode.INSERT_ONLY)
 
 	@Transactional
-	override fun update(player: Player, now: LocalDateTime): Player =
-		playerRepository.save(
-			Immutables.createPlayer(player) {
-				it.setUpdatedAt(now)
-			},
-			SaveMode.UPDATE_ONLY
-		)
+	override fun update(player: Player): Player =
+		playerRepository.save(player, SaveMode.UPDATE_ONLY)
 }

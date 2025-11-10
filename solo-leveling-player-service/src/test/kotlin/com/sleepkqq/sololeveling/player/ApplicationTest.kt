@@ -120,7 +120,7 @@ class ApplicationTest : BaseTestClass() {
 				it.setAmount(BigDecimal.TEN)
 				it.setType(PlayerBalanceTransactionType.IN)
 				it.setCause(PlayerBalanceTransactionCause.DAILY_CHECK_IN)
-				it.setBalance(playerBalance)
+				it.setBalanceId(playerBalance.id())
 			}
 		)
 
