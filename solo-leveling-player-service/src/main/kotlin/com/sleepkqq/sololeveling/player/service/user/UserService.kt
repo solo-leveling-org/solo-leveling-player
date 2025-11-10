@@ -5,8 +5,7 @@ import com.sleepkqq.sololeveling.player.model.entity.user.User
 import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher
 import com.sleepkqq.sololeveling.player.exception.ModelNotFoundException
 import org.babyfish.jimmer.View
-import java.time.LocalDateTime
-import java.util.*
+import java.util.Locale
 import kotlin.reflect.KClass
 
 interface UserService {
@@ -21,7 +20,7 @@ interface UserService {
 
 	fun findVersion(id: Long): Int?
 	fun insert(user: User): User
-	fun update(user: User, now: LocalDateTime = LocalDateTime.now()): User
+	fun update(user: User): User
 	fun upsert(user: User): User
 	fun updateLocale(id: Long, locale: Locale)
 }

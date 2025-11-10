@@ -1,14 +1,12 @@
 package com.sleepkqq.sololeveling.player.service.task.impl
 
-import com.sleepkqq.sololeveling.player.model.entity.Immutables
+import com.sleepkqq.sololeveling.player.exception.ModelNotFoundException
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.repository.task.TaskRepository
-import com.sleepkqq.sololeveling.player.exception.ModelNotFoundException
 import com.sleepkqq.sololeveling.player.service.task.TaskService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Suppress("unused")
@@ -29,15 +27,8 @@ class TaskServiceImpl(
 	override fun find(id: UUID): Task? = taskRepository.findNullable(id)
 
 	@Transactional
-	override fun updateAll(tasks: Collection<Task>, now: LocalDateTime) {
-		taskRepository.saveEntities(
-			tasks.map {
-				Immutables.createTask(it) { t ->
-					t.setUpdatedAt(now)
-				}
-			},
-			SaveMode.UPDATE_ONLY
-		)
+	override fun updateAll(tasks: Collection<Task>) {
+		taskRepository.saveEntities(tasks, SaveMode.UPDATE_ONLY)
 	}
 
 	@Transactional
@@ -45,10 +36,6 @@ class TaskServiceImpl(
 		taskRepository.save(task, SaveMode.INSERT_ONLY)
 
 	@Transactional
-	override fun update(task: Task, now: LocalDateTime): Task = taskRepository.save(
-		Immutables.createTask(task) {
-			it.setUpdatedAt(now)
-		},
-		SaveMode.UPDATE_ONLY
-	)
+	override fun update(task: Task): Task =
+		taskRepository.save(task, SaveMode.UPDATE_ONLY)
 }
