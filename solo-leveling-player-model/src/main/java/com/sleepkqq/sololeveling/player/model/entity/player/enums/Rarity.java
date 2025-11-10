@@ -1,4 +1,4 @@
-package com.sleepkqq.sololeveling.player.model.entity.task.enums;
+package com.sleepkqq.sololeveling.player.model.entity.player.enums;
 
 import com.sleepkqq.sololeveling.jimmer.enums.EnumPathGenerator;
 import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;

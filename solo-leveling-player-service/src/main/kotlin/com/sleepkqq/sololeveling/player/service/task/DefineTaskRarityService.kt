@@ -1,7 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.task
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
-import com.sleepkqq.sololeveling.player.model.entity.task.enums.Rarity
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity
 import org.springframework.stereotype.Service
 import java.util.Random
 import kotlin.math.max

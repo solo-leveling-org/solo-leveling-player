@@ -4,7 +4,7 @@ import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType
-import com.sleepkqq.sololeveling.player.model.entity.task.enums.Rarity
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerRepository
@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDateTime
+import java.util.UUID
 
 class ApplicationTest : BaseTestClass() {
 
@@ -45,8 +46,20 @@ class ApplicationTest : BaseTestClass() {
 		// Arrange
 		val now = LocalDateTime.now()
 		val initialTask = Immutables.createTask {
-			it.setTitle("Test Task Title")
-			it.setDescription("Test Task Description")
+			it.setTitle(
+				Immutables.createLocalizationItem { title ->
+					title.setId(UUID.randomUUID())
+					title.setRu("Название")
+					title.setEn("Title")
+				}
+			)
+			it.setDescription(
+				Immutables.createLocalizationItem { description ->
+					description.setId(UUID.randomUUID())
+					description.setRu("Описание")
+					description.setEn("Description")
+				}
+			)
 			it.setExperience(100)
 			it.setCurrencyReward(50)
 			it.setRarity(Rarity.EPIC)

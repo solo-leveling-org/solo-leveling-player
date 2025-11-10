@@ -10,7 +10,6 @@ import org.babyfish.jimmer.sql.Entity;
 import org.babyfish.jimmer.sql.GeneratedValue;
 import org.babyfish.jimmer.sql.Id;
 import org.babyfish.jimmer.sql.JoinColumn;
-import org.babyfish.jimmer.sql.KeyUniqueConstraint;
 import org.babyfish.jimmer.sql.ManyToOne;
 import org.babyfish.jimmer.sql.Table;
 import org.babyfish.jimmer.sql.meta.UUIDIdGenerator;
@@ -18,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 
 @Entity
 @Table(name = "player_tasks")
-@KeyUniqueConstraint
 public interface PlayerTask extends Model {
 
   @Id

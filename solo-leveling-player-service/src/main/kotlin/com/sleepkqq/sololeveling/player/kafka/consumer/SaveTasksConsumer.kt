@@ -37,7 +37,7 @@ class SaveTasksConsumer(
 	)
 	@Transactional
 	fun listen(event: SaveTasksEvent, ack: Acknowledgment) {
-		val txId = event.transactionId
+		val txId = event.txId
 
 		log.info(">> Start processing SaveTasksEvent | txId={}", txId)
 
@@ -84,7 +84,7 @@ class SaveTasksConsumer(
 	}
 
 	private fun validateSaveTasksEvent(event: SaveTasksEvent) {
-		Assert.hasText(event.transactionId, "txId cannot be blank")
+		Assert.hasText(event.txId, "txId cannot be blank")
 		Assert.notEmpty(event.tasks, "tasks list cannot be empty")
 		Assert.isTrue(event.playerId > 0, "playerId must be positive")
 

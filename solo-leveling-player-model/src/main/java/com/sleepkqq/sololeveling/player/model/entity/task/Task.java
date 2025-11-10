@@ -1,8 +1,9 @@
 package com.sleepkqq.sololeveling.player.model.entity.task;
 
 import com.sleepkqq.sololeveling.player.model.entity.Model;
+import com.sleepkqq.sololeveling.player.model.entity.localization.LocalizationItem;
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask;
-import com.sleepkqq.sololeveling.player.model.entity.task.enums.Rarity;
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity;
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic;
 import java.util.List;
 import java.util.Set;
@@ -10,8 +11,9 @@ import java.util.UUID;
 import org.babyfish.jimmer.sql.Entity;
 import org.babyfish.jimmer.sql.GeneratedValue;
 import org.babyfish.jimmer.sql.Id;
-import org.babyfish.jimmer.sql.KeyUniqueConstraint;
+import org.babyfish.jimmer.sql.JoinColumn;
 import org.babyfish.jimmer.sql.OneToMany;
+import org.babyfish.jimmer.sql.OneToOne;
 import org.babyfish.jimmer.sql.Serialized;
 import org.babyfish.jimmer.sql.Table;
 import org.babyfish.jimmer.sql.meta.UUIDIdGenerator;
@@ -19,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 
 @Entity
 @Table(name = "tasks")
-@KeyUniqueConstraint
 public interface Task extends Model {
 
   @Id
@@ -27,10 +28,14 @@ public interface Task extends Model {
   UUID id();
 
   @Nullable
-  String title();
+  @OneToOne
+  @JoinColumn(name = "localized_title_id")
+  LocalizationItem title();
 
   @Nullable
-  String description();
+  @OneToOne
+  @JoinColumn(name = "localized_description_id")
+  LocalizationItem description();
 
   @Nullable
   Integer experience();

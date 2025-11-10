@@ -33,7 +33,7 @@ class NotificationService(
 		log.info(
 			"<< {} | txId={}",
 			notificationData.successMessage,
-			notificationData.event.transactionId
+			notificationData.event.txId
 		)
 	}
 
@@ -45,7 +45,7 @@ class NotificationService(
 		)
 
 		val context = NotificationCtx(
-			txId = event.transactionId,
+			txId = event.txId,
 			userId = event.playerId,
 			source = NotificationSource.TASKS,
 			message = message,

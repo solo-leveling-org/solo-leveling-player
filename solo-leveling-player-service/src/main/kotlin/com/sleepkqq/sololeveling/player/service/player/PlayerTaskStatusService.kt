@@ -17,7 +17,6 @@ interface PlayerTaskStatusService {
 	fun completeTasks(tasks: Collection<PlayerTask>, now: LocalDateTime = LocalDateTime.now())
 	fun generateTasks(
 		playerId: Long,
-		forReplace: Boolean = false,
 		replaceOrders: Set<Int> = setOf()
 	)
 }

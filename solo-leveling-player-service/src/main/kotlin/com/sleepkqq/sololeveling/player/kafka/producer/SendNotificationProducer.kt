@@ -17,7 +17,7 @@ class SendNotificationProducer(
 
 	@Retryable(maxAttempts = 3, backoff = Backoff(delay = 1000, multiplier = 2.0))
 	fun send(event: SendNotificationEvent) {
-		val txId = event.transactionId
+		val txId = event.txId
 		log.info("Sending notification event | txId={}", txId)
 
 		try {

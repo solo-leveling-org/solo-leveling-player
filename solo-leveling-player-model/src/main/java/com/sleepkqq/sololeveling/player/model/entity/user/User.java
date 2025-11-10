@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import org.babyfish.jimmer.sql.Entity;
 import org.babyfish.jimmer.sql.Id;
-import org.babyfish.jimmer.sql.KeyUniqueConstraint;
 import org.babyfish.jimmer.sql.OneToOne;
 import org.babyfish.jimmer.sql.Serialized;
 import org.babyfish.jimmer.sql.Table;
@@ -15,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 
 @Entity
 @Table(name = "users")
-@KeyUniqueConstraint
 public interface User extends Model {
 
   @Id

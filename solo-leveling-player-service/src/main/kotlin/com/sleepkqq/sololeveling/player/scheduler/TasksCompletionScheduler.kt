@@ -59,7 +59,6 @@ class TasksCompletionScheduler(
 				try {
 					playerTaskStatusService.generateTasks(
 						playerId = playerId,
-						forReplace = true,
 						replaceOrders = tasks.map { it.order() }.toSet()
 					)
 					log.info("Successfully generated tasks for player $playerId")

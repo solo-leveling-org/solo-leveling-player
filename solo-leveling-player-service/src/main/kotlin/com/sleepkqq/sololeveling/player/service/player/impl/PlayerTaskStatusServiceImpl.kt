@@ -37,7 +37,7 @@ class PlayerTaskStatusServiceImpl(
 	override fun skipTask(playerTask: PlayerTask, playerId: Long, now: LocalDateTime) {
 		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED, now)
 
-		generateTasks(playerId, true, setOf(playerTask.order()))
+		generateTasks(playerId, setOf(playerTask.order()))
 
 		notificationService.send(NotificationCommand.SilentTasksUpdate(playerId))
 	}
@@ -94,8 +94,8 @@ class PlayerTaskStatusServiceImpl(
 	}
 
 	@Transactional
-	override fun generateTasks(playerId: Long, forReplace: Boolean, replaceOrders: Set<Int>) {
-		generateTasksProducer.send(playerId, forReplace, replaceOrders)
+	override fun generateTasks(playerId: Long, replaceOrders: Set<Int>) {
+		generateTasksProducer.send(playerId, replaceOrders)
 	}
 
 	private fun setStatus(

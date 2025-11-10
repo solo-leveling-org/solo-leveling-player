@@ -10,7 +10,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicV
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
-import com.sleepkqq.sololeveling.player.model.entity.task.enums.Rarity
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.proto.player.Assessment
 import com.sleepkqq.sololeveling.proto.player.LocalizedField

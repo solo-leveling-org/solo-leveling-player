@@ -33,7 +33,7 @@ class GenerateTasksProducer(
 
 	@Transactional
 	@Retryable(maxAttempts = 3, backoff = Backoff(delay = 1000, multiplier = 2.0))
-	fun send(playerId: Long, forReplace: Boolean = false, replaceOrders: Set<Int> = setOf()) {
+	fun send(playerId: Long, replaceOrders: Set<Int> = setOf()) {
 
 		log.info(">> Start generating tasks for player {}", playerId)
 
@@ -52,7 +52,7 @@ class GenerateTasksProducer(
 					)
 			)
 
-			val playerTasks = if (forReplace) {
+			val playerTasks = if (replaceOrders.isNotEmpty()) {
 				replaceOrders.map { playerTaskService.initialize(playerId, it) }
 
 			} else {
@@ -77,12 +77,12 @@ class GenerateTasksProducer(
 			}
 
 			val event = GenerateTasksEvent.newBuilder()
-				.setTransactionId(UUID.randomUUID().toString())
+				.setTxId(UUID.randomUUID().toString())
 				.setPlayerId(playerId)
 				.setInputs(generateTasks)
 				.build()
 
-			kafkaTemplate.send(KafkaTaskTopics.GENERATE_TASKS_TOPIC, event.transactionId, event)
+			kafkaTemplate.send(KafkaTaskTopics.GENERATE_TASKS_TOPIC, event.txId, event)
 
 		} catch (e: Exception) {
 			log.error("Failed to generate tasks for player {}", playerId, e)
