@@ -2,7 +2,6 @@ package com.sleepkqq.sololeveling.player.service.player.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerCompletionTask
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
@@ -22,8 +21,7 @@ class PlayerTaskServiceImpl(
 	private companion object {
 		val ACTIVE_TASKS_STATUSES = setOf(
 			PlayerTaskStatus.PREPARING,
-			PlayerTaskStatus.IN_PROGRESS,
-			PlayerTaskStatus.PENDING_COMPLETION
+			PlayerTaskStatus.IN_PROGRESS
 		)
 	}
 
@@ -55,13 +53,6 @@ class PlayerTaskServiceImpl(
 			playerId,
 			ACTIVE_TASKS_STATUSES,
 			PlayerTaskView::class.java
-		)
-
-	@Transactional(readOnly = true)
-	override fun getPendingCompletionTasks(): List<PlayerCompletionTask> =
-		playerTaskRepository.findByStatus(
-			PlayerTaskStatus.PENDING_COMPLETION,
-			PlayerCompletionTask::class.java
 		)
 
 	@Transactional(readOnly = true)

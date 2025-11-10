@@ -34,11 +34,3 @@ PlayerTaskView {
     }
   }
 }
-
-PlayerCompletionTask {
-  #allScalars
-
-  player {
-    id
-  }
-}

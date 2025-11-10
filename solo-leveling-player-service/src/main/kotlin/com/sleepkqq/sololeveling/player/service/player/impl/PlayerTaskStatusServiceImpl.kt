@@ -43,13 +43,13 @@ class PlayerTaskStatusServiceImpl(
 	}
 
 	@Transactional
-	override fun pendingCompleteTask(
+	override fun completeTask(
 		playerTask: PlayerTask,
 		playerId: Long,
 		now: LocalDateTime
 	): Pair<PlayerView, PlayerView> {
 
-		setStatus(listOf(playerTask), PlayerTaskStatus.PENDING_COMPLETION, now)
+		setStatus(listOf(playerTask), PlayerTaskStatus.COMPLETED, now)
 
 		val playerView = playerService.getView(playerId, PlayerView::class)
 		val player = playerView.toEntity()
@@ -109,7 +109,7 @@ class PlayerTaskStatusServiceImpl(
 					p.setStatus(status)
 					p.setUpdatedAt(now)
 
-					if (status == PlayerTaskStatus.PENDING_COMPLETION || status == PlayerTaskStatus.SKIPPED) {
+					if (status == PlayerTaskStatus.COMPLETED || status == PlayerTaskStatus.SKIPPED) {
 						p.setClosedAt(now)
 					}
 				}

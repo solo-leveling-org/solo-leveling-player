@@ -14,12 +14,9 @@ public enum PlayerTaskStatus implements LocalizableEnum {
   IN_PROGRESS,
 
   @EnumItem(ordinal = 2)
-  PENDING_COMPLETION,
-
-  @EnumItem(ordinal = 3)
   COMPLETED,
 
-  @EnumItem(ordinal = 4)
+  @EnumItem(ordinal = 3)
   SKIPPED;
 
   private final String path = EnumPathGenerator.generatePath(this);

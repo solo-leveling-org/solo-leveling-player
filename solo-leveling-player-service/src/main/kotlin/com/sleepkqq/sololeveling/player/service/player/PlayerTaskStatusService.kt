@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 interface PlayerTaskStatusService {
 
 	fun skipTask(playerTask: PlayerTask, playerId: Long, now: LocalDateTime = LocalDateTime.now())
-	fun pendingCompleteTask(
+	fun completeTask(
 		playerTask: PlayerTask,
 		playerId: Long,
 		now: LocalDateTime = LocalDateTime.now()

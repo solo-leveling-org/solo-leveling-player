@@ -77,7 +77,6 @@ import org.springframework.context.annotation.Configuration
 		// Jimmer
 		PostgresDialect::class,
 		// Jimmer generated
-		PlayerCompletionTask::class,
 		PlayerTaskInput::class,
 		PlayerTaskTopicInput::class,
 		PlayerTaskTopicView::class,
