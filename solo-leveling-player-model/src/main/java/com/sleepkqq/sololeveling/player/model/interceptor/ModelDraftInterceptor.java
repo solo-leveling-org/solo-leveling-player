@@ -23,6 +23,9 @@ public class ModelDraftInterceptor implements DraftInterceptor<Model, ModelDraft
       if (!ImmutableObjects.isLoaded(draft, ModelProps.CREATED_AT)) {
         draft.setCreatedAt(now);
       }
+      if (!ImmutableObjects.isLoaded(draft, ModelProps.VERSION)) {
+        draft.setVersion(0);
+      }
     }
   }
 }
