@@ -4,11 +4,15 @@ export com.sleepkqq.sololeveling.player.model.entity.task.Task
 input TaskInput {
   #allScalars
 
+  title {
+    #allScalars
+  }
+
+  description {
+    #allScalars
+  }
+
   -createdAt
 
   -updatedAt
-}
-
-TaskView {
-  #allScalars
 }

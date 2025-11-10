@@ -50,29 +50,59 @@ class GenerateTasksProducer(
 									.level()
 							)
 					)
+					.tasks(
+						Fetchers.PLAYER_TASK_FETCHER
+							.order()
+					)
 			)
 
-			val playerTasks = if (replaceOrders.isNotEmpty()) {
-				replaceOrders.map { playerTaskService.initialize(playerId, it) }
+			val activeTasksCount = playerTaskService.getActiveTasksCount(playerId)
+			val maxTasks = player.maxTasks()
 
-			} else {
-				val tasksToGenerateCount =
-					player.maxTasks() - playerTaskService.getActiveTasksCount(playerId)
-
-				require(tasksToGenerateCount >= 1 && tasksToGenerateCount <= player.maxTasks()) {
-					"Incorrect tasks to generate count=$tasksToGenerateCount, playerId=$playerId, maxTasks=${player.maxTasks()}"
-				}
-
-				(0 until tasksToGenerateCount.toInt())
-					.map { index -> playerTaskService.initialize(playerId, index) }
-					.toList()
+			// Генерируем задачи для замены (если указаны)
+			val replaceTasks = replaceOrders.map {
+				playerTaskService.initialize(playerId, it)
 			}
 
-			log.info("Generated {} tasks for player {}", playerTasks.size, playerId)
+			// Вычисляем сколько еще нужно задач для достижения maxTasks
+			val additionalTasksNeeded = maxTasks - activeTasksCount
 
-			playerTaskService.insertAll(playerTasks)
+			if (additionalTasksNeeded < 0) {
+				log.warn(
+					"Invalid state: tasksAfterReplace={} exceeds maxTasks={} for playerId={}, skipping generation",
+					activeTasksCount, maxTasks, playerId
+				)
+				return
+			}
 
-			val generateTasks = playerTasks.map {
+			val usedOrders = player.tasks()
+				.map { it.order() }
+
+			// Генерируем дополнительные задачи для заполнения до maxTasks
+			val additionalTasks = if (additionalTasksNeeded > 0) {
+				(0 until maxTasks)
+					.filterNot { it in usedOrders }
+					.take(additionalTasksNeeded.toInt())
+					.map { playerTaskService.initialize(playerId, it) }
+			} else {
+				emptyList()
+			}
+
+			val allNewTasks = replaceTasks + additionalTasks
+
+			if (allNewTasks.isEmpty()) {
+				log.warn("No tasks generated for playerId={}, skipping", playerId)
+				return
+			}
+
+			log.info(
+				"Generated {} tasks for player {} ({} replace, {} new)",
+				allNewTasks.size, playerId, replaceTasks.size, additionalTasks.size
+			)
+
+			playerTaskService.insertAll(allNewTasks)
+
+			val generateTasks = allNewTasks.map {
 				generateTask(it.task(), player.taskTopics())
 			}
 
@@ -86,7 +116,7 @@ class GenerateTasksProducer(
 
 		} catch (e: Exception) {
 			log.error("Failed to generate tasks for player {}", playerId, e)
-			throw e
+			return
 		}
 	}
 

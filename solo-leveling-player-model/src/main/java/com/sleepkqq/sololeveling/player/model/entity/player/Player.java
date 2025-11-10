@@ -39,6 +39,9 @@ public interface Player extends Model {
   PlayerBalance balance();
 
   @OneToMany(mappedBy = "player")
+  List<PlayerTask> tasks();
+
+  @OneToMany(mappedBy = "player")
   List<PlayerTaskTopic> taskTopics();
 
   @OneToMany(mappedBy = "player")

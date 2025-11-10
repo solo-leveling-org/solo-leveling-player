@@ -4,6 +4,7 @@ import com.google.protobuf.Timestamp
 import com.google.type.Money
 import com.sleepkqq.sololeveling.player.extenstions.toMoney
 import com.sleepkqq.sololeveling.player.extenstions.toTimestamp
+import com.sleepkqq.sololeveling.player.model.entity.localization.LocalizationItem
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
@@ -12,25 +13,15 @@ import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
-import com.sleepkqq.sololeveling.proto.player.Assessment
-import com.sleepkqq.sololeveling.proto.player.LocalizedField
+import com.sleepkqq.sololeveling.proto.player.*
 import com.sleepkqq.sololeveling.proto.player.PlayerTaskInput
-import com.sleepkqq.sololeveling.proto.player.PlayerTaskStatus
 import com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicInput
-import com.sleepkqq.sololeveling.proto.player.ResponseQueryOptions
-import com.sleepkqq.sololeveling.proto.player.SearchPlayerBalanceTransactionsResponse
-import com.sleepkqq.sololeveling.proto.player.TaskRarity
-import com.sleepkqq.sololeveling.proto.player.TaskTopic
 import com.sleepkqq.sololeveling.proto.user.UserInput
 import com.sleepkqq.sololeveling.proto.user.UserRole
 import org.babyfish.jimmer.Page
-import org.mapstruct.CollectionMappingStrategy
-import org.mapstruct.Mapper
-import org.mapstruct.Mapping
-import org.mapstruct.NullValueCheckStrategy
-import org.mapstruct.NullValueMappingStrategy
-import org.mapstruct.NullValuePropertyMappingStrategy
-import org.mapstruct.ReportingPolicy
+import org.babyfish.jimmer.View
+import org.mapstruct.*
+import org.springframework.context.i18n.LocaleContextHolder
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -61,6 +52,9 @@ abstract class ProtoMapper {
 		com.sleepkqq.sololeveling.player.model.entity.player.enums.Assessment.valueOf(input.name)
 
 	fun map(input: LocalDateTime): Timestamp = input.toTimestamp()
+
+	fun map(input: View<LocalizationItem>): String = input.toEntity()
+		.let { if (LocaleContextHolder.getLocale().language == "ru") it.ru() else it.en() }
 
 	@Mapping(target = "isActive", source = "active")
 	abstract fun map(input: PlayerTaskTopicView): com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicView

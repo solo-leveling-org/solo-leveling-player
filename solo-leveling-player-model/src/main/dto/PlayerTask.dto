@@ -24,6 +24,14 @@ PlayerTaskView {
 
   task {
     #allScalars
+
+    title {
+      #allScalars
+    }
+
+    description {
+      #allScalars
+    }
   }
 }
 
