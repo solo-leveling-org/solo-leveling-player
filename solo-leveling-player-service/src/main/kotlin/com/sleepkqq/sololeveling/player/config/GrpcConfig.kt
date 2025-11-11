@@ -19,7 +19,5 @@ class GrpcConfig {
 	fun localeServerInterceptor(): ServerInterceptor = LocaleServerInterceptor()
 
 	@Bean
-	fun enumLocalizer(messageSource: MessageSource): EnumLocalizer {
-		return EnumLocalizer(messageSource)
-	}
+	fun enumLocalizer(messageSource: MessageSource): EnumLocalizer = EnumLocalizer(messageSource)
 }

@@ -8,7 +8,6 @@ import com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput
 import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
-import com.sleepkqq.sololeveling.player.service.player.PlayerTaskStatusService
 import com.sleepkqq.sololeveling.player.service.redis.IdempotencyService
 import com.sleepkqq.sololeveling.player.service.task.TaskService
 import org.slf4j.LoggerFactory
@@ -16,7 +15,6 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.util.Assert
 import java.util.UUID
 
 @Suppress("unused")
@@ -24,7 +22,6 @@ import java.util.UUID
 class SaveTasksConsumer(
 	private val taskService: TaskService,
 	private val playerTaskService: PlayerTaskService,
-	private val playerTaskStatusService: PlayerTaskStatusService,
 	private val avroMapper: AvroMapper,
 	private val idempotencyService: IdempotencyService,
 	private val notificationService: NotificationService
@@ -64,7 +61,6 @@ class SaveTasksConsumer(
 	}
 
 	private fun processSaveTasksEvent(event: SaveTasksEvent) {
-		validateSaveTasksEvent(event)
 
 		val tasks = event.tasks.map(avroMapper::map)
 			.onEach {
@@ -84,17 +80,7 @@ class SaveTasksConsumer(
 				"Setting {} player tasks to IN_PROGRESS for player {}",
 				playerTasks.size, event.playerId
 			)
-			playerTaskStatusService.inProgressTasks(playerTasks)
-		}
-	}
-
-	private fun validateSaveTasksEvent(event: SaveTasksEvent) {
-		Assert.hasText(event.txId, "txId cannot be blank")
-		Assert.notEmpty(event.tasks, "tasks list cannot be empty")
-		Assert.isTrue(event.playerId > 0, "playerId must be positive")
-
-		event.tasks.forEach {
-			Assert.hasText(it.taskId, "taskId cannot be blank")
+			playerTaskService.inProgressTasks(playerTasks)
 		}
 	}
 }

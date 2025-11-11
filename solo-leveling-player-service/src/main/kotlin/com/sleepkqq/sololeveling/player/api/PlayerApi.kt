@@ -14,7 +14,6 @@ import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceTransactionService
 import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
-import com.sleepkqq.sololeveling.player.service.player.PlayerTaskStatusService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
 import com.sleepkqq.sololeveling.proto.player.CompleteTaskRequest
 import com.sleepkqq.sololeveling.proto.player.CompleteTaskResponse
@@ -39,7 +38,6 @@ import org.springframework.grpc.server.service.GrpcService
 class PlayerApi(
 	private val playerService: PlayerService,
 	private val playerTaskService: PlayerTaskService,
-	private val playerTaskStatusService: PlayerTaskStatusService,
 	private val playerTaskTopicService: PlayerTaskTopicService,
 	private val protoMapper: ProtoMapper,
 	private val playerBalanceTransactionService: PlayerBalanceTransactionService,
@@ -112,7 +110,7 @@ class PlayerApi(
 	) {
 		log.info(">> generateTasks called by user={}", request.playerId)
 
-		playerTaskStatusService.generateTasks(request.playerId)
+		playerTaskService.generateTasks(request.playerId)
 
 		responseObserver.onNext(Empty.newBuilder().build())
 		responseObserver.onCompleted()
@@ -127,8 +125,8 @@ class PlayerApi(
 		val playerTask = protoMapper.map(request.playerTask)
 			.toEntity()
 
-		val playerStates = playerTaskStatusService.completeTask(playerTask, request.playerId)
-		playerTaskStatusService.generateTasks(request.playerId, setOf(playerTask.order()))
+		val playerStates = playerTaskService.completeTask(playerTask, request.playerId)
+		playerTaskService.generateTasks(request.playerId, setOf(playerTask.order()))
 
 		val response = CompleteTaskResponse.newBuilder()
 			.setPlayerBefore(protoMapper.map(playerStates.first))
@@ -147,7 +145,7 @@ class PlayerApi(
 
 		val playerTask = protoMapper.map(request.playerTask)
 			.toEntity()
-		playerTaskStatusService.skipTask(playerTask, request.playerId)
+		playerTaskService.skipTask(playerTask, request.playerId)
 
 		responseObserver.onNext(Empty.newBuilder().build())
 		responseObserver.onCompleted()
