@@ -2,6 +2,7 @@ package com.sleepkqq.sololeveling.player.api
 
 import com.google.protobuf.Empty
 import com.sleepkqq.sololeveling.jimmer.enums.EnumLocalizer
+import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_BALANCE_TRANSACTIONS
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.AMOUNT_FIELD
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.CAUSE_FIELD
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.TYPE_FIELD
@@ -44,10 +45,6 @@ class PlayerApi(
 	private val playerBalanceService: PlayerBalanceService,
 	private val enumLocalizer: EnumLocalizer
 ) : PlayerServiceGrpc.PlayerServiceImplBase() {
-
-	private companion object {
-		const val TABLES_PLAYER_BALANCE_TRANSACTIONS_PATH = "tables.player.balance.transactions"
-	}
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
@@ -126,7 +123,6 @@ class PlayerApi(
 			.toEntity()
 
 		val playerStates = playerTaskService.completeTask(playerTask, request.playerId)
-		playerTaskService.generateTasks(request.playerId, setOf(playerTask.order()))
 
 		val response = CompleteTaskResponse.newBuilder()
 			.setPlayerBefore(protoMapper.map(playerStates.first))
@@ -181,7 +177,7 @@ class PlayerApi(
 			transactionsPage,
 			request.options.page,
 			enumLocalizer.localize(
-				TABLES_PLAYER_BALANCE_TRANSACTIONS_PATH,
+				TABLES_PLAYER_BALANCE_TRANSACTIONS,
 				mapOf(
 					TYPE_FIELD to PlayerBalanceTransactionType::class.java,
 					CAUSE_FIELD to PlayerBalanceTransactionCause::class.java

@@ -100,8 +100,6 @@ class PlayerTaskServiceImpl(
 		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED)
 
 		generateTasks(playerId, setOf(playerTask.order()))
-
-		notificationService.send(NotificationCommand.SilentTasksUpdate(playerId))
 	}
 
 	@Transactional
@@ -135,7 +133,7 @@ class PlayerTaskServiceImpl(
 			}
 		)
 
-		notificationService.send(NotificationCommand.SilentTasksUpdate(playerId))
+		generateTasks(playerId, setOf(playerTask.order()))
 
 		return playerView to PlayerView(updatedPlayer)
 	}
@@ -222,6 +220,8 @@ class PlayerTaskServiceImpl(
 			.build()
 
 		generateTasksProducer.send(event)
+
+		notificationService.send(NotificationCommand.SilentTasksUpdate(playerId))
 	}
 
 	private fun generateTask(task: Task, playerTaskTopics: List<PlayerTaskTopic>): GenerateTask {
