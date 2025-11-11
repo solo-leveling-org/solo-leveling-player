@@ -28,3 +28,5 @@ databaseChangeLog:
   # v7
   - include:
       file: db/changelog/v7/10-11-2025--gear-items.yml
+  - include:
+      file: db/changelog/v7/11-11-2025--remove-task-closed-at.yml
