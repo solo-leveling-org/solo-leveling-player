@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: remove-closed-at-from-player-tasks
+      author: sleepkqq
+      changes:
+        - dropColumn:
+            tableName: player_tasks
+            columnName: closed_at

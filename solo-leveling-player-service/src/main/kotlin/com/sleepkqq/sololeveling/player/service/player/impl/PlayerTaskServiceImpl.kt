@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Suppress("unused")
@@ -245,9 +244,6 @@ class PlayerTaskServiceImpl(
 			playerTasks.map {
 				Immutables.createPlayerTask(it) { p ->
 					p.setStatus(status)
-					if (status == PlayerTaskStatus.COMPLETED || status == PlayerTaskStatus.SKIPPED) {
-						p.setClosedAt(LocalDateTime.now())
-					}
 				}
 			},
 			SaveMode.UPDATE_ONLY

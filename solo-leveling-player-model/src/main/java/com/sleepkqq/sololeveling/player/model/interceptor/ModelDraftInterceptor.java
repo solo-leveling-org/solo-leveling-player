@@ -16,9 +16,7 @@ public class ModelDraftInterceptor implements DraftInterceptor<Model, ModelDraft
   @Override
   public void beforeSave(@NotNull ModelDraft draft, @Nullable Model original) {
     var now = LocalDateTime.now();
-    if (!ImmutableObjects.isLoaded(draft, ModelProps.UPDATED_AT)) {
-      draft.setCreatedAt(now);
-    }
+    draft.setUpdatedAt(now);
     if (original == null) {
       if (!ImmutableObjects.isLoaded(draft, ModelProps.CREATED_AT)) {
         draft.setCreatedAt(now);
