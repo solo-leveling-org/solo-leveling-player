@@ -40,25 +40,18 @@ class UserServiceImpl(
 	override fun insert(user: User): User = userRepository.save(user, SaveMode.INSERT_ONLY)
 
 	@Transactional
-	override fun update(user: User, now: LocalDateTime): User =
-		userRepository.save(
-			Immutables.createUser(user) {
-				it.setUpdatedAt(now)
-			},
-			SaveMode.UPDATE_ONLY
-		)
+	override fun update(user: User): User =
+		userRepository.save(user, SaveMode.UPDATE_ONLY)
 
 	@Transactional
 	override fun upsert(user: User): User {
-		val now = LocalDateTime.now()
 		return findVersion(user.id())
 			?.let {
 				update(
 					Immutables.createUser(user) { u ->
 						u.setVersion(it)
-						u.setLastLoginAt(now)
-					},
-					now
+						u.setLastLoginAt(LocalDateTime.now())
+					}
 				)
 			}
 			?: insert(userRegistrationService.register(user))

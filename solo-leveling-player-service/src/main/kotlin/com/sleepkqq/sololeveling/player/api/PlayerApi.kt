@@ -127,7 +127,8 @@ class PlayerApi(
 		val playerTask = protoMapper.map(request.playerTask)
 			.toEntity()
 
-		val playerStates = playerTaskStatusService.pendingCompleteTask(playerTask, request.playerId)
+		val playerStates = playerTaskStatusService.completeTask(playerTask, request.playerId)
+		playerTaskStatusService.generateTasks(request.playerId, setOf(playerTask.order()))
 
 		val response = CompleteTaskResponse.newBuilder()
 			.setPlayerBefore(protoMapper.map(playerStates.first))

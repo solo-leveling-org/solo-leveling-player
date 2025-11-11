@@ -61,10 +61,11 @@
     <mapstruct.version>1.6.3</mapstruct.version>
 
     <!-- solo leveling -->
-    <solo-leveling-lib.version>1.0.30</solo-leveling-lib.version>
+    <solo-leveling-lib.version>1.2.2</solo-leveling-lib.version>
 
     <!-- utils -->
     <streamex.version>0.8.3</streamex.version>
+    <build-helper-plugin.version>3.3.0</build-helper-plugin.version>
 
     <!-- tests -->
     <test-containers.version>1.21.3</test-containers.version>

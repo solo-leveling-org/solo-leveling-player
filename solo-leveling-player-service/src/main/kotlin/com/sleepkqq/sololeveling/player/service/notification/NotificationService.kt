@@ -29,25 +29,12 @@ class NotificationService(
 			is NotificationCommand.UpdateLocale -> createLocaleUpdatedNotification(command.userId)
 		}
 
-		sendNotificationSafely(notificationData)
-	}
-
-	private fun sendNotificationSafely(notificationData: NotificationData) {
-		try {
-			sendNotificationProducer.send(notificationData.event)
-			log.info(
-				"<< {} | txId={}",
-				notificationData.successMessage,
-				notificationData.event.transactionId
-			)
-		} catch (e: Exception) {
-			log.error(
-				"Failed to send {} | txId={}",
-				notificationData.errorContext,
-				notificationData.event.transactionId,
-				e
-			)
-		}
+		sendNotificationProducer.send(notificationData.event)
+		log.info(
+			"<< {} | txId={}",
+			notificationData.successMessage,
+			notificationData.event.txId
+		)
 	}
 
 	private fun createTasksSavedNotification(event: SaveTasksEvent): NotificationData {
@@ -57,8 +44,8 @@ class NotificationService(
 			LocaleContextHolder.getLocale()
 		)
 
-		val context = NotificationContext(
-			txId = event.transactionId,
+		val context = NotificationCtx(
+			txId = event.txId,
 			userId = event.playerId,
 			source = NotificationSource.TASKS,
 			message = message,
@@ -70,7 +57,7 @@ class NotificationService(
 	}
 
 	private fun createTaskCompletedNotification(userId: Long): NotificationData {
-		val context = NotificationContext(
+		val context = NotificationCtx(
 			txId = UUID.randomUUID().toString(),
 			userId = userId,
 			source = NotificationSource.TASKS,
@@ -81,7 +68,7 @@ class NotificationService(
 	}
 
 	private fun createLocaleUpdatedNotification(userId: Long): NotificationData {
-		val context = NotificationContext(
+		val context = NotificationCtx(
 			txId = UUID.randomUUID().toString(),
 			userId = userId,
 			source = NotificationSource.LOCALE,
@@ -91,7 +78,7 @@ class NotificationService(
 		return createBaseNotification(context)
 	}
 
-	private fun createBaseNotification(context: NotificationContext): NotificationData {
+	private fun createBaseNotification(context: NotificationCtx): NotificationData {
 		val notification = Notification(
 			context.message,
 			context.type,
@@ -119,7 +106,7 @@ class NotificationService(
 		val errorContext: String
 	)
 
-	private data class NotificationContext(
+	private data class NotificationCtx(
 		val txId: String,
 		val userId: Long,
 		val source: NotificationSource,

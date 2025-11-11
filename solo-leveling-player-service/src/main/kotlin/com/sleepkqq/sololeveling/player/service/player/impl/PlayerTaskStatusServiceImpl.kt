@@ -34,22 +34,18 @@ class PlayerTaskStatusServiceImpl(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	@Transactional
-	override fun skipTask(playerTask: PlayerTask, playerId: Long, now: LocalDateTime) {
-		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED, now)
+	override fun skipTask(playerTask: PlayerTask, playerId: Long) {
+		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED)
 
-		generateTasks(playerId, true, setOf(playerTask.order()))
+		generateTasks(playerId, setOf(playerTask.order()))
 
 		notificationService.send(NotificationCommand.SilentTasksUpdate(playerId))
 	}
 
 	@Transactional
-	override fun pendingCompleteTask(
-		playerTask: PlayerTask,
-		playerId: Long,
-		now: LocalDateTime
-	): Pair<PlayerView, PlayerView> {
+	override fun completeTask(playerTask: PlayerTask, playerId: Long): Pair<PlayerView, PlayerView> {
 
-		setStatus(listOf(playerTask), PlayerTaskStatus.PENDING_COMPLETION, now)
+		setStatus(listOf(playerTask), PlayerTaskStatus.COMPLETED)
 
 		val playerView = playerService.getView(playerId, PlayerView::class)
 		val player = playerView.toEntity()
@@ -74,8 +70,7 @@ class PlayerTaskStatusServiceImpl(
 				it.setStrength(player.strength() + task.strength()!!)
 				it.setIntelligence(player.intelligence() + task.intelligence()!!)
 				it.setBalance(updatedBalance)
-			},
-			now
+			}
 		)
 
 		notificationService.send(NotificationCommand.SilentTasksUpdate(playerId))
@@ -84,33 +79,30 @@ class PlayerTaskStatusServiceImpl(
 	}
 
 	@Transactional
-	override fun inProgressTasks(tasks: Collection<PlayerTask>, now: LocalDateTime) {
-		setStatus(tasks, PlayerTaskStatus.IN_PROGRESS, now)
+	override fun inProgressTasks(tasks: Collection<PlayerTask>) {
+		setStatus(tasks, PlayerTaskStatus.IN_PROGRESS)
 	}
 
 	@Transactional
-	override fun completeTasks(tasks: Collection<PlayerTask>, now: LocalDateTime) {
-		setStatus(tasks, PlayerTaskStatus.COMPLETED, now)
+	override fun completeTasks(tasks: Collection<PlayerTask>) {
+		setStatus(tasks, PlayerTaskStatus.COMPLETED)
 	}
 
 	@Transactional
-	override fun generateTasks(playerId: Long, forReplace: Boolean, replaceOrders: Set<Int>) {
-		generateTasksProducer.send(playerId, forReplace, replaceOrders)
+	override fun generateTasks(playerId: Long, replaceOrders: Set<Int>) {
+		generateTasksProducer.send(playerId, replaceOrders)
 	}
 
 	private fun setStatus(
 		playerTasks: Collection<PlayerTask>,
-		status: PlayerTaskStatus,
-		now: LocalDateTime
+		status: PlayerTaskStatus
 	) {
 		playerTaskRepository.saveEntities(
 			playerTasks.map {
 				Immutables.createPlayerTask(it) { p ->
 					p.setStatus(status)
-					p.setUpdatedAt(now)
-
-					if (status == PlayerTaskStatus.PENDING_COMPLETION || status == PlayerTaskStatus.SKIPPED) {
-						p.setClosedAt(now)
+					if (status == PlayerTaskStatus.COMPLETED || status == PlayerTaskStatus.SKIPPED) {
+						p.setClosedAt(LocalDateTime.now())
 					}
 				}
 			},

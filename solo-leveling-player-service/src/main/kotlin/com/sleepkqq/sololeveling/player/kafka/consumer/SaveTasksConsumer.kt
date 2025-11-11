@@ -4,6 +4,7 @@ import com.sleepkqq.sololeveling.avro.constants.KafkaGroupIds
 import com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics
 import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent
 import com.sleepkqq.sololeveling.player.mapper.AvroMapper
+import com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput
 import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
@@ -16,6 +17,7 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.Assert
+import java.util.UUID
 
 @Suppress("unused")
 @Service
@@ -37,7 +39,7 @@ class SaveTasksConsumer(
 	)
 	@Transactional
 	fun listen(event: SaveTasksEvent, ack: Acknowledgment) {
-		val txId = event.transactionId
+		val txId = event.txId
 
 		log.info(">> Start processing SaveTasksEvent | txId={}", txId)
 
@@ -64,9 +66,12 @@ class SaveTasksConsumer(
 	private fun processSaveTasksEvent(event: SaveTasksEvent) {
 		validateSaveTasksEvent(event)
 
-		val tasks = event.tasks.map {
-			avroMapper.map(it).toEntity()
-		}
+		val tasks = event.tasks.map(avroMapper::map)
+			.onEach {
+				it.title!!.id = UUID.randomUUID()
+				it.description!!.id = UUID.randomUUID()
+			}
+			.map(TaskInput::toEntity)
 
 		log.info("Updating {} tasks for player {}", tasks.size, event.playerId)
 		taskService.updateAll(tasks)
@@ -84,7 +89,7 @@ class SaveTasksConsumer(
 	}
 
 	private fun validateSaveTasksEvent(event: SaveTasksEvent) {
-		Assert.hasText(event.transactionId, "txId cannot be blank")
+		Assert.hasText(event.txId, "txId cannot be blank")
 		Assert.notEmpty(event.tasks, "tasks list cannot be empty")
 		Assert.isTrue(event.playerId > 0, "playerId must be positive")
 

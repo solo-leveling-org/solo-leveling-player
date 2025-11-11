@@ -2,22 +2,15 @@ package com.sleepkqq.sololeveling.player.service.player
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
-import java.time.LocalDateTime
 
 interface PlayerTaskStatusService {
 
-	fun skipTask(playerTask: PlayerTask, playerId: Long, now: LocalDateTime = LocalDateTime.now())
-	fun pendingCompleteTask(
-		playerTask: PlayerTask,
-		playerId: Long,
-		now: LocalDateTime = LocalDateTime.now()
-	): Pair<PlayerView, PlayerView>
-
-	fun inProgressTasks(tasks: Collection<PlayerTask>, now: LocalDateTime = LocalDateTime.now())
-	fun completeTasks(tasks: Collection<PlayerTask>, now: LocalDateTime = LocalDateTime.now())
+	fun skipTask(playerTask: PlayerTask, playerId: Long)
+	fun completeTask(playerTask: PlayerTask, playerId: Long): Pair<PlayerView, PlayerView>
+	fun inProgressTasks(tasks: Collection<PlayerTask>)
+	fun completeTasks(tasks: Collection<PlayerTask>)
 	fun generateTasks(
 		playerId: Long,
-		forReplace: Boolean = false,
 		replaceOrders: Set<Int> = setOf()
 	)
 }

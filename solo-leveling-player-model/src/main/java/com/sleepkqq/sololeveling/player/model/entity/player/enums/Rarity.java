@@ -6,18 +6,21 @@ import lombok.Getter;
 import org.babyfish.jimmer.sql.EnumItem;
 
 @Getter
-public enum PlayerTaskStatus implements LocalizableEnum {
+public enum Rarity implements LocalizableEnum {
   @EnumItem(ordinal = 0)
-  PREPARING,
+  COMMON,
 
   @EnumItem(ordinal = 1)
-  IN_PROGRESS,
+  UNCOMMON,
 
   @EnumItem(ordinal = 2)
-  COMPLETED,
+  RARE,
 
   @EnumItem(ordinal = 3)
-  SKIPPED;
+  EPIC,
+
+  @EnumItem(ordinal = 4)
+  LEGENDARY;
 
   private final String path = EnumPathGenerator.generatePath(this);
 }

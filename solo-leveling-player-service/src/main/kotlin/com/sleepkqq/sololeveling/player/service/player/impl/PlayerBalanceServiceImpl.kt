@@ -12,7 +12,6 @@ import org.babyfish.jimmer.View
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
-import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.reflect.KClass
 
@@ -43,8 +42,7 @@ class PlayerBalanceServiceImpl(
 		playerBalance: PlayerBalance,
 		amount: BigDecimal,
 		currencyCode: CurrencyCode,
-		cause: PlayerBalanceTransactionCause,
-		now: LocalDateTime
+		cause: PlayerBalanceTransactionCause
 	): PlayerBalance {
 
 		require(amount > BigDecimal.ZERO) {
@@ -58,8 +56,6 @@ class PlayerBalanceServiceImpl(
 				it.setType(PlayerBalanceTransactionType.IN)
 				it.setCause(cause)
 				it.setBalanceId(playerBalance.id())
-				it.setCreatedAt(now)
-				it.setUpdatedAt(now)
 			}
 		)
 
@@ -67,7 +63,6 @@ class PlayerBalanceServiceImpl(
 
 		return Immutables.createPlayerBalance(playerBalance) {
 			it.setBalance(currentBalance.plus(amount))
-			it.setUpdatedAt(now)
 		}
 	}
 
@@ -75,8 +70,7 @@ class PlayerBalanceServiceImpl(
 	override fun withdraw(
 		playerBalance: PlayerBalance,
 		amount: BigDecimal,
-		cause: PlayerBalanceTransactionCause,
-		now: LocalDateTime
+		cause: PlayerBalanceTransactionCause
 	): PlayerBalance {
 
 		require(amount > BigDecimal.ZERO) {
@@ -97,14 +91,11 @@ class PlayerBalanceServiceImpl(
 				it.setType(PlayerBalanceTransactionType.OUT)
 				it.setCause(cause)
 				it.setBalance(playerBalance)
-				it.setCreatedAt(now)
-				it.setUpdatedAt(now)
 			}
 		)
 
 		return Immutables.createPlayerBalance(playerBalance) {
 			it.setBalance(newBalance)
-			it.setUpdatedAt(now)
 		}
 	}
 }

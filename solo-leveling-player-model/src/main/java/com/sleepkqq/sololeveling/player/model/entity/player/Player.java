@@ -6,7 +6,6 @@ import java.util.List;
 import org.babyfish.jimmer.sql.Entity;
 import org.babyfish.jimmer.sql.Id;
 import org.babyfish.jimmer.sql.JoinColumn;
-import org.babyfish.jimmer.sql.KeyUniqueConstraint;
 import org.babyfish.jimmer.sql.OneToOne;
 import org.babyfish.jimmer.sql.OneToMany;
 import org.babyfish.jimmer.sql.Table;
@@ -14,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 
 @Entity
 @Table(name = "players")
-@KeyUniqueConstraint
 public interface Player extends Model {
 
   @Id
@@ -23,6 +21,7 @@ public interface Player extends Model {
   int maxTasks();
 
   int agility();
+
   int strength();
 
   int intelligence();
@@ -40,5 +39,11 @@ public interface Player extends Model {
   PlayerBalance balance();
 
   @OneToMany(mappedBy = "player")
+  List<PlayerTask> tasks();
+
+  @OneToMany(mappedBy = "player")
   List<PlayerTaskTopic> taskTopics();
+
+  @OneToMany(mappedBy = "player")
+  List<PlayerGearItem> gearItems();
 }

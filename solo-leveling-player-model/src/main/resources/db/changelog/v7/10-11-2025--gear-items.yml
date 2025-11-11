@@ -1,0 +1,157 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-gear-and-localization-tables
+      author: sleepkqq
+      changes:
+        # Localization items table
+        - createTable:
+            tableName: localization_items
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: en
+                  type: varchar(1000)
+              - column:
+                  name: ru
+                  type: varchar(1000)
+              - column:
+                  name: version
+                  type: integer
+                  defaultValue: 0
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        # Gear items table
+        - createTable:
+            tableName: gear_items
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: localized_title_id
+                  type: uuid
+              - column:
+                  name: localized_description_id
+                  type: uuid
+              - column:
+                  name: type
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rarity
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: strength
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: agility
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: intelligence
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: integer
+                  defaultValue: 0
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: add-gear-items-foreign-keys
+      author: sleepkqq
+      changes:
+        # Gear items FKs to localization
+        - addForeignKeyConstraint:
+            baseTableName: gear_items
+            baseColumnNames: localized_title_id
+            constraintName: fk_gear_item_title
+            referencedTableName: localization_items
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: gear_items
+            baseColumnNames: localized_description_id
+            constraintName: fk_gear_item_description
+            referencedTableName: localization_items
+            referencedColumnNames: id
+
+  - changeSet:
+      id: migrate-tasks-to-use-localization
+      author: sleepkqq
+      changes:
+        # Add new columns for localized references
+        - addColumn:
+            tableName: tasks
+            columns:
+              - column:
+                  name: localized_title_id
+                  type: uuid
+              - column:
+                  name: localized_description_id
+                  type: uuid
+
+        # Drop old direct text columns
+        - dropColumn:
+            tableName: tasks
+            columnName: title
+
+        - dropColumn:
+            tableName: tasks
+            columnName: description
+
+  - changeSet:
+      id: add-tasks-localization-foreign-keys
+      author: sleepkqq
+      changes:
+        # Add FK constraints to localization_items
+        - addForeignKeyConstraint:
+            baseTableName: tasks
+            baseColumnNames: localized_title_id
+            constraintName: fk_task_title
+            referencedTableName: localization_items
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: tasks
+            baseColumnNames: localized_description_id
+            constraintName: fk_task_description
+            referencedTableName: localization_items
+            referencedColumnNames: id

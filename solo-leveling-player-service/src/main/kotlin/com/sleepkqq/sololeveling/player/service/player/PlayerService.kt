@@ -5,7 +5,6 @@ import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerFetcher
 import com.sleepkqq.sololeveling.player.exception.ModelNotFoundException
 import org.babyfish.jimmer.View
-import java.time.LocalDateTime
 import kotlin.reflect.KClass
 
 interface PlayerService {
@@ -19,5 +18,5 @@ interface PlayerService {
 		?: throw ModelNotFoundException(Player::class, id)
 
 	fun insert(player: Player): Player
-	fun update(player: Player, now: LocalDateTime = LocalDateTime.now()): Player
+	fun update(player: Player, ): Player
 }

@@ -24,13 +24,13 @@ PlayerTaskView {
 
   task {
     #allScalars
-  }
-}
 
-PlayerCompletionTask {
-  #allScalars
+    title {
+      #allScalars
+    }
 
-  player {
-    id
+    description {
+      #allScalars
+    }
   }
 }
