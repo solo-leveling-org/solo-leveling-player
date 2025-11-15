@@ -35,15 +35,6 @@ public class UserRepository {
   }
 
   @Nullable
-  public Integer findVersionById(long id) {
-    var table = USER_TABLE;
-    return sql.createQuery(table)
-        .where(table.id().eq(id))
-        .select(table.version())
-        .fetchFirstOrNull();
-  }
-
-  @Nullable
   public <V extends View<User>> V findView(long id, Class<V> viewType) {
     var table = USER_TABLE;
     return sql.createQuery(table)

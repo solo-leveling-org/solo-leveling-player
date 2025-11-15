@@ -5,6 +5,7 @@ import com.google.type.Money
 import com.sleepkqq.sololeveling.player.extenstions.toMoney
 import com.sleepkqq.sololeveling.player.extenstions.toTimestamp
 import com.sleepkqq.sololeveling.player.model.entity.localization.LocalizationItem
+import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
@@ -51,6 +52,8 @@ abstract class ProtoMapper {
 	fun map(input: Assessment): com.sleepkqq.sololeveling.player.model.entity.player.enums.Assessment =
 		com.sleepkqq.sololeveling.player.model.entity.player.enums.Assessment.valueOf(input.name)
 
+	fun map(input: View<TaskTopicItem>): TaskTopic = TaskTopic.valueOf(input.toEntity().topic().name)
+
 	fun map(input: LocalDateTime): Timestamp = input.toTimestamp()
 
 	fun map(input: View<LocalizationItem>): String = input.toEntity()
@@ -79,10 +82,8 @@ abstract class ProtoMapper {
 	@Mapping(target = "taskTopicsList", source = "taskTopics")
 	abstract fun map(input: PlayerView): com.sleepkqq.sololeveling.proto.player.PlayerView
 
-	@Mapping(target = "task.topics", source = "input.task.topicsList")
 	abstract fun map(input: PlayerTaskInput): com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskInput
 
-	@Mapping(target = "roles", source = "rolesList")
 	abstract fun map(input: UserInput): com.sleepkqq.sololeveling.player.model.entity.user.dto.UserInput
 
 	@Mapping(target = "active", source = "isActive")

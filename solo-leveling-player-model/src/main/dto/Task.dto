@@ -6,22 +6,14 @@ input TaskInput {
 
   title {
     #allScalars
-
-    -createdAt
-
-    -updatedAt
-
-    -version
   }
 
   description {
     #allScalars
+  }
 
-    -createdAt
-
-    -updatedAt
-
-    -version
+  topics {
+    #allScalars
   }
 
   -createdAt

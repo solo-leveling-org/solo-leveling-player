@@ -2,13 +2,12 @@ package com.sleepkqq.sololeveling.player.model.entity.user;
 
 import com.sleepkqq.sololeveling.player.model.entity.Model;
 import com.sleepkqq.sololeveling.player.model.entity.player.Player;
-import com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 import org.babyfish.jimmer.sql.Entity;
 import org.babyfish.jimmer.sql.Id;
+import org.babyfish.jimmer.sql.OneToMany;
 import org.babyfish.jimmer.sql.OneToOne;
-import org.babyfish.jimmer.sql.Serialized;
 import org.babyfish.jimmer.sql.Table;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,8 +33,8 @@ public interface User extends Model {
 
   LocalDateTime lastLoginAt();
 
-  @Serialized
-  Set<UserRole> roles();
+  @OneToMany(mappedBy = "user")
+  List<UserRoleItem> roles();
 
   @Nullable
   @OneToOne(mappedBy = "user")

@@ -3,7 +3,11 @@ package com.sleepkqq.sololeveling.player.service.player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
+import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions
+import org.babyfish.jimmer.Page
+import org.babyfish.jimmer.View
 import java.util.UUID
+import kotlin.reflect.KClass
 
 interface PlayerTaskService {
 
@@ -21,4 +25,9 @@ interface PlayerTaskService {
 		playerId: Long,
 		replaceOrders: Set<Int> = setOf()
 	)
+	fun <V : View<PlayerTask>> searchView(
+		playerId: Long,
+		options: RequestQueryOptions,
+		viewType: KClass<V>
+	) : Page<V>
 }

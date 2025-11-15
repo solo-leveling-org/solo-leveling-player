@@ -22,12 +22,16 @@ import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.task.DefineTaskRarityService
 import com.sleepkqq.sololeveling.player.service.task.DefineTaskTopicService
+import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions
+import org.babyfish.jimmer.Page
+import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.util.UUID
+import kotlin.reflect.KClass
 
 @Suppress("unused")
 @Service
@@ -142,6 +146,14 @@ class PlayerTaskServiceImpl(
 		setStatus(tasks, PlayerTaskStatus.IN_PROGRESS)
 	}
 
+	@Transactional(readOnly = true)
+	override fun <V : View<PlayerTask>> searchView(
+		playerId: Long,
+		options: RequestQueryOptions,
+		viewType: KClass<V>
+	): Page<V> = playerTaskRepository.searchView(playerId, options, viewType.java)
+
+	// todo: refactor
 	@Transactional
 	override fun generateTasks(playerId: Long, replaceOrders: Set<Int>) {
 		val player = playerService.get(

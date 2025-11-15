@@ -3,9 +3,9 @@ package com.sleepkqq.sololeveling.player.service.player.impl
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.Level
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
+import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Assessment
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.LevelType
-import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.service.player.CountExperienceService
 import com.sleepkqq.sololeveling.player.service.player.LevelService
 import com.sleepkqq.sololeveling.player.service.task.DefineTaskTopicService.Companion.MAX_TASK_TOPICS_COUNT
@@ -40,7 +40,7 @@ class LevelServiceImpl(
 
 	override fun gainExperience(
 		player: Player,
-		taskTopics: Set<TaskTopic>,
+		taskTopics: Collection<TaskTopicItem>,
 		experience: Int
 	): Player {
 
@@ -53,13 +53,14 @@ class LevelServiceImpl(
 			.toMutableMap()
 
 		taskTopics.forEach {
-			val playerTaskTopic = playerTaskTopicsMap[it]!!
+			val topic = it.topic()
+			val playerTaskTopic = playerTaskTopicsMap[topic]!!
 			val processedTaskTopicLevel = processExperienceGain(
 				playerTaskTopic.level()!!,
 				LevelType.TASK_TOPIC,
 				experience / taskTopics.size
 			)
-			playerTaskTopicsMap[it] = Immutables.createPlayerTaskTopic(playerTaskTopic) { p ->
+			playerTaskTopicsMap[topic] = Immutables.createPlayerTaskTopic(playerTaskTopic) { p ->
 				p.setLevel(processedTaskTopicLevel)
 			}
 		}

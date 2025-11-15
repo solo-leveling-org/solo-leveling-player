@@ -6,6 +6,7 @@ import static com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalance
 
 import com.sleepkqq.sololeveling.jimmer.fetcher.PageFetcher;
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction;
+import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransactionTable;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType;
 import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions;
@@ -17,7 +18,8 @@ import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class PlayerBalanceTransactionRepository extends PageFetcher {
+public class PlayerBalanceTransactionRepository extends
+    PageFetcher<PlayerBalanceTransaction, PlayerBalanceTransactionTable> {
 
   private final JSqlClient sql;
 
