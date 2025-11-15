@@ -1,5 +1,5 @@
 # Build stage
-FROM eclipse-temurin:24-jdk-alpine AS build
+FROM eclipse-temurin:25-jdk-alpine AS build
 
 # Создаём пользователя для безопасности
 RUN adduser -D myuser && \
@@ -17,7 +17,7 @@ RUN chmod +x ./mvnw && \
     ./mvnw clean package -DskipTests --settings settings.xml
 
 # Run stage
-FROM eclipse-temurin:24-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 # Копируем собранный JAR
 COPY --from=build /usr/src/app/solo-leveling-player-service/target/*.jar /app/solo-leveling-player.jar
