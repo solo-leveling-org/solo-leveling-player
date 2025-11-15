@@ -10,6 +10,7 @@ import org.mapstruct.CollectionMappingStrategy
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.ReportingPolicy
+import java.util.UUID
 
 @Mapper(
 	componentModel = "spring",
@@ -24,8 +25,11 @@ abstract class AvroMapper {
 	fun map(rarity: Rarity): com.sleepkqq.sololeveling.avro.player.Rarity =
 		com.sleepkqq.sololeveling.avro.player.Rarity.valueOf(rarity.name)
 
-	fun map(topic: com.sleepkqq.sololeveling.avro.task.TaskTopic): TaskTopic =
-		TaskTopic.valueOf(topic.name)
+	fun map(topic: com.sleepkqq.sololeveling.avro.task.TaskTopic): TaskInput.TargetOf_topics =
+		TaskInput.TargetOf_topics.Builder()
+			.id(UUID.randomUUID())
+			.topic(TaskTopic.valueOf(topic.name))
+			.build()
 
 	fun map(topic: TaskTopic): com.sleepkqq.sololeveling.avro.task.TaskTopic =
 		com.sleepkqq.sololeveling.avro.task.TaskTopic.valueOf(topic.name)

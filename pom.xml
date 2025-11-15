@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.6</version>
+    <version>3.5.7</version>
   </parent>
 
   <groupId>com.sleepkqq</groupId>
@@ -61,7 +61,7 @@
     <mapstruct.version>1.6.3</mapstruct.version>
 
     <!-- solo leveling -->
-    <solo-leveling-lib.version>1.2.4.3</solo-leveling-lib.version>
+    <solo-leveling-lib.version>1.2.4.12</solo-leveling-lib.version>
 
     <!-- utils -->
     <streamex.version>0.8.3</streamex.version>

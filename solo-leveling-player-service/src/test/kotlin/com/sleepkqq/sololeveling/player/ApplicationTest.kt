@@ -15,17 +15,14 @@ import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceTransactionS
 import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.user.UserService
-import com.sleepkqq.sololeveling.proto.player.CollectionEnumFilter
 import com.sleepkqq.sololeveling.proto.player.EnumFilter
 import com.sleepkqq.sololeveling.proto.player.Filter
 import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions
 import org.assertj.core.api.Assertions.assertThat
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
-import java.time.LocalDateTime
 import java.util.UUID
 
 class ApplicationTest : BaseTestClass() {
@@ -48,16 +45,9 @@ class ApplicationTest : BaseTestClass() {
 	@Autowired
 	private lateinit var playerTaskService: PlayerTaskService
 
-	@BeforeEach
-	fun setup() {
-
-	}
-
 	@Test
 	fun `success deposit test`() {
 		// Arrange
-		val now = LocalDateTime.now()
-
 		val insertedUser = userService.upsert(
 			Immutables.createUser {
 				it.setId(1)
@@ -66,9 +56,6 @@ class ApplicationTest : BaseTestClass() {
 				it.setLastName("test")
 				it.setPhotoUrl("test")
 				it.setLocale("test")
-				it.setLastLoginAt(now)
-				it.setUpdatedAt(now)
-				it.setCreatedAt(now)
 				it.setRoles(
 					listOf(
 						Immutables.createUserRoleItem { it.setRole(UserRole.USER) }
@@ -136,8 +123,6 @@ class ApplicationTest : BaseTestClass() {
 	@Test
 	fun `success player task search test`() {
 		// Given
-		val now = LocalDateTime.now()
-
 		val insertedUser = userService.upsert(
 			Immutables.createUser {
 				it.setId(2)
@@ -146,9 +131,6 @@ class ApplicationTest : BaseTestClass() {
 				it.setLastName("test")
 				it.setPhotoUrl("test")
 				it.setLocale("test")
-				it.setLastLoginAt(now)
-				it.setUpdatedAt(now)
-				it.setCreatedAt(now)
 				it.setRoles(
 					listOf(
 						Immutables.createUserRoleItem { it.setRole(UserRole.USER) }
@@ -184,15 +166,15 @@ class ApplicationTest : BaseTestClass() {
 			it.setTopics(
 				listOf(
 					Immutables.createTaskTopicItem { t ->
+						t.setId(UUID.randomUUID())
 						t.setTopic(TaskTopic.PRODUCTIVITY)
 					},
 					Immutables.createTaskTopicItem { t ->
+						t.setId(UUID.randomUUID())
 						t.setTopic(TaskTopic.HEALTHY_EATING)
 					}
 				)
 			)
-			it.setCreatedAt(now)
-			it.setUpdatedAt(now)
 		}
 
 		val playerTask = Immutables.createPlayerTask {

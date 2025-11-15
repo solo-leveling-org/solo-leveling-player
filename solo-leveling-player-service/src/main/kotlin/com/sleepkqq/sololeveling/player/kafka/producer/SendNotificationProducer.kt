@@ -1,7 +1,6 @@
 package com.sleepkqq.sololeveling.player.kafka.producer
 
 import com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics
-import com.sleepkqq.sololeveling.avro.notification.SendNotificationEvent
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -9,7 +8,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class SendNotificationProducer(
-	private val kafkaTemplate: KafkaTemplate<String, SendNotificationEvent>
+	private val kafkaTemplate: KafkaTemplate<String, Any>
 ) {
 
 	private val log = LoggerFactory.getLogger(javaClass)

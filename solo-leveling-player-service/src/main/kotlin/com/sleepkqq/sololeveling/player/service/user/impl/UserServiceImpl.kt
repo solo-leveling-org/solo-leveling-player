@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.Locale
+import java.util.UUID
 import kotlin.reflect.KClass
 
 @Suppress("unused")
@@ -81,7 +82,10 @@ class UserServiceImpl(
 	override fun register(user: User): User = Immutables.createUser(user) {
 		it.setRoles(
 			listOf(
-				Immutables.createUserRoleItem { r -> r.setRole(UserRole.USER) }
+				Immutables.createUserRoleItem { r ->
+					r.setId(UUID.randomUUID())
+					r.setRole(UserRole.USER)
+				}
 			)
 		)
 		it.setPlayer(Immutables.createPlayer { p ->
