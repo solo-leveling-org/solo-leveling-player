@@ -26,7 +26,6 @@ import org.springframework.context.i18n.LocaleContextHolder
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
-@Suppress("unused")
 @Mapper(
 	componentModel = "spring",
 	unmappedTargetPolicy = ReportingPolicy.IGNORE,

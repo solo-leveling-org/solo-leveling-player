@@ -16,14 +16,12 @@ import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
 import com.sleepkqq.sololeveling.player.service.user.UserService
 import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.Locale
 import java.util.UUID
 import kotlin.reflect.KClass
 
-@Suppress("unused")
 @Service
 class UserServiceImpl(
 	private val userRepository: UserRepository,
@@ -36,8 +34,6 @@ class UserServiceImpl(
 	private companion object {
 		const val INITIAL_PLAYER_MAX_TASKS = 5
 	}
-
-	private val log = LoggerFactory.getLogger(javaClass)
 
 	override fun find(id: Long, fetcher: UserFetcher): User? =
 		userRepository.findNullable(id, fetcher)

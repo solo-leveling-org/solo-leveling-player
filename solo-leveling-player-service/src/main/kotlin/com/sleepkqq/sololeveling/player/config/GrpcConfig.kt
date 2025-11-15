@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.grpc.server.GlobalServerInterceptor
 
-@Suppress("unused")
 @Configuration
 class GrpcConfig {
 

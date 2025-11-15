@@ -13,7 +13,6 @@ import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceT
 import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceTransactionService
-import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
 import com.sleepkqq.sololeveling.proto.player.CompleteTaskRequest
@@ -34,10 +33,8 @@ import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
 import org.springframework.grpc.server.service.GrpcService
 
-@Suppress("unused")
 @GrpcService
 class PlayerApi(
-	private val playerService: PlayerService,
 	private val playerTaskService: PlayerTaskService,
 	private val playerTaskTopicService: PlayerTaskTopicService,
 	private val protoMapper: ProtoMapper,

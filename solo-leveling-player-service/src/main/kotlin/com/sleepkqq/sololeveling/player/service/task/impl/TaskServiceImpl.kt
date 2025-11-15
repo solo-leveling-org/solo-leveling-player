@@ -9,15 +9,10 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
-@Suppress("unused")
 @Service
 class TaskServiceImpl(
 	private val taskRepository: TaskRepository
 ) : TaskService {
-
-	private companion object {
-		const val INITIAL_TASK_VERSION = 0
-	}
 
 	@Transactional(readOnly = true)
 	override fun get(id: UUID): Task = find(id)

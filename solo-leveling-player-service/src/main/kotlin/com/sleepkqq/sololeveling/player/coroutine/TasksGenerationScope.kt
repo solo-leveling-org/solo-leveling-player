@@ -9,7 +9,6 @@ import kotlinx.coroutines.cancel
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
-@Suppress("unused")
 @Component
 class TaskGenerationScope(loomDispatcher: CoroutineDispatcher) {
 

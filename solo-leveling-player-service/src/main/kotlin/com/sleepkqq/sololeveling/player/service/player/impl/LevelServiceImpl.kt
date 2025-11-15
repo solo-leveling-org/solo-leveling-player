@@ -12,7 +12,6 @@ import com.sleepkqq.sololeveling.player.service.task.DefineTaskTopicService.Comp
 import org.springframework.stereotype.Service
 import java.util.UUID
 
-@Suppress("unused")
 @Service
 class LevelServiceImpl(
 	private val countExperienceService: CountExperienceService

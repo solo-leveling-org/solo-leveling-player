@@ -50,7 +50,6 @@ import org.babyfish.jimmer.sql.dialect.PostgresDialect
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding
 import org.springframework.context.annotation.Configuration
 
-@Suppress("unused")
 @RegisterReflectionForBinding(
 	classes = [
 		// Avro

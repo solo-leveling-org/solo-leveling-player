@@ -33,7 +33,6 @@ import java.math.BigDecimal
 import java.util.UUID
 import kotlin.reflect.KClass
 
-@Suppress("unused")
 @Service
 class PlayerTaskServiceImpl(
 	private val playerTaskRepository: PlayerTaskRepository,

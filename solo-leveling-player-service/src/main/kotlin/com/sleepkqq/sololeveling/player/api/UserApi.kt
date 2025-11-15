@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.grpc.server.service.GrpcService
 import java.util.Locale
 
-@Suppress("unused")
 @GrpcService
 class UserApi(
 	private val userService: UserService,
