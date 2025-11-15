@@ -40,8 +40,8 @@ class PlayerBalanceServiceImpl(
 	override fun deposit(
 		playerBalance: PlayerBalance,
 		amount: BigDecimal,
-		currencyCode: CurrencyCode,
-		cause: PlayerBalanceTransactionCause
+		cause: PlayerBalanceTransactionCause,
+		currencyCode: CurrencyCode
 	): PlayerBalance {
 
 		require(amount > BigDecimal.ZERO) {

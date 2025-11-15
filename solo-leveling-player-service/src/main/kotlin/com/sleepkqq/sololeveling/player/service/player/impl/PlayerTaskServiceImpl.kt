@@ -13,6 +13,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
+import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
 import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
@@ -105,7 +106,11 @@ class PlayerTaskServiceImpl(
 	}
 
 	@Transactional
-	override fun completeTask(playerTask: PlayerTask, playerId: Long): Pair<PlayerView, PlayerView> {
+	override fun completeTask(
+		playerTask: PlayerTask,
+		playerId: Long,
+		topics: Collection<TaskTopic>
+	): Pair<PlayerView, PlayerView> {
 
 		setStatus(listOf(playerTask), PlayerTaskStatus.COMPLETED)
 
@@ -115,16 +120,12 @@ class PlayerTaskServiceImpl(
 		val task = playerTask.task()
 
 		val updatedBalance = playerBalanceService.deposit(
-			playerBalance = player.balance()!!,
-			amount = BigDecimal(task.currencyReward()!!),
-			cause = PlayerBalanceTransactionCause.TASK_COMPLETION
+			player.balance()!!,
+			BigDecimal(task.currencyReward()!!),
+			PlayerBalanceTransactionCause.TASK_COMPLETION
 		)
 
-		val gainedExperiencePlayer = levelService.gainExperience(
-			player,
-			task.topics()!!,
-			task.experience()!!
-		)
+		val gainedExperiencePlayer = levelService.gainExperience(player, topics, task.experience()!!)
 
 		val updatedPlayer = playerService.update(
 			Immutables.createPlayer(gainedExperiencePlayer) {
