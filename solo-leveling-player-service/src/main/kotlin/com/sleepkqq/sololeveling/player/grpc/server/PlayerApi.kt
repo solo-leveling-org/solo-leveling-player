@@ -1,34 +1,20 @@
-package com.sleepkqq.sololeveling.player.api
+package com.sleepkqq.sololeveling.player.grpc.server
 
 import com.google.protobuf.Empty
 import com.sleepkqq.sololeveling.jimmer.enums.EnumLocalizer
 import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_BALANCE_TRANSACTIONS
+import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.AMOUNT_FIELD
-import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.CAUSE_FIELD
-import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.TYPE_FIELD
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType
-import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
+import com.sleepkqq.sololeveling.player.model.repository.player.PlayerBalanceTransactionRepository
+import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceTransactionService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
-import com.sleepkqq.sololeveling.proto.player.CompleteTaskRequest
-import com.sleepkqq.sololeveling.proto.player.CompleteTaskResponse
-import com.sleepkqq.sololeveling.proto.player.GenerateTasksRequest
-import com.sleepkqq.sololeveling.proto.player.GetActiveTasksRequest
-import com.sleepkqq.sololeveling.proto.player.GetActiveTasksResponse
-import com.sleepkqq.sololeveling.proto.player.GetPlayerBalanceRequest
-import com.sleepkqq.sololeveling.proto.player.GetPlayerBalanceResponse
-import com.sleepkqq.sololeveling.proto.player.GetPlayerTopicsRequest
-import com.sleepkqq.sololeveling.proto.player.GetPlayerTopicsResponse
-import com.sleepkqq.sololeveling.proto.player.PlayerServiceGrpc
-import com.sleepkqq.sololeveling.proto.player.SavePlayerTopicsRequest
-import com.sleepkqq.sololeveling.proto.player.SearchPlayerBalanceTransactionsRequest
-import com.sleepkqq.sololeveling.proto.player.SearchPlayerBalanceTransactionsResponse
-import com.sleepkqq.sololeveling.proto.player.SkipTaskRequest
+import com.sleepkqq.sololeveling.proto.player.*
 import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
 import org.springframework.grpc.server.service.GrpcService
@@ -172,17 +158,38 @@ class PlayerApi(
 			request.options,
 			PlayerBalanceTransactionView::class
 		)
-		val response = protoMapper.map(
+		val response = protoMapper.mapTransactions(
 			transactionsPage,
 			request.options.page,
 			enumLocalizer.localize(
 				TABLES_PLAYER_BALANCE_TRANSACTIONS,
-				mapOf(
-					TYPE_FIELD to PlayerBalanceTransactionType::class.java,
-					CAUSE_FIELD to PlayerBalanceTransactionCause::class.java
-				)
+				PlayerBalanceTransactionRepository.FIELD_ENUM_TYPES
 			),
 			setOf(AMOUNT_FIELD)
+		)
+
+		responseObserver.onNext(response)
+		responseObserver.onCompleted()
+	}
+
+	override fun searchPlayerTasks(
+		request: SearchPlayerTasksRequest,
+		responseObserver: StreamObserver<SearchPlayerTasksResponse>
+	) {
+		log.info(">> searchPlayerTasks called by user={}", request.playerId)
+
+		val tasksPage = playerTaskService.searchView(
+			request.playerId,
+			request.options,
+			PlayerTaskView::class
+		)
+		val response = protoMapper.mapTasks(
+			tasksPage,
+			request.options.page,
+			enumLocalizer.localize(
+				TABLES_PLAYER_BALANCE_TRANSACTIONS,
+				PlayerTaskRepository.FIELD_ENUM_TYPES
+			)
 		)
 
 		responseObserver.onNext(response)

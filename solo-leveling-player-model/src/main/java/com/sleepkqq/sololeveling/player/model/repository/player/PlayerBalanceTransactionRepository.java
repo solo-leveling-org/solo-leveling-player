@@ -4,6 +4,7 @@ import static com.sleepkqq.sololeveling.player.model.entity.Tables.PLAYER_BALANC
 import static com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.CAUSE_FIELD;
 import static com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.TYPE_FIELD;
 
+import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
 import com.sleepkqq.sololeveling.jimmer.fetcher.PageFetcher;
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction;
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransactionTable;
@@ -21,13 +22,15 @@ import org.springframework.stereotype.Repository;
 public class PlayerBalanceTransactionRepository extends
     PageFetcher<PlayerBalanceTransaction, PlayerBalanceTransactionTable> {
 
+  public static final Map<String, Class<? extends LocalizableEnum>> FIELD_ENUM_TYPES = Map.of(
+      CAUSE_FIELD, PlayerBalanceTransactionCause.class,
+      TYPE_FIELD, PlayerBalanceTransactionType.class
+  );
+
   private final JSqlClient sql;
 
   public PlayerBalanceTransactionRepository(JSqlClient sql) {
-    super(sql, Map.of(
-        CAUSE_FIELD, PlayerBalanceTransactionCause.class,
-        TYPE_FIELD, PlayerBalanceTransactionType.class
-    ));
+    super(sql, FIELD_ENUM_TYPES);
     this.sql = sql;
   }
 

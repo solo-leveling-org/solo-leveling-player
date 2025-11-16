@@ -1,4 +1,4 @@
-package com.sleepkqq.sololeveling.player.api
+package com.sleepkqq.sololeveling.player.grpc.server
 
 import com.google.protobuf.Empty
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers

@@ -81,6 +81,7 @@ abstract class ProtoMapper {
 	@Mapping(target = "taskTopicsList", source = "taskTopics")
 	abstract fun map(input: PlayerView): com.sleepkqq.sololeveling.proto.player.PlayerView
 
+	@Mapping(target = "taskId", source = "input.task.id")
 	abstract fun map(input: PlayerTaskInput): com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskInput
 
 	abstract fun map(input: UserInput): com.sleepkqq.sololeveling.player.model.entity.user.dto.UserInput
@@ -97,12 +98,24 @@ abstract class ProtoMapper {
 		target = "options",
 		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage, filters, sorts))"
 	)
-	abstract fun map(
+	abstract fun mapTransactions(
 		page: Page<PlayerBalanceTransactionView>,
 		currentPage: Int,
 		filters: List<LocalizedField>,
 		sorts: Set<String>
 	): SearchPlayerBalanceTransactionsResponse
+
+	@Mapping(target = "tasksList", source = "page.rows")
+	@Mapping(
+		target = "options",
+		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage, filters, sorts))"
+	)
+	abstract fun mapTasks(
+		page: Page<PlayerTaskView>,
+		currentPage: Int,
+		filters: List<LocalizedField>,
+		sorts: Set<String> = setOf()
+	): SearchPlayerTasksResponse
 
 	@Mapping(target = "filtersList", source = "filters")
 	@Mapping(target = "sortsList", source = "sorts")

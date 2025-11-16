@@ -5,6 +5,7 @@ import static com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask.ST
 import static com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem.TOPIC_FIELD;
 import static com.sleepkqq.sololeveling.player.model.entity.task.Task.RARITY_FIELD;
 
+import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
 import com.sleepkqq.sololeveling.jimmer.fetcher.PageFetcher;
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask;
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTable;
@@ -29,19 +30,21 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class PlayerTaskRepository extends PageFetcher<PlayerTask, PlayerTaskTable> {
 
+  public static final Map<String, Class<? extends LocalizableEnum>> FIELD_ENUM_TYPES = Map.of(
+      RARITY_FIELD, Rarity.class,
+      TOPIC_FIELD, TaskTopic.class,
+      STATUS_FIELD, PlayerTaskStatus.class
+  );
+
   private static final Map<String, Function<PlayerTaskTable, TableEx<?>>> FIELD_TABLES = Map.of(
-      RARITY_FIELD, t -> t.task(JoinType.LEFT).asTableEx(),
-      TOPIC_FIELD, t -> t.task(JoinType.LEFT).asTableEx()
+      RARITY_FIELD, t -> t.asTableEx().task(JoinType.LEFT),
+      TOPIC_FIELD, t -> t.asTableEx().task(JoinType.LEFT).topics(JoinType.LEFT)
   );
 
   private final JSqlClient sql;
 
   public PlayerTaskRepository(JSqlClient sql) {
-    super(sql, Map.of(
-        RARITY_FIELD, Rarity.class,
-        TOPIC_FIELD, TaskTopic.class,
-        STATUS_FIELD, PlayerTaskStatus.class
-    ));
+    super(sql, FIELD_ENUM_TYPES);
     this.sql = sql;
   }
 
