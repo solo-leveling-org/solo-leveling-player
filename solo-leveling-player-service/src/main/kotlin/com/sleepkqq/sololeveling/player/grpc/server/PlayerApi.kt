@@ -3,6 +3,7 @@ package com.sleepkqq.sololeveling.player.grpc.server
 import com.google.protobuf.Empty
 import com.sleepkqq.sololeveling.jimmer.enums.EnumLocalizer
 import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_BALANCE_TRANSACTIONS
+import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_TASKS
 import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.AMOUNT_FIELD
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
@@ -187,7 +188,7 @@ class PlayerApi(
 			tasksPage,
 			request.options.page,
 			enumLocalizer.localize(
-				TABLES_PLAYER_BALANCE_TRANSACTIONS,
+				TABLES_PLAYER_TASKS,
 				PlayerTaskRepository.FIELD_ENUM_TYPES
 			)
 		)
