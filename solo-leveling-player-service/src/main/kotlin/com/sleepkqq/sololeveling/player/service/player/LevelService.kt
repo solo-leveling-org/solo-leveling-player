@@ -8,5 +8,5 @@ import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 interface LevelService {
 
 	fun initializeLevel(levelType: LevelType): Level
-	fun gainExperience(player: Player, taskTopics: Set<TaskTopic>, experience: Int): Player
+	fun gainExperience(player: Player, taskTopics: Collection<TaskTopic>, experience: Int): Player
 }

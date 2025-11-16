@@ -8,15 +8,7 @@ input PlayerTaskInput {
 
   -updatedAt
 
-  -closedAt
-
-  task {
-    #allScalars
-
-    -createdAt
-
-    -updatedAt
-  }
+  id(task)
 }
 
 PlayerTaskView {
@@ -25,11 +17,19 @@ PlayerTaskView {
   task {
     #allScalars
 
+    -createdAt
+
+    -updatedAt
+
     title {
       #allScalars
     }
 
     description {
+      #allScalars
+    }
+
+    topics {
       #allScalars
     }
   }

@@ -5,6 +5,7 @@ import com.google.type.Money
 import com.sleepkqq.sololeveling.player.extenstions.toMoney
 import com.sleepkqq.sololeveling.player.extenstions.toTimestamp
 import com.sleepkqq.sololeveling.player.model.entity.localization.LocalizationItem
+import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
@@ -25,7 +26,6 @@ import org.springframework.context.i18n.LocaleContextHolder
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
-@Suppress("unused")
 @Mapper(
 	componentModel = "spring",
 	unmappedTargetPolicy = ReportingPolicy.IGNORE,
@@ -50,6 +50,8 @@ abstract class ProtoMapper {
 
 	fun map(input: Assessment): com.sleepkqq.sololeveling.player.model.entity.player.enums.Assessment =
 		com.sleepkqq.sololeveling.player.model.entity.player.enums.Assessment.valueOf(input.name)
+
+	fun map(input: View<TaskTopicItem>): TaskTopic = TaskTopic.valueOf(input.toEntity().topic().name)
 
 	fun map(input: LocalDateTime): Timestamp = input.toTimestamp()
 
@@ -79,10 +81,19 @@ abstract class ProtoMapper {
 	@Mapping(target = "taskTopicsList", source = "taskTopics")
 	abstract fun map(input: PlayerView): com.sleepkqq.sololeveling.proto.player.PlayerView
 
-	@Mapping(target = "task.topics", source = "input.task.topicsList")
+	@Mapping(target = "taskId", source = "input.task.id")
 	abstract fun map(input: PlayerTaskInput): com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskInput
 
-	@Mapping(target = "roles", source = "rolesList")
+	@Mapping(target = "title", ignore = true)
+	@Mapping(target = "description", ignore = true)
+	@Mapping(target = "topics", source = "topicsList")
+	abstract fun map(input: TaskInput): com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput
+
+	protected fun taskTopicToTargetOf_topics(input: TaskTopic):
+			com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput.TargetOf_topics =
+		com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput.TargetOf_topics()
+			.apply { topic = map(input) }
+
 	abstract fun map(input: UserInput): com.sleepkqq.sololeveling.player.model.entity.user.dto.UserInput
 
 	@Mapping(target = "active", source = "isActive")
@@ -97,12 +108,24 @@ abstract class ProtoMapper {
 		target = "options",
 		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage, filters, sorts))"
 	)
-	abstract fun map(
+	abstract fun mapTransactions(
 		page: Page<PlayerBalanceTransactionView>,
 		currentPage: Int,
 		filters: List<LocalizedField>,
 		sorts: Set<String>
 	): SearchPlayerBalanceTransactionsResponse
+
+	@Mapping(target = "tasksList", source = "page.rows")
+	@Mapping(
+		target = "options",
+		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage, filters, sorts))"
+	)
+	abstract fun mapTasks(
+		page: Page<PlayerTaskView>,
+		currentPage: Int,
+		filters: List<LocalizedField>,
+		sorts: Set<String> = setOf()
+	): SearchPlayerTasksResponse
 
 	@Mapping(target = "filtersList", source = "filters")
 	@Mapping(target = "sortsList", source = "sorts")

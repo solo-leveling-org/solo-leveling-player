@@ -1,0 +1,88 @@
+databaseChangeLog:
+  - changeSet:
+      id: migrate-jsonb-to-onetomany-tables
+      author: sleepkqq
+      changes:
+        # Создаем таблицу user_role_items
+        - createTable:
+            tableName: user_role_items
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: role
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+
+        # Создаем таблицу task_topic_items
+        - createTable:
+            tableName: task_topic_items
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: topic
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: task_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+        # Добавляем foreign keys
+        - addForeignKeyConstraint:
+            baseTableName: user_role_items
+            baseColumnNames: user_id
+            constraintName: fk_user_role_item_user
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: task_topic_items
+            baseColumnNames: task_id
+            constraintName: fk_task_topic_item_task
+            referencedTableName: tasks
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+        # Удаляем JSONB колонки
+        - dropColumn:
+            tableName: users
+            columnName: roles
+
+        - dropColumn:
+            tableName: tasks
+            columnName: topics
+
+  - changeSet:
+      id: remove-audit-fields-from-localization-items
+      author: sleepkqq
+      changes:
+        - dropColumn:
+            tableName: localization_items
+            columnName: version
+
+        - dropColumn:
+            tableName: localization_items
+            columnName: created_at
+
+        - dropColumn:
+            tableName: localization_items
+            columnName: updated_at

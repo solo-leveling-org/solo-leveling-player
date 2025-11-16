@@ -1,5 +1,5 @@
 # Вариант 1: Использование официального образа с уже установленным native-image
-FROM ghcr.io/graalvm/native-image-community:24 AS build
+FROM ghcr.io/graalvm/native-image-community:25 AS build
 
 # Создаём системного пользователя
 RUN useradd -r -m -u 1001 -U -d /home/myuser -s /bin/bash myuser && \

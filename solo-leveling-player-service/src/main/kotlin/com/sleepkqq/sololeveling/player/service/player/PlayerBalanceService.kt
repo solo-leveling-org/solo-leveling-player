@@ -18,8 +18,8 @@ interface PlayerBalanceService {
 	fun deposit(
 		playerBalance: PlayerBalance,
 		amount: BigDecimal,
-		currencyCode: CurrencyCode = CurrencyCode.SLCN,
-		cause: PlayerBalanceTransactionCause
+		cause: PlayerBalanceTransactionCause,
+		currencyCode: CurrencyCode = CurrencyCode.SLCN
 	): PlayerBalance
 
 	fun withdraw(

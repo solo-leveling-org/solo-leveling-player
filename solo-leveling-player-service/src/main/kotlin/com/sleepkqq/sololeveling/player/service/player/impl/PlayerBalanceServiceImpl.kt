@@ -15,7 +15,6 @@ import java.math.BigDecimal
 import java.util.UUID
 import kotlin.reflect.KClass
 
-@Suppress("unused")
 @Service
 class PlayerBalanceServiceImpl(
 	private val playerBalanceTransactionService: PlayerBalanceTransactionService,
@@ -41,8 +40,8 @@ class PlayerBalanceServiceImpl(
 	override fun deposit(
 		playerBalance: PlayerBalance,
 		amount: BigDecimal,
-		currencyCode: CurrencyCode,
-		cause: PlayerBalanceTransactionCause
+		cause: PlayerBalanceTransactionCause,
+		currencyCode: CurrencyCode
 	): PlayerBalance {
 
 		require(amount > BigDecimal.ZERO) {

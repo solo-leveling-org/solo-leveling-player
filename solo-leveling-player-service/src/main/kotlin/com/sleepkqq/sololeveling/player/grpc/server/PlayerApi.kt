@@ -1,55 +1,34 @@
-package com.sleepkqq.sololeveling.player.api
+package com.sleepkqq.sololeveling.player.grpc.server
 
 import com.google.protobuf.Empty
 import com.sleepkqq.sololeveling.jimmer.enums.EnumLocalizer
+import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_BALANCE_TRANSACTIONS
+import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_TASKS
+import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.AMOUNT_FIELD
-import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.CAUSE_FIELD
-import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.TYPE_FIELD
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType
-import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
+import com.sleepkqq.sololeveling.player.model.repository.player.PlayerBalanceTransactionRepository
+import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceTransactionService
-import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
-import com.sleepkqq.sololeveling.player.service.player.PlayerTaskStatusService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
-import com.sleepkqq.sololeveling.proto.player.CompleteTaskRequest
-import com.sleepkqq.sololeveling.proto.player.CompleteTaskResponse
-import com.sleepkqq.sololeveling.proto.player.GenerateTasksRequest
-import com.sleepkqq.sololeveling.proto.player.GetActiveTasksRequest
-import com.sleepkqq.sololeveling.proto.player.GetActiveTasksResponse
-import com.sleepkqq.sololeveling.proto.player.GetPlayerBalanceRequest
-import com.sleepkqq.sololeveling.proto.player.GetPlayerBalanceResponse
-import com.sleepkqq.sololeveling.proto.player.GetPlayerTopicsRequest
-import com.sleepkqq.sololeveling.proto.player.GetPlayerTopicsResponse
-import com.sleepkqq.sololeveling.proto.player.PlayerServiceGrpc
-import com.sleepkqq.sololeveling.proto.player.SavePlayerTopicsRequest
-import com.sleepkqq.sololeveling.proto.player.SearchPlayerBalanceTransactionsRequest
-import com.sleepkqq.sololeveling.proto.player.SearchPlayerBalanceTransactionsResponse
-import com.sleepkqq.sololeveling.proto.player.SkipTaskRequest
+import com.sleepkqq.sololeveling.proto.player.*
 import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
 import org.springframework.grpc.server.service.GrpcService
 
-@Suppress("unused")
 @GrpcService
 class PlayerApi(
-	private val playerService: PlayerService,
 	private val playerTaskService: PlayerTaskService,
-	private val playerTaskStatusService: PlayerTaskStatusService,
 	private val playerTaskTopicService: PlayerTaskTopicService,
 	private val protoMapper: ProtoMapper,
 	private val playerBalanceTransactionService: PlayerBalanceTransactionService,
 	private val playerBalanceService: PlayerBalanceService,
 	private val enumLocalizer: EnumLocalizer
 ) : PlayerServiceGrpc.PlayerServiceImplBase() {
-
-	private companion object {
-		const val TABLES_PLAYER_BALANCE_TRANSACTIONS_PATH = "tables.player.balance.transactions"
-	}
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
@@ -112,7 +91,7 @@ class PlayerApi(
 	) {
 		log.info(">> generateTasks called by user={}", request.playerId)
 
-		playerTaskStatusService.generateTasks(request.playerId)
+		playerTaskService.generateTasks(request.playerId)
 
 		responseObserver.onNext(Empty.newBuilder().build())
 		responseObserver.onCompleted()
@@ -126,9 +105,10 @@ class PlayerApi(
 
 		val playerTask = protoMapper.map(request.playerTask)
 			.toEntity()
+		val task = protoMapper.map(request.playerTask.task)
+			.toEntity()
 
-		val playerStates = playerTaskStatusService.completeTask(playerTask, request.playerId)
-		playerTaskStatusService.generateTasks(request.playerId, setOf(playerTask.order()))
+		val playerStates = playerTaskService.completeTask(request.playerId, playerTask, task)
 
 		val response = CompleteTaskResponse.newBuilder()
 			.setPlayerBefore(protoMapper.map(playerStates.first))
@@ -147,7 +127,7 @@ class PlayerApi(
 
 		val playerTask = protoMapper.map(request.playerTask)
 			.toEntity()
-		playerTaskStatusService.skipTask(playerTask, request.playerId)
+		playerTaskService.skipTask(request.playerId, playerTask)
 
 		responseObserver.onNext(Empty.newBuilder().build())
 		responseObserver.onCompleted()
@@ -179,17 +159,38 @@ class PlayerApi(
 			request.options,
 			PlayerBalanceTransactionView::class
 		)
-		val response = protoMapper.map(
+		val response = protoMapper.mapTransactions(
 			transactionsPage,
 			request.options.page,
 			enumLocalizer.localize(
-				TABLES_PLAYER_BALANCE_TRANSACTIONS_PATH,
-				mapOf(
-					TYPE_FIELD to PlayerBalanceTransactionType::class.java,
-					CAUSE_FIELD to PlayerBalanceTransactionCause::class.java
-				)
+				TABLES_PLAYER_BALANCE_TRANSACTIONS,
+				PlayerBalanceTransactionRepository.FIELD_ENUM_TYPES
 			),
 			setOf(AMOUNT_FIELD)
+		)
+
+		responseObserver.onNext(response)
+		responseObserver.onCompleted()
+	}
+
+	override fun searchPlayerTasks(
+		request: SearchPlayerTasksRequest,
+		responseObserver: StreamObserver<SearchPlayerTasksResponse>
+	) {
+		log.info(">> searchPlayerTasks called by user={}", request.playerId)
+
+		val tasksPage = playerTaskService.searchView(
+			request.playerId,
+			request.options,
+			PlayerTaskView::class
+		)
+		val response = protoMapper.mapTasks(
+			tasksPage,
+			request.options.page,
+			enumLocalizer.localize(
+				TABLES_PLAYER_TASKS,
+				PlayerTaskRepository.FIELD_ENUM_TYPES
+			)
 		)
 
 		responseObserver.onNext(response)

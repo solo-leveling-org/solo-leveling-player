@@ -1,71 +1,47 @@
 package com.sleepkqq.sololeveling.player.kafka.consumer
 
-import com.sleepkqq.sololeveling.avro.constants.KafkaGroupIds
+import com.sleepkqq.sololeveling.avro.config.consumer.AbstractKafkaConsumer
 import com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics
+import com.sleepkqq.sololeveling.avro.idempotency.IdempotencyService
 import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent
 import com.sleepkqq.sololeveling.player.mapper.AvroMapper
 import com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput
 import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
-import com.sleepkqq.sololeveling.player.service.player.PlayerTaskStatusService
-import com.sleepkqq.sololeveling.player.service.redis.IdempotencyService
 import com.sleepkqq.sololeveling.player.service.task.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.support.Acknowledgment
+import org.springframework.kafka.annotation.RetryableTopic
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.util.Assert
 import java.util.UUID
 
-@Suppress("unused")
 @Service
 class SaveTasksConsumer(
 	private val taskService: TaskService,
 	private val playerTaskService: PlayerTaskService,
-	private val playerTaskStatusService: PlayerTaskStatusService,
 	private val avroMapper: AvroMapper,
-	private val idempotencyService: IdempotencyService,
-	private val notificationService: NotificationService
+	private val notificationService: NotificationService,
+	idempotencyService: IdempotencyService
+) : AbstractKafkaConsumer<SaveTasksEvent>(
+	idempotencyService = idempotencyService,
+	log = LoggerFactory.getLogger(SaveTasksConsumer::class.java)
 ) {
 
-	private val log = LoggerFactory.getLogger(javaClass)
-
+	@Transactional
+	@RetryableTopic
 	@KafkaListener(
 		topics = [KafkaTaskTopics.SAVE_TASKS_TOPIC],
-		groupId = KafkaGroupIds.PLAYER_GROUP_ID,
-		containerFactory = "kafkaListenerContainerFactorySaveTasksEvent"
+		groupId = $$"${spring.kafka.avro.group-id}"
 	)
-	@Transactional
-	fun listen(event: SaveTasksEvent, ack: Acknowledgment) {
-		val txId = event.txId
-
-		log.info(">> Start processing SaveTasksEvent | txId={}", txId)
-
-		try {
-			if (idempotencyService.isProcessed(txId)) {
-				ack.acknowledge()
-				return
-			}
-
-			processSaveTasksEvent(event)
-
-			notificationService.send(NotificationCommand.SaveTasks(event))
-
-			log.info("Successfully processed SaveTasksEvent | txId={}", txId)
-
-			ack.acknowledge()
-
-		} catch (e: Exception) {
-			log.error("Failed to process SaveTasksEvent | txId={}", txId, e)
-			throw e
-		}
+	fun listen(event: SaveTasksEvent) {
+		consumeWithIdempotency(event)
 	}
 
-	private fun processSaveTasksEvent(event: SaveTasksEvent) {
-		validateSaveTasksEvent(event)
+	override fun getTxId(event: SaveTasksEvent): String = event.txId
 
+	override fun processEvent(event: SaveTasksEvent) {
 		val tasks = event.tasks.map(avroMapper::map)
 			.onEach {
 				it.title!!.id = UUID.randomUUID()
@@ -84,17 +60,9 @@ class SaveTasksConsumer(
 				"Setting {} player tasks to IN_PROGRESS for player {}",
 				playerTasks.size, event.playerId
 			)
-			playerTaskStatusService.inProgressTasks(playerTasks)
+			playerTaskService.inProgressTasks(playerTasks)
 		}
-	}
 
-	private fun validateSaveTasksEvent(event: SaveTasksEvent) {
-		Assert.hasText(event.txId, "txId cannot be blank")
-		Assert.notEmpty(event.tasks, "tasks list cannot be empty")
-		Assert.isTrue(event.playerId > 0, "playerId must be positive")
-
-		event.tasks.forEach {
-			Assert.hasText(it.taskId, "taskId cannot be blank")
-		}
+		notificationService.send(NotificationCommand.SaveTasks(event))
 	}
 }

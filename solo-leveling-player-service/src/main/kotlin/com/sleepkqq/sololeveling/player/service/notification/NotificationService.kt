@@ -8,41 +8,28 @@ import com.sleepkqq.sololeveling.avro.notification.SendNotificationEvent
 import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent
 import com.sleepkqq.sololeveling.player.kafka.producer.SendNotificationProducer
 import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TASKS_GENERATION_SUCCESS
-import org.slf4j.LoggerFactory
-import org.springframework.context.MessageSource
-import org.springframework.context.i18n.LocaleContextHolder
+import com.sleepkqq.sololeveling.player.service.i18n.I18nService
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
 class NotificationService(
-	private val messageSource: MessageSource,
+	private val i18nService: I18nService,
 	private val sendNotificationProducer: SendNotificationProducer
 ) {
-
-	private val log = LoggerFactory.getLogger(javaClass)
 
 	fun send(command: NotificationCommand) {
 		val notificationData = when (command) {
 			is NotificationCommand.SaveTasks -> createTasksSavedNotification(command.event)
-			is NotificationCommand.SilentTasksUpdate -> createTaskCompletedNotification(command.userId)
+			is NotificationCommand.SilentTasksUpdate -> createTaskUpdatedNotification(command.userId)
 			is NotificationCommand.UpdateLocale -> createLocaleUpdatedNotification(command.userId)
 		}
 
-		sendNotificationProducer.send(notificationData.event)
-		log.info(
-			"<< {} | txId={}",
-			notificationData.successMessage,
-			notificationData.event.txId
-		)
+		sendNotificationProducer.send(notificationData)
 	}
 
 	private fun createTasksSavedNotification(event: SaveTasksEvent): NotificationData {
-		val message = messageSource.getMessage(
-			TASKS_GENERATION_SUCCESS,
-			null,
-			LocaleContextHolder.getLocale()
-		)
+		val message = i18nService.getMessage(TASKS_GENERATION_SUCCESS)
 
 		val context = NotificationCtx(
 			txId = event.txId,
@@ -50,18 +37,18 @@ class NotificationService(
 			source = NotificationSource.TASKS,
 			message = message,
 			visible = true,
-			notificationType = "tasks saved"
+			notificationCause = "tasks saved"
 		)
 
 		return createBaseNotification(context)
 	}
 
-	private fun createTaskCompletedNotification(userId: Long): NotificationData {
+	private fun createTaskUpdatedNotification(userId: Long): NotificationData {
 		val context = NotificationCtx(
 			txId = UUID.randomUUID().toString(),
 			userId = userId,
 			source = NotificationSource.TASKS,
-			notificationType = "task completed"
+			notificationCause = "task updated"
 		)
 
 		return createBaseNotification(context)
@@ -72,39 +59,19 @@ class NotificationService(
 			txId = UUID.randomUUID().toString(),
 			userId = userId,
 			source = NotificationSource.LOCALE,
-			notificationType = "locale updated"
+			notificationCause = "locale updated"
 		)
 
 		return createBaseNotification(context)
 	}
 
 	private fun createBaseNotification(context: NotificationCtx): NotificationData {
-		val notification = Notification(
-			context.message,
-			context.type,
-			context.source,
-			context.visible
-		)
+		val notification = Notification(context.message, context.type, context.source, context.visible)
 
-		val event = SendNotificationEvent(
-			context.txId,
-			context.userId,
-			context.priority,
-			notification
-		)
+		val event = SendNotificationEvent(context.txId, context.userId, context.priority, notification)
 
-		return NotificationData(
-			event = event,
-			successMessage = "${context.notificationType.replaceFirstChar { it.uppercase() }} notification sent",
-			errorContext = "${context.notificationType} notification"
-		)
+		return NotificationData(event, context.notificationCause)
 	}
-
-	private data class NotificationData(
-		val event: SendNotificationEvent,
-		val successMessage: String,
-		val errorContext: String
-	)
 
 	private data class NotificationCtx(
 		val txId: String,
@@ -112,8 +79,13 @@ class NotificationService(
 		val source: NotificationSource,
 		val message: String? = null,
 		val visible: Boolean = false,
-		val notificationType: String,
+		val notificationCause: String,
 		val type: NotificationType = NotificationType.INFO,
 		val priority: NotificationPriority = NotificationPriority.LOW
+	)
+
+	data class NotificationData(
+		val event: SendNotificationEvent,
+		val message: String
 	)
 }
