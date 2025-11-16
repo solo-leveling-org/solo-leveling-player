@@ -17,6 +17,10 @@ PlayerTaskView {
   task {
     #allScalars
 
+    -createdAt
+
+    -updatedAt
+
     title {
       #allScalars
     }
