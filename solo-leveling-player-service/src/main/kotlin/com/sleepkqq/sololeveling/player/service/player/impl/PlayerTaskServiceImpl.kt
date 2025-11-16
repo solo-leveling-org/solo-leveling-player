@@ -8,12 +8,12 @@ import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
+import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
-import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
 import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
@@ -99,7 +99,7 @@ class PlayerTaskServiceImpl(
 	}
 
 	@Transactional
-	override fun skipTask(playerTask: PlayerTask, playerId: Long) {
+	override fun skipTask(playerId: Long, playerTask: PlayerTask) {
 		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED)
 
 		generateTasks(playerId, setOf(playerTask.order()))
@@ -107,9 +107,9 @@ class PlayerTaskServiceImpl(
 
 	@Transactional
 	override fun completeTask(
-		playerTask: PlayerTask,
 		playerId: Long,
-		topics: Collection<TaskTopic>
+		playerTask: PlayerTask,
+		task: Task
 	): Pair<PlayerView, PlayerView> {
 
 		setStatus(listOf(playerTask), PlayerTaskStatus.COMPLETED)
@@ -117,14 +117,13 @@ class PlayerTaskServiceImpl(
 		val playerView = playerService.getView(playerId, PlayerView::class)
 		val player = playerView.toEntity()
 
-		val task = playerTask.task()
-
 		val updatedBalance = playerBalanceService.deposit(
 			player.balance()!!,
 			BigDecimal(task.currencyReward()!!),
 			PlayerBalanceTransactionCause.TASK_COMPLETION
 		)
 
+		val topics = task.topics().map(TaskTopicItem::topic)
 		val gainedExperiencePlayer = levelService.gainExperience(player, topics, task.experience()!!)
 
 		val updatedPlayer = playerService.update(

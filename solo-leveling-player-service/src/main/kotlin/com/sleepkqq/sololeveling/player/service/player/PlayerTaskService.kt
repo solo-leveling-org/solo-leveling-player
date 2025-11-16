@@ -3,7 +3,7 @@ package com.sleepkqq.sololeveling.player.service.player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
-import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
+import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
@@ -19,11 +19,11 @@ interface PlayerTaskService {
 	fun getActiveTasks(playerId: Long): List<PlayerTaskView>
 	fun getActiveTasksCount(playerId: Long): Long
 	fun initialize(playerId: Long, order: Int): PlayerTask
-	fun skipTask(playerTask: PlayerTask, playerId: Long)
+	fun skipTask(playerId: Long, playerTask: PlayerTask)
 	fun completeTask(
-		playerTask: PlayerTask,
 		playerId: Long,
-		topics: Collection<TaskTopic>
+		playerTask: PlayerTask,
+		task: Task
 	): Pair<PlayerView, PlayerView>
 
 	fun inProgressTasks(tasks: Collection<PlayerTask>)
