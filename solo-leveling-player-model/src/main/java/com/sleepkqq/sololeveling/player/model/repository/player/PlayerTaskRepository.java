@@ -28,6 +28,7 @@ import org.babyfish.jimmer.sql.JoinType;
 import org.babyfish.jimmer.sql.ast.Predicate;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
 import org.babyfish.jimmer.sql.ast.table.TableEx;
+import org.babyfish.jimmer.sql.fetcher.Fetcher;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -81,6 +82,21 @@ public class PlayerTaskRepository extends PageFetcher<PlayerTask, PlayerTaskTabl
         .execute();
   }
 
+  public List<PlayerTask> findByPlayerIdAndStatusIn(
+      long playerId,
+      Collection<PlayerTaskStatus> statuses,
+      Fetcher<PlayerTask> fetcher
+  ) {
+    var table = PLAYER_TASK_TABLE;
+    return sql.createQuery(table)
+        .where(Predicate.and(
+            table.playerId().eq(playerId),
+            table.status().in(statuses)
+        ))
+        .select(table.fetch(fetcher))
+        .execute();
+  }
+
   public List<PlayerTask> findPreparingTasksForRetry() {
     var table = PLAYER_TASK_TABLE;
     var oneMinuteAgo = Instant.now().minus(1, ChronoUnit.MINUTES);
@@ -98,17 +114,6 @@ public class PlayerTaskRepository extends PageFetcher<PlayerTask, PlayerTaskTabl
             )
         ))
         .execute();
-  }
-
-  public long countByPlayerIdAndStatusIn(long playerId, Collection<PlayerTaskStatus> statuses) {
-    var table = PLAYER_TASK_TABLE;
-    return sql.createQuery(table)
-        .where(Predicate.and(
-            table.playerId().eq(playerId),
-            table.status().in(statuses)
-        ))
-        .selectCount()
-        .fetchFirst();
   }
 
   public List<PlayerTask> findByPlayerIdAndTaskIdIn(long playerId, Collection<UUID> taskIds) {

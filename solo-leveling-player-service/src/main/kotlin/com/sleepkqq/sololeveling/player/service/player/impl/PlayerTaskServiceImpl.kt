@@ -2,6 +2,7 @@ package com.sleepkqq.sololeveling.player.service.player.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
+import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
@@ -19,6 +20,7 @@ import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
+import org.babyfish.jimmer.sql.fetcher.Fetcher
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -66,8 +68,8 @@ class PlayerTaskServiceImpl(
 		playerTaskRepository.findPreparingTasksForRetry()
 
 	@Transactional(readOnly = true)
-	override fun getActiveTasksCount(playerId: Long): Long =
-		playerTaskRepository.countByPlayerIdAndStatusIn(playerId, ACTIVE_TASKS_STATUSES)
+	override fun getActiveTasks(playerId: Long, fetcher: Fetcher<PlayerTask>): List<PlayerTask> =
+		playerTaskRepository.findByPlayerIdAndStatusIn(playerId, ACTIVE_TASKS_STATUSES, fetcher)
 
 	override fun initialize(playerId: Long, order: Int, task: Task): PlayerTask =
 		Immutables.createPlayerTask {
@@ -82,7 +84,7 @@ class PlayerTaskServiceImpl(
 	override fun skipTask(playerId: Long, playerTask: PlayerTask) {
 		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED)
 
-		generateTasks(playerId, setOf(playerTask.order()))
+		generateTasks(playerId, replaceOrders = setOf(playerTask.order()))
 	}
 
 	@Transactional
@@ -115,7 +117,7 @@ class PlayerTaskServiceImpl(
 			}
 		)
 
-		generateTasks(playerId, setOf(playerTask.order()))
+		generateTasks(playerId, updatedPlayer, setOf(playerTask.order()))
 
 		return playerView to PlayerView(updatedPlayer)
 	}
@@ -133,8 +135,12 @@ class PlayerTaskServiceImpl(
 	): Page<V> = playerTaskRepository.searchView(playerId, options, viewType.java)
 
 	@Transactional
-	override fun generateTasks(playerId: Long, replaceOrders: Set<Int>) {
-		val player = playerService.get(
+	override fun generateTasks(
+		playerId: Long,
+		player: Player?,
+		replaceOrders: Set<Int>
+	) {
+		val resolvedPlayer = player ?: playerService.get(
 			playerId,
 			Fetchers.PLAYER_FETCHER.maxTasks()
 				.taskTopics(
@@ -142,41 +148,35 @@ class PlayerTaskServiceImpl(
 						.taskTopic()
 						.active()
 						.level(
-							Fetchers.LEVEL_FETCHER
-								.level()
+							Fetchers.LEVEL_FETCHER.level()
 						)
-				)
-				.tasks(
-					Fetchers.PLAYER_TASK_FETCHER
-						.order()
 				)
 		)
 
-		val activeTasksCount = getActiveTasksCount(playerId)
-		val maxTasks = player.maxTasks()
-		val additionalTasksNeeded = maxTasks - activeTasksCount
+		val activeTasks = getActiveTasks(playerId, Fetchers.PLAYER_TASK_FETCHER.order())
+		val maxTasks = resolvedPlayer.maxTasks()
+		val additionalTasksNeeded = maxTasks - activeTasks.size
 
 		if (additionalTasksNeeded < 0) {
 			log.warn(
 				"Invalid state: activeTasksCount={} exceeds maxTasks={} for playerId={}, skipping generation",
-				activeTasksCount, maxTasks, playerId
+				activeTasks, maxTasks, playerId
 			)
 			return
 		}
 
-		val usedOrders = player.tasks().map { it.order() }.toSet()
+		val usedOrders = activeTasks.map { it.order() }.toSet()
 
-		// Вычисляем все orders для генерации (замена + дополнительные)
 		val additionalOrders = if (additionalTasksNeeded > 0) {
 			(0 until maxTasks)
 				.filterNot { it in usedOrders }
-				.take(additionalTasksNeeded.toInt())
+				.take(additionalTasksNeeded)
 		} else {
 			emptyList()
 		}
 
 		val allNewTasks = (replaceOrders + additionalOrders).map {
-			val task = taskService.initialize(player.taskTopics())
+			val task = taskService.initialize(resolvedPlayer.taskTopics())
 			initialize(playerId, it, task)
 		}
 
