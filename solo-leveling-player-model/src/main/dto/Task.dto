@@ -15,6 +15,26 @@ input TaskInput {
   description {
     #allScalars
   }
+
+  topics {
+    #allScalars
+  }
+}
+
+input SaveTaskInput {
+  #allScalars
+
+  -createdAt
+
+  -updatedAt
+
+  title {
+    #allScalars
+  }
+
+  description {
+    #allScalars
+  }
 }
 
 GenerateTaskView {

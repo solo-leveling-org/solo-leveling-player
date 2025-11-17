@@ -86,7 +86,13 @@ abstract class ProtoMapper {
 
 	@Mapping(target = "title", ignore = true)
 	@Mapping(target = "description", ignore = true)
+	@Mapping(target = "topics", source = "topicsList")
 	abstract fun map(input: TaskInput): com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput
+
+	protected fun taskTopicToTargetOf_topics(input: TaskTopic):
+			com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput.TargetOf_topics =
+		com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput.TargetOf_topics()
+			.apply { topic = map(input) }
 
 	abstract fun map(input: UserInput): com.sleepkqq.sololeveling.player.model.entity.user.dto.UserInput
 

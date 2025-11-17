@@ -4,7 +4,7 @@ import com.sleepkqq.sololeveling.avro.task.GenerateTask
 import com.sleepkqq.sololeveling.avro.task.SaveTask
 import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
 import com.sleepkqq.sololeveling.player.model.entity.task.dto.GenerateTaskView
-import com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput
+import com.sleepkqq.sololeveling.player.model.entity.task.dto.SaveTaskInput
 import org.babyfish.jimmer.View
 import org.mapstruct.CollectionMappingStrategy
 import org.mapstruct.Mapper
@@ -28,7 +28,7 @@ abstract class AvroMapper {
 		com.sleepkqq.sololeveling.avro.task.TaskTopic.valueOf(input.toEntity().topic().name)
 
 	@Mapping(target = "id", source = "taskId")
-	abstract fun map(input: SaveTask): TaskInput
+	abstract fun map(input: SaveTask): SaveTaskInput
 
 	@Mapping(target = "taskId", source = "id")
 	abstract fun map(input: GenerateTaskView): GenerateTask

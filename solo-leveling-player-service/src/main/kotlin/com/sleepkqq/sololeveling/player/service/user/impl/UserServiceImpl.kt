@@ -89,7 +89,7 @@ class UserServiceImpl(
 		it.setPlayer(Immutables.createPlayer { p ->
 			p.setId(user.id())
 			p.setMaxTasks(INITIAL_PLAYER_MAX_TASKS)
-			p.setLevel(levelService.initializeLevel(LevelType.PLAYER))
+			p.setLevel(levelService.initialize(LevelType.PLAYER))
 			p.setBalance(playerBalanceService.initializePlayerBalance())
 			p.setTaskTopics(
 				TaskTopic.entries.map { topic ->
