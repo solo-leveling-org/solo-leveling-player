@@ -3,8 +3,7 @@ package com.sleepkqq.sololeveling.player.model.interceptor;
 import com.sleepkqq.sololeveling.player.model.entity.Model;
 import com.sleepkqq.sololeveling.player.model.entity.ModelDraft;
 import com.sleepkqq.sololeveling.player.model.entity.ModelProps;
-import com.sleepkqq.sololeveling.player.model.entity.user.UserDraft;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import org.babyfish.jimmer.ImmutableObjects;
 import org.babyfish.jimmer.sql.DraftInterceptor;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +15,7 @@ public class ModelDraftInterceptor implements DraftInterceptor<Model, ModelDraft
 
   @Override
   public void beforeSave(@NotNull ModelDraft draft, @Nullable Model original) {
-    var now = LocalDateTime.now();
+    var now = Instant.now();
     draft.setUpdatedAt(now);
     if (original == null) {
       if (!ImmutableObjects.isLoaded(draft, ModelProps.CREATED_AT)) {
@@ -25,10 +24,6 @@ public class ModelDraftInterceptor implements DraftInterceptor<Model, ModelDraft
       if (!ImmutableObjects.isLoaded(draft, ModelProps.VERSION)) {
         draft.setVersion(0);
       }
-    }
-
-    if (draft instanceof UserDraft userDraft) {
-      userDraft.setLastLoginAt(now);
     }
   }
 }

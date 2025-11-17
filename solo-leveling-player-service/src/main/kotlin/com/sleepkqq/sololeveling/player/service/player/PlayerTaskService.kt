@@ -13,12 +13,11 @@ import kotlin.reflect.KClass
 interface PlayerTaskService {
 
 	fun find(playerId: Long, taskIds: Collection<UUID>): List<PlayerTask>
-	fun insert(playerTask: PlayerTask): PlayerTask
-	fun update(playerTask: PlayerTask): PlayerTask
 	fun insertAll(playerTasks: Collection<PlayerTask>)
 	fun getActiveTasks(playerId: Long): List<PlayerTaskView>
+	fun getPreparingTasksForRetry(): List<PlayerTask>
 	fun getActiveTasksCount(playerId: Long): Long
-	fun initialize(playerId: Long, order: Int): PlayerTask
+	fun initialize(playerId: Long, order: Int, task: Task): PlayerTask
 	fun skipTask(playerId: Long, playerTask: PlayerTask)
 	fun completeTask(
 		playerId: Long,
@@ -27,11 +26,7 @@ interface PlayerTaskService {
 	): Pair<PlayerView, PlayerView>
 
 	fun inProgressTasks(tasks: Collection<PlayerTask>)
-	fun generateTasks(
-		playerId: Long,
-		replaceOrders: Set<Int> = setOf()
-	)
-
+	fun generateTasks(playerId: Long, replaceOrders: Set<Int> = setOf())
 	fun <V : View<PlayerTask>> searchView(
 		playerId: Long,
 		options: RequestQueryOptions,

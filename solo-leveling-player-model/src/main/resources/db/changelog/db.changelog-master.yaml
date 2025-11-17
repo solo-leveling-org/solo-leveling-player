@@ -32,3 +32,5 @@ databaseChangeLog:
       file: db/changelog/v7/11-11-2025--remove-task-closed-at.yml
   - include:
       file: db/changelog/v7/15-11-2025--jsonb-enums-migration.yml
+  - include:
+      file: db/changelog/v7/17-11-2025--timestamptz-date-time-fields.yml

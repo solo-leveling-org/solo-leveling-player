@@ -58,7 +58,7 @@ class ApplicationTest : BaseTestClass() {
 				it.setLocale("test")
 				it.setRoles(
 					listOf(
-						Immutables.createUserRoleItem { it.setRole(UserRole.USER) }
+						Immutables.createUserRoleItem { i -> i.setRole(UserRole.USER) }
 					)
 				)
 			}
@@ -133,7 +133,7 @@ class ApplicationTest : BaseTestClass() {
 				it.setLocale("test")
 				it.setRoles(
 					listOf(
-						Immutables.createUserRoleItem { it.setRole(UserRole.USER) }
+						Immutables.createUserRoleItem { i -> i.setRole(UserRole.USER) }
 					)
 				)
 			}

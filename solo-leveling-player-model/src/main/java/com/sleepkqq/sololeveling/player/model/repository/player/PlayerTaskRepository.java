@@ -7,12 +7,15 @@ import static com.sleepkqq.sololeveling.player.model.entity.task.Task.RARITY_FIE
 
 import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
 import com.sleepkqq.sololeveling.jimmer.fetcher.PageFetcher;
+import com.sleepkqq.sololeveling.player.model.entity.Fetchers;
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask;
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTable;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity;
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic;
 import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -57,13 +60,6 @@ public class PlayerTaskRepository extends PageFetcher<PlayerTask, PlayerTaskTabl
     return fetch(table, options, table.fetch(viewType), table.playerId().eq(playerId));
   }
 
-  public PlayerTask save(PlayerTask playerTask, SaveMode saveMode) {
-    return sql.saveCommand(playerTask)
-        .setMode(saveMode)
-        .execute()
-        .getModifiedEntity();
-  }
-
   public void saveEntities(Collection<PlayerTask> playerTasks, SaveMode saveMode) {
     sql.saveEntitiesCommand(playerTasks)
         .setMode(saveMode)
@@ -85,6 +81,25 @@ public class PlayerTaskRepository extends PageFetcher<PlayerTask, PlayerTaskTabl
         .execute();
   }
 
+  public List<PlayerTask> findPreparingTasksForRetry() {
+    var table = PLAYER_TASK_TABLE;
+    var oneMinuteAgo = Instant.now().minus(1, ChronoUnit.MINUTES);
+
+    return sql.createQuery(table)
+        .where(
+            table.status().eq(PlayerTaskStatus.PREPARING),
+            table.updatedAt().le(oneMinuteAgo)
+        )
+        .select(table.fetch(Fetchers.PLAYER_TASK_FETCHER.allScalarFields()
+            .player()
+            .task(Fetchers.TASK_FETCHER
+                .version()
+                .topics(Fetchers.TASK_TOPIC_ITEM_FETCHER.topic())
+            )
+        ))
+        .execute();
+  }
+
   public long countByPlayerIdAndStatusIn(long playerId, Collection<PlayerTaskStatus> statuses) {
     var table = PLAYER_TASK_TABLE;
     return sql.createQuery(table)
@@ -99,10 +114,10 @@ public class PlayerTaskRepository extends PageFetcher<PlayerTask, PlayerTaskTabl
   public List<PlayerTask> findByPlayerIdAndTaskIdIn(long playerId, Collection<UUID> taskIds) {
     var table = PLAYER_TASK_TABLE;
     return sql.createQuery(table)
-        .where(Predicate.and(
+        .where(
             table.playerId().eq(playerId),
             table.taskId().in(taskIds)
-        ))
+        )
         .select(table)
         .execute();
   }

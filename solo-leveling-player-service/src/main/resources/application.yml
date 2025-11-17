@@ -31,6 +31,11 @@ spring:
     encoding: UTF-8
     cache-duration: -1
     fallback-to-system-locale: false
+app:
+  scheduler:
+    preparing-tasks-retry:
+      enabled: true
+      cron: "0 * * * * *"
 logging:
   level:
     org.apache.kafka.clients.consumer.ConsumerConfig: WARN

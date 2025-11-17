@@ -1,0 +1,99 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: timestamtz-migration
+      author: sleepkqq
+      changes:
+        # users
+        - modifyDataType:
+            tableName: users
+            columnName: created_at
+            newDataType: timestamptz
+        - modifyDataType:
+            tableName: users
+            columnName: updated_at
+            newDataType: timestamptz
+        - modifyDataType:
+            tableName: users
+            columnName: last_login_at
+            newDataType: timestamptz
+
+        # levels
+        - modifyDataType:
+            tableName: levels
+            columnName: created_at
+            newDataType: timestamptz
+        - modifyDataType:
+            tableName: levels
+            columnName: updated_at
+            newDataType: timestamptz
+
+        # players
+        - modifyDataType:
+            tableName: players
+            columnName: created_at
+            newDataType: timestamptz
+        - modifyDataType:
+            tableName: players
+            columnName: updated_at
+            newDataType: timestamptz
+
+        # player balances
+        - modifyDataType:
+            tableName: player_balances
+            columnName: created_at
+            newDataType: timestamptz
+        - modifyDataType:
+            tableName: player_balances
+            columnName: updated_at
+            newDataType: timestamptz
+
+        # player balance transactions
+        - modifyDataType:
+            tableName: player_balance_transactions
+            columnName: created_at
+            newDataType: timestamptz
+        - modifyDataType:
+            tableName: player_balance_transactions
+            columnName: updated_at
+            newDataType: timestamptz
+
+        # player tasks
+        - modifyDataType:
+            tableName: player_tasks
+            columnName: created_at
+            newDataType: timestamptz
+        - modifyDataType:
+            tableName: player_tasks
+            columnName: updated_at
+            newDataType: timestamptz
+
+        # player task topics
+        - modifyDataType:
+            tableName: player_task_topics
+            columnName: created_at
+            newDataType: timestamptz
+        - modifyDataType:
+            tableName: player_task_topics
+            columnName: updated_at
+            newDataType: timestamptz
+
+        # tasks
+        - modifyDataType:
+            tableName: tasks
+            columnName: created_at
+            newDataType: timestamptz
+        - modifyDataType:
+            tableName: tasks
+            columnName: updated_at
+            newDataType: timestamptz
+
+        # gear items
+        - modifyDataType:
+            tableName: gear_items
+            columnName: created_at
+            newDataType: timestamptz
+        - modifyDataType:
+            tableName: gear_items
+            columnName: updated_at
+            newDataType: timestamptz

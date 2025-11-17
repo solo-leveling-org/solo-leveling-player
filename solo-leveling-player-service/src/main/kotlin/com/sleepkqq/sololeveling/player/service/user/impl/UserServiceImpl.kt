@@ -18,6 +18,7 @@ import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 import java.util.Locale
 import java.util.UUID
 import kotlin.reflect.KClass
@@ -63,6 +64,7 @@ class UserServiceImpl(
 						u.setVersion(it.version())
 						u.setManualLocale(it.manualLocale())
 						u.setRoles(it.roles())
+						u.setLastLoginAt(Instant.now())
 					}
 				)
 			}

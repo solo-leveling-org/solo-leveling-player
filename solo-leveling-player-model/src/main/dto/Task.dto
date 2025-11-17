@@ -20,3 +20,15 @@ input TaskInput {
     #allScalars
   }
 }
+
+GenerateTaskView {
+  id
+
+  version
+
+  rarity
+
+  topics {
+    topic
+  }
+}

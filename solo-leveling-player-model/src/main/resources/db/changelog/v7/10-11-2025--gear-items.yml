@@ -155,3 +155,60 @@ databaseChangeLog:
             constraintName: fk_task_description
             referencedTableName: localization_items
             referencedColumnNames: id
+
+  - changeSet:
+      id: create-player-gear-items-table
+      author: user
+      changes:
+        - createTable:
+            tableName: player_gear_items
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: player_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: gear_item_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: integer
+                  defaultValue: 0
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: add-player-gear-items-foreign-keys
+      author: user
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: player_gear_items
+            baseColumnNames: player_id
+            constraintName: fk_player_gear_items_player
+            referencedTableName: players
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: player_gear_items
+            baseColumnNames: gear_item_id
+            constraintName: fk_player_gear_items_gear_item
+            referencedTableName: gear_items
+            referencedColumnNames: id

@@ -1,5 +1,6 @@
 package com.sleepkqq.sololeveling.player.model.entity.player;
 
+import com.sleepkqq.sololeveling.player.model.entity.Model;
 import com.sleepkqq.sololeveling.player.model.entity.gear.GearItem;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerGearItemStatus;
 import java.util.UUID;
@@ -13,7 +14,7 @@ import org.babyfish.jimmer.sql.meta.UUIDIdGenerator;
 
 @Entity
 @Table(name = "player_gear_items")
-public interface PlayerGearItem {
+public interface PlayerGearItem extends Model {
 
   @Id
   @GeneratedValue(generatorType = UUIDIdGenerator.class)

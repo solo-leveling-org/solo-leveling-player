@@ -1,13 +1,8 @@
 package com.sleepkqq.sololeveling.player.service.player.impl
 
-import com.sleepkqq.sololeveling.avro.task.GenerateTask
-import com.sleepkqq.sololeveling.avro.task.GenerateTasksEvent
-import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
-import com.sleepkqq.sololeveling.player.mapper.AvroMapper
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
-import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
@@ -15,14 +10,11 @@ import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceT
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
-import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
-import com.sleepkqq.sololeveling.player.service.notification.NotificationService
 import com.sleepkqq.sololeveling.player.service.player.LevelService
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
-import com.sleepkqq.sololeveling.player.service.task.DefineTaskRarityService
-import com.sleepkqq.sololeveling.player.service.task.DefineTaskTopicService
+import com.sleepkqq.sololeveling.player.service.task.TaskService
 import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
@@ -31,20 +23,16 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 import kotlin.reflect.KClass
 
 @Service
 class PlayerTaskServiceImpl(
 	private val playerTaskRepository: PlayerTaskRepository,
-	private val generateTasksProducer: GenerateTasksProducer,
 	private val playerBalanceService: PlayerBalanceService,
 	private val playerService: PlayerService,
 	private val levelService: LevelService,
-	private val notificationService: NotificationService,
-	private val defineTaskTopicService: DefineTaskTopicService,
-	private val defineTaskRarityService: DefineTaskRarityService,
-	private val avroMapper: AvroMapper
+	private val taskService: TaskService
 ) : PlayerTaskService {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -61,14 +49,6 @@ class PlayerTaskServiceImpl(
 		playerTaskRepository.findByPlayerIdAndTaskIdIn(playerId, taskIds)
 
 	@Transactional
-	override fun insert(playerTask: PlayerTask): PlayerTask =
-		playerTaskRepository.save(playerTask, SaveMode.INSERT_ONLY)
-
-	@Transactional
-	override fun update(playerTask: PlayerTask): PlayerTask =
-		playerTaskRepository.save(playerTask, SaveMode.UPDATE_ONLY)
-
-	@Transactional
 	override fun insertAll(playerTasks: Collection<PlayerTask>) {
 		playerTaskRepository.saveEntities(playerTasks, SaveMode.INSERT_ONLY)
 	}
@@ -82,21 +62,21 @@ class PlayerTaskServiceImpl(
 		)
 
 	@Transactional(readOnly = true)
+	override fun getPreparingTasksForRetry(): List<PlayerTask> =
+		playerTaskRepository.findPreparingTasksForRetry()
+
+	@Transactional(readOnly = true)
 	override fun getActiveTasksCount(playerId: Long): Long =
 		playerTaskRepository.countByPlayerIdAndStatusIn(playerId, ACTIVE_TASKS_STATUSES)
 
-	override fun initialize(playerId: Long, order: Int): PlayerTask = Immutables.createPlayerTask {
-		it.setId(UUID.randomUUID())
-		it.setStatus(PlayerTaskStatus.PREPARING)
-		it.setOrder(order)
-		it.setPlayerId(playerId)
-		it.setTask(
-			Immutables.createTask { t ->
-				t.setId(UUID.randomUUID())
-				t.setVersion(0)
-			}
-		)
-	}
+	override fun initialize(playerId: Long, order: Int, task: Task): PlayerTask =
+		Immutables.createPlayerTask {
+			it.setId(UUID.randomUUID())
+			it.setStatus(PlayerTaskStatus.PREPARING)
+			it.setOrder(order)
+			it.setPlayerId(playerId)
+			it.setTask(task)
+		}
 
 	@Transactional
 	override fun skipTask(playerId: Long, playerTask: PlayerTask) {
@@ -175,37 +155,31 @@ class PlayerTaskServiceImpl(
 
 		val activeTasksCount = getActiveTasksCount(playerId)
 		val maxTasks = player.maxTasks()
-
-		// Генерируем задачи для замены (если указаны)
-		val replaceTasks = replaceOrders.map {
-			initialize(playerId, it)
-		}
-
-		// Вычисляем сколько еще нужно задач для достижения maxTasks
 		val additionalTasksNeeded = maxTasks - activeTasksCount
 
 		if (additionalTasksNeeded < 0) {
 			log.warn(
-				"Invalid state: tasksAfterReplace={} exceeds maxTasks={} for playerId={}, skipping generation",
+				"Invalid state: activeTasksCount={} exceeds maxTasks={} for playerId={}, skipping generation",
 				activeTasksCount, maxTasks, playerId
 			)
 			return
 		}
 
-		val usedOrders = player.tasks()
-			.map { it.order() }
+		val usedOrders = player.tasks().map { it.order() }.toSet()
 
-		// Генерируем дополнительные задачи для заполнения до maxTasks
-		val additionalTasks = if (additionalTasksNeeded > 0) {
+		// Вычисляем все orders для генерации (замена + дополнительные)
+		val additionalOrders = if (additionalTasksNeeded > 0) {
 			(0 until maxTasks)
 				.filterNot { it in usedOrders }
 				.take(additionalTasksNeeded.toInt())
-				.map { initialize(playerId, it) }
 		} else {
 			emptyList()
 		}
 
-		val allNewTasks = replaceTasks + additionalTasks
+		val allNewTasks = (replaceOrders + additionalOrders).map {
+			val task = taskService.initialize(player.taskTopics())
+			initialize(playerId, it, task)
+		}
 
 		if (allNewTasks.isEmpty()) {
 			log.warn("No tasks generated for playerId={}, skipping", playerId)
@@ -214,43 +188,15 @@ class PlayerTaskServiceImpl(
 
 		log.info(
 			"Generated {} tasks for player {} ({} replace, {} new)",
-			allNewTasks.size, playerId, replaceTasks.size, additionalTasks.size
+			allNewTasks.size, playerId, replaceOrders.size, allNewTasks.size - replaceOrders.size
 		)
 
 		insertAll(allNewTasks)
 
-		val generateTasks = allNewTasks.map {
-			generateTask(it.task(), player.taskTopics())
-		}
-
-		val event = GenerateTasksEvent.newBuilder()
-			.setTxId(UUID.randomUUID().toString())
-			.setPlayerId(playerId)
-			.setInputs(generateTasks)
-			.build()
-
-		generateTasksProducer.send(event)
-
-		notificationService.send(NotificationCommand.SilentTasksUpdate(playerId))
+		taskService.generateTasks(playerId, allNewTasks.map { it.task() })
 	}
 
-	private fun generateTask(task: Task, playerTaskTopics: List<PlayerTaskTopic>): GenerateTask {
-		val playerTaskTopicsMap = playerTaskTopics
-			.filter(PlayerTaskTopic::isActive)
-			.associateBy(PlayerTaskTopic::taskTopic)
-
-		val definedTopics = defineTaskTopicService.define(playerTaskTopicsMap.keys)
-		val chosenTopics = definedTopics.map(playerTaskTopicsMap::getValue)
-
-		val rarity = defineTaskRarityService.define(chosenTopics)
-
-		return avroMapper.map(task, definedTopics, rarity)
-	}
-
-	private fun setStatus(
-		playerTasks: Collection<PlayerTask>,
-		status: PlayerTaskStatus
-	) {
+	private fun setStatus(playerTasks: Collection<PlayerTask>, status: PlayerTaskStatus) {
 		playerTaskRepository.saveEntities(
 			playerTasks.map {
 				Immutables.createPlayerTask(it) { p ->
