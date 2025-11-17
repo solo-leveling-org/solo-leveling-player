@@ -28,7 +28,6 @@ abstract class AvroMapper {
 		com.sleepkqq.sololeveling.avro.task.TaskTopic.valueOf(input.toEntity().topic().name)
 
 	@Mapping(target = "id", source = "taskId")
-	@Mapping(target = "topics", ignore = true)
 	abstract fun map(input: SaveTask): TaskInput
 
 	@Mapping(target = "taskId", source = "id")

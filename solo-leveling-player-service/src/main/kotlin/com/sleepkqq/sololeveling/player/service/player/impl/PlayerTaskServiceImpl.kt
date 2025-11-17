@@ -132,7 +132,6 @@ class PlayerTaskServiceImpl(
 		viewType: KClass<V>
 	): Page<V> = playerTaskRepository.searchView(playerId, options, viewType.java)
 
-	// todo: refactor
 	@Transactional
 	override fun generateTasks(playerId: Long, replaceOrders: Set<Int>) {
 		val player = playerService.get(

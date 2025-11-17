@@ -15,10 +15,6 @@ input TaskInput {
   description {
     #allScalars
   }
-
-  topics {
-    #allScalars
-  }
 }
 
 GenerateTaskView {

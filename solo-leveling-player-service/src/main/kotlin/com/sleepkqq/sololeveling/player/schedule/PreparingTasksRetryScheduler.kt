@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 @EnableConfigurationProperties(PreparingTasksRetrySchedulerProperties::class)
@@ -18,6 +19,7 @@ class PreparingTasksRetryScheduler(
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
+	@Transactional(readOnly = true)
 	@Scheduled(cron = $$"${app.scheduler.preparing-tasks-retry.cron}")
 	fun call() {
 		if (!preparingTasksRetrySchedulerProperties.enabled) {
