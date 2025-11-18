@@ -1,7 +1,6 @@
 package com.sleepkqq.sololeveling.player.model.repository.task;
 
 import static com.sleepkqq.sololeveling.player.model.entity.Tables.TASK_TABLE;
-import static java.util.Objects.requireNonNull;
 
 import com.sleepkqq.sololeveling.jimmer.sql.SqlFileLoader;
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask;
@@ -65,9 +64,15 @@ public class TaskRepository {
 
     return sql.createQuery(table)
         .where(
-            table.asTableEx().playerTasks().playerId().ne(playerId),
             table.rarity().eq(task.rarity()),
             table.version().ne(0),
+            Predicate.sql(
+                "NOT EXISTS (SELECT 1 FROM player_tasks pt WHERE pt.task_id = %e AND pt.player_id = %v)",
+                ctx -> {
+                  ctx.expression(table.id());
+                  ctx.value(playerId);
+                }
+            ),
             Predicate.sql(
                 """
                     EXISTS (
@@ -91,12 +96,13 @@ public class TaskRepository {
         .fetchFirstOrNull();
   }
 
+
   public Map<UUID, UUID> findMatchingTasks(long playerId, Collection<PlayerTask> playerTasks) {
 
     var inputJson = StreamEx.of(playerTasks)
         .map(p -> new JsonObject()
             .put("player_task_id", p.id())
-            .put("rarity", requireNonNull(p.task().rarity()).ordinal())
+            .put("rarity", p.task().rarity().ordinal())
             .put("topics", StreamEx.of(p.task().topics())
                 .map(TaskTopicItem::topic)
                 .map(TaskTopic::ordinal)

@@ -31,7 +31,7 @@ public interface PlayerTask extends Model {
   @JoinColumn(name = "player_id")
   Player player();
 
-  @Nullable
+  @Nullable // для механизма переиспользования задач
   @ManyToOne
   @JoinColumn(name = "task_id")
   Task task();
