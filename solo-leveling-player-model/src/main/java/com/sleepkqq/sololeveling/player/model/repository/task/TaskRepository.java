@@ -1,9 +1,9 @@
 package com.sleepkqq.sololeveling.player.model.repository.task;
 
 import static com.sleepkqq.sololeveling.player.model.entity.Tables.TASK_TABLE;
-import static com.sleepkqq.sololeveling.player.model.util.SqlUtils.loadSqlFile;
 import static java.util.Objects.requireNonNull;
 
+import com.sleepkqq.sololeveling.jimmer.sql.SqlFileLoader;
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask;
 import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity;
@@ -28,10 +28,11 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class TaskRepository {
 
-  private static final String FIND_MATCHING_TASKS_SQL = loadSqlFile("sql/find-matching-tasks.sql");
+  private static final String FIND_MATCHING_TASKS_SQL_FILE = "sql/find-matching-tasks.sql";
 
   private final JSqlClient sql;
   private final JdbcTemplate jdbcTemplate;
+  private final SqlFileLoader sqlFileLoader;
 
   @Nullable
   public Task findNullable(UUID id, Fetcher<Task> fetcher) {
@@ -55,7 +56,7 @@ public class TaskRepository {
         .execute();
   }
 
-  public UUID find(long playerId, Rarity rarity, Collection<TaskTopic> topics) {
+  public UUID findMatchingTasks(long playerId, Rarity rarity, Collection<TaskTopic> topics) {
     var topicOrdinalsArray = StreamEx.of(topics)
         .map(TaskTopic::ordinal)
         .toArray(Integer.class);
@@ -105,8 +106,8 @@ public class TaskRepository {
         .toListAndThen(JsonArray::new)
         .toString();
 
-    var result = jdbcTemplate.queryForList(FIND_MATCHING_TASKS_SQL, inputJson, playerId);
-    return StreamEx.of(result)
+    var sqlFile = sqlFileLoader.load(FIND_MATCHING_TASKS_SQL_FILE);
+    return StreamEx.of(jdbcTemplate.queryForList(sqlFile, inputJson, playerId))
         .toMap(
             row -> (UUID) row.get("player_task_id"),
             row -> (UUID) row.get("task_id")

@@ -179,10 +179,10 @@ class ApplicationTest : BaseTestClass() {
 		val testTopics = listOf(TaskTopic.MENTAL_HEALTH, TaskTopic.EDUCATION)
 
 		val (foundTaskId, duration) = measureTimedValue {
-			taskRepository.find(testPlayer.id(), Rarity.EPIC, testTopics)
+			taskRepository.findMatchingTasks(testPlayer.id(), Rarity.EPIC, testTopics)
 		}
 
-		println("find() took ${duration.inWholeMilliseconds} ms")
+		println("findMatchingTasks took ${duration.inWholeMilliseconds} ms")
 
 		// Then
 		assertThat(foundTaskId).isNotNull
