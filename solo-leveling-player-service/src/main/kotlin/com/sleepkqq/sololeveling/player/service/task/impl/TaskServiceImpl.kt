@@ -2,7 +2,9 @@ package com.sleepkqq.sololeveling.player.service.task.impl
 
 import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
+import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.repository.task.TaskRepository
 import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
@@ -43,9 +45,47 @@ class TaskServiceImpl(
 		taskRepository.save(task, SaveMode.UPDATE_ONLY)
 
 	override fun generateTasks(playerId: Long, tasks: List<Task>) {
+		if (tasks.isEmpty()) return
+
 		generateTasksProducer.send(playerId, tasks)
 
 		notificationService.send(NotificationCommand.SilentTasksUpdate(playerId))
+	}
+
+	@Transactional(readOnly = true)
+	override fun findMatchingTasks(playerId: Long, playerTasks: List<PlayerTask>): List<PlayerTask> {
+		if (playerTasks.isEmpty()) return listOf()
+
+		if (playerTasks.size == 1) {
+			val playerTask = playerTasks.first()
+
+			val updatedTask = taskRepository.findMatchingTasks(playerId, playerTask.task())
+				?.let {
+					Immutables.createPlayerTask(playerTask) { t ->
+						t.setTask(null)
+						t.setTaskId(it)
+						t.setStatus(PlayerTaskStatus.IN_PROGRESS)
+					}
+				}
+				?: playerTask
+
+			return listOf(updatedTask)
+		}
+
+		val playerTasksMap = playerTasks.associateBy { it.id() }.toMutableMap()
+		val matchedTasksMap = taskRepository.findMatchingTasks(playerId, playerTasks)
+
+		matchedTasksMap.forEach { (playerTaskId, taskId) ->
+			val playerTask = playerTasksMap[playerTaskId]
+
+			playerTasksMap[playerTaskId] = Immutables.createPlayerTask(playerTask) {
+				it.setTask(null)
+				it.setTaskId(taskId)
+				it.setStatus(PlayerTaskStatus.IN_PROGRESS)
+			}
+		}
+
+		return playerTasksMap.values.toList()
 	}
 
 	override fun initialize(playerTaskTopics: List<PlayerTaskTopic>): Task {

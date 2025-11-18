@@ -190,9 +190,14 @@ class PlayerTaskServiceImpl(
 			allNewTasks.size, playerId, replaceOrders.size, allNewTasks.size - replaceOrders.size
 		)
 
-		insertAll(allNewTasks)
+		val playerTasksToInsert = taskService.findMatchingTasks(playerId, allNewTasks)
 
-		taskService.generateTasks(playerId, allNewTasks.map { it.task() })
+		insertAll(playerTasksToInsert)
+
+		val tasksToGenerate = playerTasksToInsert.filter { it.status() == PlayerTaskStatus.PREPARING }
+			.map { it.task() }
+
+		taskService.generateTasks(playerId, tasksToGenerate)
 	}
 
 	private fun setStatus(playerTasks: Collection<PlayerTask>, status: PlayerTaskStatus) {

@@ -6,7 +6,6 @@ import static java.util.Objects.requireNonNull;
 import com.sleepkqq.sololeveling.jimmer.sql.SqlFileLoader;
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask;
 import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem;
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity;
 import com.sleepkqq.sololeveling.player.model.entity.task.Task;
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic;
 import io.vertx.core.json.JsonArray;
@@ -56,8 +55,9 @@ public class TaskRepository {
         .execute();
   }
 
-  public UUID findMatchingTasks(long playerId, Rarity rarity, Collection<TaskTopic> topics) {
-    var topicOrdinalsArray = StreamEx.of(topics)
+  public UUID findMatchingTasks(long playerId, Task task) {
+    var topicOrdinalsArray = StreamEx.of(task.topics())
+        .map(TaskTopicItem::topic)
         .map(TaskTopic::ordinal)
         .toArray(Integer.class);
 
@@ -66,7 +66,7 @@ public class TaskRepository {
     return sql.createQuery(table)
         .where(
             table.asTableEx().playerTasks().playerId().ne(playerId),
-            table.rarity().eq(rarity),
+            table.rarity().eq(task.rarity()),
             table.version().ne(0),
             Predicate.sql(
                 """
