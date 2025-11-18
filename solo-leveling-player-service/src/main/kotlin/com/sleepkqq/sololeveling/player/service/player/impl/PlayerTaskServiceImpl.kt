@@ -195,7 +195,7 @@ class PlayerTaskServiceImpl(
 		insertAll(playerTasksToInsert)
 
 		val tasksToGenerate = playerTasksToInsert.filter { it.status() == PlayerTaskStatus.PREPARING }
-			.map { it.task() }
+			.map { it.task()!! }
 
 		taskService.generateTasks(playerId, tasksToGenerate)
 	}

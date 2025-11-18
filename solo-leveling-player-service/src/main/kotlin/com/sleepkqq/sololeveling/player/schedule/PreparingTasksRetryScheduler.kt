@@ -40,7 +40,7 @@ class PreparingTasksRetryScheduler(
 		preparingTasks
 			.groupBy(
 				{ it.player().id() },
-				{ it.task() }
+				{ it.task()!! }
 			)
 			.forEach { (playerId, tasks) ->
 				log.info("Generating tasks for playerId={} with tasks={}", playerId, tasks.map { it.id() })

@@ -77,15 +77,14 @@ class TaskServiceImpl(
 		return updatedTasks
 	}
 
-	private fun updateTaskOrKeep(playerTask: PlayerTask, newTaskId: UUID?): PlayerTask {
-		return newTaskId?.let {
+	private fun updateTaskOrKeep(playerTask: PlayerTask, newTaskId: UUID?): PlayerTask =
+		newTaskId?.let {
 			Immutables.createPlayerTask(playerTask) {
 				it.setTask(null)
 					.setTaskId(newTaskId)
 					.setStatus(PlayerTaskStatus.IN_PROGRESS)
 			}
 		} ?: playerTask
-	}
 
 	override fun initialize(playerTaskTopics: List<PlayerTaskTopic>): Task {
 
