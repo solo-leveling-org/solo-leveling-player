@@ -69,6 +69,8 @@ class TaskServiceImpl(
 				}
 				?: playerTask
 
+			notificationService.send(NotificationCommand.SaveTasks(playerId))
+
 			return listOf(updatedTask)
 		}
 
@@ -85,7 +87,13 @@ class TaskServiceImpl(
 			}
 		}
 
-		return playerTasksMap.values.toList()
+		val updatedTasks = playerTasksMap.values.toList()
+
+		if (updatedTasks.all { it.status() == PlayerTaskStatus.IN_PROGRESS }) {
+			notificationService.send(NotificationCommand.SaveTasks(playerId))
+		}
+
+		return updatedTasks
 	}
 
 	override fun initialize(playerTaskTopics: List<PlayerTaskTopic>): Task {

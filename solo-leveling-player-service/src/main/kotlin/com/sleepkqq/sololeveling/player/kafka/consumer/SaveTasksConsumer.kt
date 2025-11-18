@@ -63,6 +63,6 @@ class SaveTasksConsumer(
 			playerTaskService.inProgressTasks(playerTasks)
 		}
 
-		notificationService.send(NotificationCommand.SaveTasks(event))
+		notificationService.send(NotificationCommand.SaveTasks(event.playerId, event.txId))
 	}
 }

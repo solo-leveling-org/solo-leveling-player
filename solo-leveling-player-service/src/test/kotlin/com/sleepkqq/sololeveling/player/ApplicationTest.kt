@@ -179,7 +179,10 @@ class ApplicationTest : BaseTestClass() {
 		val testTopics = listOf(TaskTopic.MENTAL_HEALTH, TaskTopic.EDUCATION)
 
 		val (foundTaskId, duration) = measureTimedValue {
-			taskRepository.findMatchingTasks(testPlayer.id(), Rarity.EPIC, testTopics)
+			taskRepository.findMatchingTasks(
+				testPlayer.id(),
+				createTask(rarity = Rarity.EPIC, topics = testTopics)
+			)
 		}
 
 		println("findMatchingTasks took ${duration.inWholeMilliseconds} ms")
