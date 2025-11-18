@@ -1,8 +1,8 @@
 package com.sleepkqq.sololeveling.player.schedule
 
 import com.sleepkqq.sololeveling.player.config.properties.PreparingTasksRetrySchedulerProperties
+import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
-import com.sleepkqq.sololeveling.player.service.task.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.scheduling.annotation.Scheduled
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 class PreparingTasksRetryScheduler(
 	private val preparingTasksRetrySchedulerProperties: PreparingTasksRetrySchedulerProperties,
 	private val playerTaskService: PlayerTaskService,
-	private val taskService: TaskService
+	private val generateTasksProducer: GenerateTasksProducer
 ) {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -44,7 +44,7 @@ class PreparingTasksRetryScheduler(
 			)
 			.forEach { (playerId, tasks) ->
 				log.info("Generating tasks for playerId={} with tasks={}", playerId, tasks.map { it.id() })
-				taskService.generateTasks(playerId, tasks)
+				generateTasksProducer.send(playerId, tasks)
 			}
 
 		log.info("Finished preparing tasks retry scheduler")
