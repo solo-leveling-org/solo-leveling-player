@@ -1,14 +1,11 @@
 package com.sleepkqq.sololeveling.player.service.task.impl
 
-import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.repository.task.TaskRepository
-import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
-import com.sleepkqq.sololeveling.player.service.notification.NotificationService
 import com.sleepkqq.sololeveling.player.service.task.DefineTaskRarityService
 import com.sleepkqq.sololeveling.player.service.task.DefineTaskTopicService
 import com.sleepkqq.sololeveling.player.service.task.TaskService
@@ -22,9 +19,7 @@ import java.util.UUID
 class TaskServiceImpl(
 	private val taskRepository: TaskRepository,
 	private val defineTaskTopicService: DefineTaskTopicService,
-	private val defineTaskRarityService: DefineTaskRarityService,
-	private val generateTasksProducer: GenerateTasksProducer,
-	private val notificationService: NotificationService,
+	private val defineTaskRarityService: DefineTaskRarityService
 ) : TaskService {
 
 	@Transactional(readOnly = true)
@@ -43,14 +38,6 @@ class TaskServiceImpl(
 	@Transactional
 	override fun update(task: Task): Task =
 		taskRepository.save(task, SaveMode.UPDATE_ONLY)
-
-	override fun generateTasks(playerId: Long, tasks: List<Task>) {
-		if (tasks.isEmpty()) return
-
-		generateTasksProducer.send(playerId, tasks)
-
-		notificationService.send(NotificationCommand.SilentTasksUpdate(playerId))
-	}
 
 	@Transactional(readOnly = true)
 	override fun findMatchingTasks(playerId: Long, playerTasks: List<PlayerTask>): List<PlayerTask> {

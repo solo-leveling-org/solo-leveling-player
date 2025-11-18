@@ -1,5 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.player.impl
 
+import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
@@ -37,7 +38,8 @@ class PlayerTaskServiceImpl(
 	private val playerService: PlayerService,
 	private val levelService: LevelService,
 	private val taskService: TaskService,
-	private val notificationService: NotificationService
+	private val notificationService: NotificationService,
+	private val generateTasksProducer: GenerateTasksProducer
 ) : PlayerTaskService {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -199,12 +201,14 @@ class PlayerTaskServiceImpl(
 
 		if (playerTasksToInsert.all { it.status() == PlayerTaskStatus.IN_PROGRESS }) {
 			notificationService.send(NotificationCommand.SaveTasks(playerId))
+		} else {
+			notificationService.send(NotificationCommand.SilentTasksUpdate(playerId))
 		}
 
 		val tasksToGenerate = playerTasksToInsert.filter { it.status() == PlayerTaskStatus.PREPARING }
 			.map { it.task()!! }
 
-		taskService.generateTasks(playerId, tasksToGenerate)
+		generateTasksProducer.send(playerId, tasksToGenerate)
 	}
 
 	private fun setStatus(playerTasks: Collection<PlayerTask>, status: PlayerTaskStatus) {

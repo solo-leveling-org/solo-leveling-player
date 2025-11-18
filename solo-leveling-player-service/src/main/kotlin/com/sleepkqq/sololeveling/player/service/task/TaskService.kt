@@ -17,7 +17,6 @@ interface TaskService {
 	fun updateAll(tasks: Collection<Task>)
 	fun insert(task: Task): Task
 	fun update(task: Task): Task
-	fun generateTasks(playerId: Long, tasks: List<Task>)
 	fun findMatchingTasks(playerId: Long, playerTasks: List<PlayerTask>): List<PlayerTask>
 	fun initialize(playerTaskTopics: List<PlayerTaskTopic>): Task
 }
