@@ -1,6 +1,5 @@
 package com.sleepkqq.sololeveling.player.service.task.impl
 
-import com.sleepkqq.sololeveling.player.exception.ModelNotFoundException
 import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
@@ -12,6 +11,7 @@ import com.sleepkqq.sololeveling.player.service.task.DefineTaskRarityService
 import com.sleepkqq.sololeveling.player.service.task.DefineTaskTopicService
 import com.sleepkqq.sololeveling.player.service.task.TaskService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
+import org.babyfish.jimmer.sql.fetcher.Fetcher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -26,11 +26,8 @@ class TaskServiceImpl(
 ) : TaskService {
 
 	@Transactional(readOnly = true)
-	override fun get(id: UUID): Task = find(id)
-		?: throw ModelNotFoundException(Task::class, id)
-
-	@Transactional(readOnly = true)
-	override fun find(id: UUID): Task? = taskRepository.findNullable(id)
+	override fun find(id: UUID, fetcher: Fetcher<Task>): Task? =
+		taskRepository.findNullable(id, fetcher)
 
 	@Transactional
 	override fun updateAll(tasks: Collection<Task>) {
