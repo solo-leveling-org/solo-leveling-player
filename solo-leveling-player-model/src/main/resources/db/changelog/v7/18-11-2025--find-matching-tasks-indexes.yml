@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-indexes-for-find-matching-tasks-query
+      author: sleepkqq
+      changes:
+        # Индекс для task_topic_items - ускоряет GROUP BY и JOIN в task_topic_agg CTE
+        - createIndex:
+            indexName: idx_task_topic_items_task_id_topic
+            tableName: task_topic_items
+            columns:
+              - column:
+                  name: task_id
+              - column:
+                  name: topic
+            clustered: false
+            unique: false
+
+        # Индекс для tasks по rarity - ускоряет фильтрацию в matching_tasks CTE
+        - createIndex:
+            indexName: idx_tasks_rarity
+            tableName: tasks
+            columns:
+              - column:
+                  name: rarity
+            clustered: false
+            unique: false
+
+        # Составной индекс для player_tasks - ускоряет NOT EXISTS проверку
+        - createIndex:
+            indexName: idx_player_tasks_player_id_task_id
+            tableName: player_tasks
+            columns:
+              - column:
+                  name: player_id
+              - column:
+                  name: task_id
+            clustered: false
+            unique: false
+
+        # Индекс на tasks.id для ускорения ORDER BY в ROW_NUMBER()
+        - createIndex:
+            indexName: idx_tasks_id
+            tableName: tasks
+            columns:
+              - column:
+                  name: id
+            clustered: false
+            unique: false

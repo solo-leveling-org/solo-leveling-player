@@ -46,6 +46,11 @@
       <artifactId>lombok</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+      <version>5.0.5</version>
+    </dependency>
 
     <!-- solo leveling -->
     <dependency>
