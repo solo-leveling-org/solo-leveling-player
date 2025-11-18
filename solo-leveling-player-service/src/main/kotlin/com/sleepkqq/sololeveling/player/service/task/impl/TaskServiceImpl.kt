@@ -54,46 +54,37 @@ class TaskServiceImpl(
 
 	@Transactional(readOnly = true)
 	override fun findMatchingTasks(playerId: Long, playerTasks: List<PlayerTask>): List<PlayerTask> {
-		if (playerTasks.isEmpty()) return listOf()
 
-		if (playerTasks.size == 1) {
-			val playerTask = playerTasks.first()
+		val updatedTasks = when (playerTasks.size) {
+			0 -> return emptyList()
 
-			val updatedTask = taskRepository.findMatchingTasks(playerId, playerTask.task())
-				?.let {
-					Immutables.createPlayerTask(playerTask) { t ->
-						t.setTask(null)
-						t.setTaskId(it)
-						t.setStatus(PlayerTaskStatus.IN_PROGRESS)
-					}
-				}
-				?: playerTask
+			1 -> {
+				val playerTask = playerTasks.first()
+				val newTaskId = taskRepository.findMatchingTasks(playerId, playerTask.task())
+				listOf(updateTaskOrKeep(playerTask, newTaskId))
+			}
 
-			notificationService.send(NotificationCommand.SaveTasks(playerId))
-
-			return listOf(updatedTask)
-		}
-
-		val playerTasksMap = playerTasks.associateBy { it.id() }.toMutableMap()
-		val matchedTasksMap = taskRepository.findMatchingTasks(playerId, playerTasks)
-
-		matchedTasksMap.forEach { (playerTaskId, taskId) ->
-			val playerTask = playerTasksMap[playerTaskId]
-
-			playerTasksMap[playerTaskId] = Immutables.createPlayerTask(playerTask) {
-				it.setTask(null)
-				it.setTaskId(taskId)
-				it.setStatus(PlayerTaskStatus.IN_PROGRESS)
+			else -> {
+				val matchedTasksMap = taskRepository.findMatchingTasks(playerId, playerTasks)
+				playerTasks.map { updateTaskOrKeep(it, matchedTasksMap[it.id()]) }
 			}
 		}
-
-		val updatedTasks = playerTasksMap.values.toList()
 
 		if (updatedTasks.all { it.status() == PlayerTaskStatus.IN_PROGRESS }) {
 			notificationService.send(NotificationCommand.SaveTasks(playerId))
 		}
 
 		return updatedTasks
+	}
+
+	private fun updateTaskOrKeep(playerTask: PlayerTask, newTaskId: UUID?): PlayerTask {
+		return newTaskId?.let {
+			Immutables.createPlayerTask(playerTask) {
+				it.setTask(null)
+					.setTaskId(newTaskId)
+					.setStatus(PlayerTaskStatus.IN_PROGRESS)
+			}
+		} ?: playerTask
 	}
 
 	override fun initialize(playerTaskTopics: List<PlayerTaskTopic>): Task {
