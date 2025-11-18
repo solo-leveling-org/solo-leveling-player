@@ -1,13 +1,11 @@
 package com.sleepkqq.sololeveling.player.extenstions
 
 import com.google.protobuf.Timestamp
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.Instant
 
-fun LocalDateTime.toTimestamp(): Timestamp {
-	val instant = this.atZone(ZoneOffset.UTC).toInstant()
+fun Instant.toTimestamp(): Timestamp {
 	return Timestamp.newBuilder()
-		.setSeconds(instant.epochSecond)
-		.setNanos(instant.nano)
+		.setSeconds(this.epochSecond)
+		.setNanos(this.nano)
 		.build()
 }

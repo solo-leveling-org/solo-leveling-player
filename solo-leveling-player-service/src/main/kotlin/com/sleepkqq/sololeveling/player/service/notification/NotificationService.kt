@@ -5,7 +5,6 @@ import com.sleepkqq.sololeveling.avro.notification.NotificationPriority
 import com.sleepkqq.sololeveling.avro.notification.NotificationSource
 import com.sleepkqq.sololeveling.avro.notification.NotificationType
 import com.sleepkqq.sololeveling.avro.notification.SendNotificationEvent
-import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent
 import com.sleepkqq.sololeveling.player.kafka.producer.SendNotificationProducer
 import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TASKS_GENERATION_SUCCESS
 import com.sleepkqq.sololeveling.player.service.i18n.I18nService
@@ -20,7 +19,7 @@ class NotificationService(
 
 	fun send(command: NotificationCommand) {
 		val notificationData = when (command) {
-			is NotificationCommand.SaveTasks -> createTasksSavedNotification(command.event)
+			is NotificationCommand.SaveTasks -> createTasksSavedNotification(command.userId, command.txId)
 			is NotificationCommand.SilentTasksUpdate -> createTaskUpdatedNotification(command.userId)
 			is NotificationCommand.UpdateLocale -> createLocaleUpdatedNotification(command.userId)
 		}
@@ -28,12 +27,12 @@ class NotificationService(
 		sendNotificationProducer.send(notificationData)
 	}
 
-	private fun createTasksSavedNotification(event: SaveTasksEvent): NotificationData {
+	private fun createTasksSavedNotification(userId: Long, txId: String): NotificationData {
 		val message = i18nService.getMessage(TASKS_GENERATION_SUCCESS)
 
 		val context = NotificationCtx(
-			txId = event.txId,
-			userId = event.playerId,
+			txId = txId,
+			userId = userId,
 			source = NotificationSource.TASKS,
 			message = message,
 			visible = true,

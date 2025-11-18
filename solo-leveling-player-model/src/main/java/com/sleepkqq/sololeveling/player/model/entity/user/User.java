@@ -2,7 +2,7 @@ package com.sleepkqq.sololeveling.player.model.entity.user;
 
 import com.sleepkqq.sololeveling.player.model.entity.Model;
 import com.sleepkqq.sololeveling.player.model.entity.player.Player;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import org.babyfish.jimmer.sql.Entity;
 import org.babyfish.jimmer.sql.Id;
@@ -31,7 +31,7 @@ public interface User extends Model {
   @Nullable
   String manualLocale();
 
-  LocalDateTime lastLoginAt();
+  Instant lastLoginAt();
 
   @OneToMany(mappedBy = "user")
   List<UserRoleItem> roles();

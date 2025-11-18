@@ -24,7 +24,7 @@ import org.babyfish.jimmer.View
 import org.mapstruct.*
 import org.springframework.context.i18n.LocaleContextHolder
 import java.math.BigDecimal
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Mapper(
 	componentModel = "spring",
@@ -53,7 +53,7 @@ abstract class ProtoMapper {
 
 	fun map(input: View<TaskTopicItem>): TaskTopic = TaskTopic.valueOf(input.toEntity().topic().name)
 
-	fun map(input: LocalDateTime): Timestamp = input.toTimestamp()
+	fun map(input: Instant): Timestamp = input.toTimestamp()
 
 	fun map(input: View<LocalizationItem>): String = input.toEntity()
 		.let { if (LocaleContextHolder.getLocale().language == "ru") it.ru() else it.en() }

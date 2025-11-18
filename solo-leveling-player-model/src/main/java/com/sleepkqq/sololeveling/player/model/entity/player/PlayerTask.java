@@ -12,6 +12,7 @@ import org.babyfish.jimmer.sql.JoinColumn;
 import org.babyfish.jimmer.sql.ManyToOne;
 import org.babyfish.jimmer.sql.Table;
 import org.babyfish.jimmer.sql.meta.UUIDIdGenerator;
+import org.jetbrains.annotations.Nullable;
 
 @Entity
 @Table(name = "player_tasks")
@@ -30,6 +31,7 @@ public interface PlayerTask extends Model {
   @JoinColumn(name = "player_id")
   Player player();
 
+  @Nullable // для механизма переиспользования задач
   @ManyToOne
   @JoinColumn(name = "task_id")
   Task task();

@@ -22,7 +22,7 @@ class LevelServiceImpl(
 		const val INITIAL_EXPERIENCE = 0
 	}
 
-	override fun initializeLevel(levelType: LevelType): Level =
+	override fun initialize(levelType: LevelType): Level =
 		Immutables.createLevel {
 			it.setId(UUID.randomUUID())
 			it.setLevel(INITIAL_LEVEL)

@@ -20,3 +20,31 @@ input TaskInput {
     #allScalars
   }
 }
+
+input SaveTaskInput {
+  #allScalars
+
+  -createdAt
+
+  -updatedAt
+
+  title {
+    #allScalars
+  }
+
+  description {
+    #allScalars
+  }
+}
+
+GenerateTaskView {
+  id
+
+  version
+
+  rarity
+
+  topics {
+    topic
+  }
+}

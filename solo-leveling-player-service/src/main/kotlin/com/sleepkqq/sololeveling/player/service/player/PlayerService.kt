@@ -18,5 +18,5 @@ interface PlayerService {
 		?: throw ModelNotFoundException(Player::class, id)
 
 	fun insert(player: Player): Player
-	fun update(player: Player, ): Player
+	fun update(player: Player): Player
 }

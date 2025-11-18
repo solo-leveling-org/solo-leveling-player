@@ -24,7 +24,7 @@ class PlayerTaskTopicServiceImpl(
 			it.setId(UUID.randomUUID())
 			it.setTaskTopic(taskTopic)
 			it.setPlayerId(playerId)
-			it.setLevel(levelService.initializeLevel(LevelType.TASK_TOPIC))
+			it.setLevel(levelService.initialize(LevelType.TASK_TOPIC))
 			it.setActive(false)
 		}
 

@@ -5,7 +5,7 @@ import com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics
 import com.sleepkqq.sololeveling.avro.idempotency.IdempotencyService
 import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent
 import com.sleepkqq.sololeveling.player.mapper.AvroMapper
-import com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput
+import com.sleepkqq.sololeveling.player.model.entity.task.dto.SaveTaskInput
 import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
@@ -47,7 +47,7 @@ class SaveTasksConsumer(
 				it.title!!.id = UUID.randomUUID()
 				it.description!!.id = UUID.randomUUID()
 			}
-			.map(TaskInput::toEntity)
+			.map(SaveTaskInput::toEntity)
 
 		log.info("Updating {} tasks for player {}", tasks.size, event.playerId)
 		taskService.updateAll(tasks)
@@ -63,6 +63,6 @@ class SaveTasksConsumer(
 			playerTaskService.inProgressTasks(playerTasks)
 		}
 
-		notificationService.send(NotificationCommand.SaveTasks(event))
+		notificationService.send(NotificationCommand.SaveTasks(event.playerId, event.txId))
 	}
 }
