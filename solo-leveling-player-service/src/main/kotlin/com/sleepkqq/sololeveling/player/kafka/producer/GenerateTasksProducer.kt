@@ -20,6 +20,8 @@ class GenerateTasksProducer(
 
 	fun send(playerId: Long, tasks: List<Task>) {
 
+		if (tasks.isEmpty()) return
+
 		val generateTasks = tasks.map { avroMapper.map(GenerateTaskView(it)) }
 
 		val event = GenerateTasksEvent.newBuilder()
