@@ -70,10 +70,6 @@ class TaskServiceImpl(
 			}
 		}
 
-		if (updatedTasks.all { it.status() == PlayerTaskStatus.IN_PROGRESS }) {
-			notificationService.send(NotificationCommand.SaveTasks(playerId))
-		}
-
 		return updatedTasks
 	}
 

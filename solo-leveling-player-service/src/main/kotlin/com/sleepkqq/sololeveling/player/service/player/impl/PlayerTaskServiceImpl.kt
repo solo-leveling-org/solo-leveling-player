@@ -11,6 +11,8 @@ import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceT
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
+import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
+import com.sleepkqq.sololeveling.player.service.notification.NotificationService
 import com.sleepkqq.sololeveling.player.service.player.LevelService
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerService
@@ -34,7 +36,8 @@ class PlayerTaskServiceImpl(
 	private val playerBalanceService: PlayerBalanceService,
 	private val playerService: PlayerService,
 	private val levelService: LevelService,
-	private val taskService: TaskService
+	private val taskService: TaskService,
+	private val notificationService: NotificationService
 ) : PlayerTaskService {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -193,6 +196,10 @@ class PlayerTaskServiceImpl(
 		val playerTasksToInsert = taskService.findMatchingTasks(playerId, allNewTasks)
 
 		insertAll(playerTasksToInsert)
+
+		if (playerTasksToInsert.all { it.status() == PlayerTaskStatus.IN_PROGRESS }) {
+			notificationService.send(NotificationCommand.SaveTasks(playerId))
+		}
 
 		val tasksToGenerate = playerTasksToInsert.filter { it.status() == PlayerTaskStatus.PREPARING }
 			.map { it.task()!! }

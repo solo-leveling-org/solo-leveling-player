@@ -61,7 +61,6 @@ public class TaskRepository {
         .toArray(Integer.class);
 
     var table = TASK_TABLE;
-
     return sql.createQuery(table)
         .where(
             table.rarity().eq(task.rarity()),
