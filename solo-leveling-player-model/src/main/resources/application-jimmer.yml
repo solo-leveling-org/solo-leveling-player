@@ -3,9 +3,9 @@ spring:
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
-liquibase:
-  enabled: true
-  default-schema: public
+  liquibase:
+    enabled: true
+    default-schema: public
 jimmer:
   default-enum-strategy: ORDINAL
   show-sql: false
