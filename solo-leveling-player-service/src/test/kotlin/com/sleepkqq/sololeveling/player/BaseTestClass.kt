@@ -16,20 +16,20 @@ import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceTransactionS
 import com.sleepkqq.sololeveling.player.service.user.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
+import org.springframework.transaction.annotation.Transactional
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.kafka.ConfluentKafkaContainer
 import java.math.BigDecimal
 import java.util.UUID
 
 @Suppress("unused")
+@Transactional
 @Testcontainers
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -42,50 +42,64 @@ abstract class BaseTestClass {
 	protected lateinit var playerBalanceTransactionService: PlayerBalanceTransactionService
 
 	companion object {
-		@JvmStatic
-		@Container
-		val kafkaContainer = ConfluentKafkaContainer("confluentinc/cp-kafka:7.6.0")
-			.apply {
-				withExposedPorts(9092)
-				withNetwork(Network.SHARED)
-			}
+		private val network = Network.newNetwork()
 
-		@JvmStatic
-		@Container
-		@ServiceConnection(name = "redis")
-		val redisContainer = GenericContainer("redis:7.2.4")
-			.apply {
-				withExposedPorts(6379)
-				withNetwork(Network.SHARED)
-			}
-
-		@JvmStatic
-		@Container
-		val schemaRegistryContainer = GenericContainer("confluentinc/cp-schema-registry:7.6.0")
-			.apply {
-				withExposedPorts(8081)
-				withNetwork(Network.SHARED)
-			}
-
-		@JvmStatic
-		@Container
-		@ServiceConnection(name = "postgresql")
-		val postgresContainer = PostgreSQLContainer<Nothing>("postgres:16.2")
+		private val postgresContainer = PostgreSQLContainer("postgres:16.2")
 			.apply {
 				withDatabaseName("sololeveling_test")
 				withUsername("test")
 				withPassword("test")
-				withNetwork(Network.SHARED)
+				withNetwork(network)
+				withNetworkAliases("postgres")
 			}
+
+		private val kafkaContainer = ConfluentKafkaContainer("confluentinc/cp-kafka:7.6.0")
+			.apply {
+				withNetwork(network)
+				withNetworkAliases("kafka")
+			}
+
+		private val schemaRegistryContainer = GenericContainer("confluentinc/cp-schema-registry:7.6.0")
+			.apply {
+				withExposedPorts(8081)
+				withNetwork(network)
+				withNetworkAliases("schema-registry")
+				dependsOn(kafkaContainer)
+				withEnv("SCHEMA_REGISTRY_HOST_NAME", "schema-registry")
+				withEnv("SCHEMA_REGISTRY_LISTENERS", "http://0.0.0.0:8081")
+				withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "PLAINTEXT://kafka:9092")
+			}
+
+		private val redisContainer = GenericContainer("redis:7.2.4")
+			.apply {
+				withExposedPorts(6379)
+				withNetwork(network)
+				withNetworkAliases("redis")
+			}
+
+		init {
+			postgresContainer.start()
+			kafkaContainer.start()
+			schemaRegistryContainer.start()
+			redisContainer.start()
+		}
 
 		@JvmStatic
 		@DynamicPropertySource
 		fun configureProperties(registry: DynamicPropertyRegistry) {
-			registry.add("spring.kafka.bootstrap-servers") {
-				kafkaContainer.bootstrapServers
-			}
+			registry.add("spring.datasource.url", postgresContainer::getJdbcUrl)
+			registry.add("spring.datasource.username", postgresContainer::getUsername)
+			registry.add("spring.datasource.password", postgresContainer::getPassword)
+
+			registry.add("spring.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers)
+
 			registry.add("spring.kafka.properties.schema.registry.url") {
 				"http://${schemaRegistryContainer.host}:${schemaRegistryContainer.firstMappedPort}"
+			}
+
+			registry.add("spring.data.redis.host", redisContainer::getHost)
+			registry.add("spring.data.redis.port") {
+				redisContainer.getMappedPort(6379).toString()
 			}
 		}
 	}
