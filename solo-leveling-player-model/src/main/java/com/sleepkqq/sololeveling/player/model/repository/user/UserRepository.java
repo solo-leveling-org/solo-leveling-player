@@ -5,9 +5,12 @@ import static com.sleepkqq.sololeveling.player.model.entity.Tables.USER_TABLE;
 
 import com.sleepkqq.sololeveling.player.model.entity.leaderboard.enums.LeaderboardType;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus;
+import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser;
+import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUserMapper;
 import com.sleepkqq.sololeveling.player.model.entity.user.User;
 import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher;
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.LeaderboardUserView;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Locale;
@@ -16,8 +19,9 @@ import org.babyfish.jimmer.Page;
 import org.babyfish.jimmer.View;
 import org.babyfish.jimmer.sql.JSqlClient;
 import org.babyfish.jimmer.sql.ast.Expression;
+import org.babyfish.jimmer.sql.ast.Predicate;
+import org.babyfish.jimmer.sql.ast.Selection;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
-import org.babyfish.jimmer.sql.ast.tuple.Tuple3;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Repository;
 
@@ -60,7 +64,8 @@ public class UserRepository {
         .execute();
   }
 
-  public Page<? extends Tuple3<LeaderboardUserView, ? extends Number, Integer>> getLeaderboardPage(
+  @SuppressWarnings("unchecked")
+  public Page<LeaderboardUser> getLeaderboardPage(
       LeaderboardType type,
       @Nullable LocalDate day,
       int page,
@@ -68,13 +73,16 @@ public class UserRepository {
   ) {
     var u = USER_TABLE;
 
-    var expression = switch (type) {
+    Expression<? extends Number> expression;
+    Predicate predicate;
+
+    switch (type) {
       case TASKS -> {
         var pt = PLAYER_TASK_TABLE;
 
         var query = sql.createSubQuery(pt)
             .where(
-                pt.player().user().id().eq(u.id()),
+                pt.player().id().eq(u.id()),
                 pt.status().eq(PlayerTaskStatus.COMPLETED)
             );
 
@@ -89,15 +97,27 @@ public class UserRepository {
           );
         }
 
-        yield query.selectCount();
+        var taskCount = query.selectCount();
+        expression = taskCount;
+        predicate = taskCount.gt(0L);
       }
 
-      case CURRENCY -> u.player().balance().balance();
+      case CURRENCY -> {
+        var balance = u.player().balance().balance();
+        expression = balance;
+        predicate = balance.gt(BigDecimal.ZERO);
+      }
 
-      case LEVEL -> u.player().level().level();
-    };
+      case LEVEL -> {
+        expression = u.player().level().level();
+        predicate = null;
+      }
+
+      default -> throw new IllegalArgumentException("Unknown leaderboard type: " + type);
+    }
 
     var baseUser = sql.createBaseQuery(u)
+        .where(predicate)
         .addSelect(u)
         .addSelect(expression)
         .addSelect(
@@ -111,10 +131,10 @@ public class UserRepository {
         .asBaseTable();
 
     return sql.createQuery(baseUser)
-        .select(
-            baseUser.get_1().fetch(LeaderboardUserView.class),
-            baseUser.get_2(),
-            baseUser.get_3()
+        .select(LeaderboardUserMapper
+            .user(baseUser.get_1().fetch(LeaderboardUserView.class))
+            .score((Selection<Number>) baseUser.get_2())
+            .position(baseUser.get_3())
         )
         .fetchPage(page, size);
   }
