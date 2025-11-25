@@ -49,7 +49,7 @@
     <!-- database -->
     <postgresql.version>42.7.8</postgresql.version>
     <liquibase.version>5.0.1</liquibase.version>
-    <jimmer.version>0.9.115</jimmer.version>
+    <jimmer.version>0.9.116</jimmer.version>
 
     <!-- native build -->
     <native-maven-plugin.version>0.11.0</native-maven-plugin.version>
@@ -61,7 +61,7 @@
     <mapstruct.version>1.6.3</mapstruct.version>
 
     <!-- solo leveling -->
-    <solo-leveling-lib.version>1.3.6</solo-leveling-lib.version>
+    <solo-leveling-lib.version>1.3.11</solo-leveling-lib.version>
 
     <!-- utils -->
     <streamex.version>0.8.3</streamex.version>

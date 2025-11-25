@@ -1,14 +1,23 @@
 package com.sleepkqq.sololeveling.player.model.repository.user;
 
+import static com.sleepkqq.sololeveling.player.model.entity.Tables.PLAYER_TASK_TABLE;
 import static com.sleepkqq.sololeveling.player.model.entity.Tables.USER_TABLE;
 
+import com.sleepkqq.sololeveling.player.model.entity.leaderboard.enums.LeaderboardType;
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus;
 import com.sleepkqq.sololeveling.player.model.entity.user.User;
 import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher;
+import com.sleepkqq.sololeveling.player.model.entity.user.dto.LeaderboardUserView;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
+import org.babyfish.jimmer.Page;
 import org.babyfish.jimmer.View;
 import org.babyfish.jimmer.sql.JSqlClient;
+import org.babyfish.jimmer.sql.ast.Expression;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
+import org.babyfish.jimmer.sql.ast.tuple.Tuple3;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Repository;
 
@@ -49,5 +58,64 @@ public class UserRepository {
         .where(table.id().eq(id))
         .set(table.manualLocale(), locale.getLanguage())
         .execute();
+  }
+
+  public Page<? extends Tuple3<LeaderboardUserView, ? extends Number, Integer>> getLeaderboardPage(
+      LeaderboardType type,
+      @Nullable LocalDate day,
+      int page,
+      int size
+  ) {
+    var u = USER_TABLE;
+
+    var expression = switch (type) {
+      case TASKS -> {
+        var pt = PLAYER_TASK_TABLE;
+
+        var query = sql.createSubQuery(pt)
+            .where(
+                pt.player().user().id().eq(u.id()),
+                pt.status().eq(PlayerTaskStatus.COMPLETED)
+            );
+
+        if (day != null) {
+          var utc = ZoneId.of("UTC");
+          var startOfDay = day.atStartOfDay(utc).toInstant();
+          var endOfDay = day.plusDays(1).atStartOfDay(utc).toInstant();
+
+          query = query.where(
+              pt.updatedAt().ge(startOfDay),
+              pt.updatedAt().lt(endOfDay)
+          );
+        }
+
+        yield query.selectCount();
+      }
+
+      case CURRENCY -> u.player().balance().balance();
+
+      case LEVEL -> u.player().level().level();
+    };
+
+    var baseUser = sql.createBaseQuery(u)
+        .addSelect(u)
+        .addSelect(expression)
+        .addSelect(
+            Expression.numeric().sql(
+                Integer.class,
+                "row_number() over(order by %e desc, %e asc)",
+                expression,
+                u.id()
+            )
+        )
+        .asBaseTable();
+
+    return sql.createQuery(baseUser)
+        .select(
+            baseUser.get_1().fetch(LeaderboardUserView.class),
+            baseUser.get_2(),
+            baseUser.get_3()
+        )
+        .fetchPage(page, size);
   }
 }
