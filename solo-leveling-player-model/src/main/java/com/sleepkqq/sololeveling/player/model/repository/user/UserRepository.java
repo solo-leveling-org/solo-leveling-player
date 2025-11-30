@@ -1,15 +1,16 @@
 package com.sleepkqq.sololeveling.player.model.repository.user;
 
+import static com.sleepkqq.sololeveling.player.model.entity.Tables.PLAYER_TABLE;
 import static com.sleepkqq.sololeveling.player.model.entity.Tables.PLAYER_TASK_TABLE;
 import static com.sleepkqq.sololeveling.player.model.entity.Tables.USER_TABLE;
 
-import com.sleepkqq.sololeveling.player.model.entity.leaderboard.enums.LeaderboardType;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus;
 import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser;
 import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUserMapper;
 import com.sleepkqq.sololeveling.player.model.entity.user.User;
 import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher;
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.LeaderboardUserView;
+import com.sleepkqq.sololeveling.proto.user.LeaderboardType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -67,11 +68,10 @@ public class UserRepository {
   @SuppressWarnings("unchecked")
   public Page<LeaderboardUser> getLeaderboardPage(
       LeaderboardType type,
-      @Nullable LocalDate day,
-      int page,
-      int size
+      LeaderboardRequestQueryOptions options,
+      RequestPaging paging
   ) {
-    var u = USER_TABLE;
+    var p = PLAYER_TABLE;
 
     Expression<? extends Number> expression;
     Predicate predicate;
@@ -82,14 +82,14 @@ public class UserRepository {
 
         var query = sql.createSubQuery(pt)
             .where(
-                pt.player().id().eq(u.id()),
+                pt.player().id().eq(p.id()),
                 pt.status().eq(PlayerTaskStatus.COMPLETED)
             );
 
-        if (day != null) {
+        if (options.from != null && options.to != null) {
           var utc = ZoneId.of("UTC");
-          var startOfDay = day.atStartOfDay(utc).toInstant();
-          var endOfDay = day.plusDays(1).atStartOfDay(utc).toInstant();
+          var startOfDay = options.from.atStartOfDay(utc).toInstant();
+          var endOfDay = options.to.plusDays(1).atStartOfDay(utc).toInstant();
 
           query = query.where(
               pt.updatedAt().ge(startOfDay),
@@ -102,30 +102,30 @@ public class UserRepository {
         predicate = taskCount.gt(0L);
       }
 
-      case CURRENCY -> {
-        var balance = u.player().balance().balance();
+      case BALANCE -> {
+        var balance = p.balance().balance();
         expression = balance;
         predicate = balance.gt(BigDecimal.ZERO);
       }
 
       case LEVEL -> {
-        expression = u.player().level().level();
+        expression = p.level().level();
         predicate = null;
       }
 
       default -> throw new IllegalArgumentException("Unknown leaderboard type: " + type);
     }
 
-    var baseUser = sql.createBaseQuery(u)
+    var baseUser = sql.createBaseQuery(p)
         .where(predicate)
-        .addSelect(u)
+        .addSelect(p.user())
         .addSelect(expression)
         .addSelect(
             Expression.numeric().sql(
-                Integer.class,
+                Long.class,
                 "row_number() over(order by %e desc, %e asc)",
                 expression,
-                u.id()
+                p.id()
             )
         )
         .asBaseTable();
@@ -136,6 +136,14 @@ public class UserRepository {
             .score((Selection<Number>) baseUser.get_2())
             .position(baseUser.get_3())
         )
-        .fetchPage(page, size);
+        .fetchPage(paging.page, paging.pageSize);
+  }
+
+  public record LeaderboardRequestQueryOptions(LocalDate from, LocalDate to, LeaderboardType type) {
+
+  }
+
+  public record RequestPaging(int page, int pageSize) {
+
   }
 }

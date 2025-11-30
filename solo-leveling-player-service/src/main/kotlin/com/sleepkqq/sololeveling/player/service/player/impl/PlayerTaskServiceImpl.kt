@@ -19,6 +19,7 @@ import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.task.TaskService
+import com.sleepkqq.sololeveling.proto.player.RequestPaging
 import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
@@ -136,8 +137,9 @@ class PlayerTaskServiceImpl(
 	override fun <V : View<PlayerTask>> searchView(
 		playerId: Long,
 		options: RequestQueryOptions,
+		paging: RequestPaging,
 		viewType: KClass<V>
-	): Page<V> = playerTaskRepository.searchView(playerId, options, viewType.java)
+	): Page<V> = playerTaskRepository.searchView(playerId, options, paging, viewType.java)
 
 	@Transactional
 	override fun generateTasks(

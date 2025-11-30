@@ -13,6 +13,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTable;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity;
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic;
+import com.sleepkqq.sololeveling.proto.player.RequestPaging;
 import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -55,10 +56,11 @@ public class PlayerTaskRepository extends PageFetcher<PlayerTask, PlayerTaskTabl
   public <V extends View<PlayerTask>> Page<V> searchView(
       long playerId,
       RequestQueryOptions options,
+      RequestPaging paging,
       Class<V> viewType
   ) {
     var table = PLAYER_TASK_TABLE;
-    return fetch(table, options, table.fetch(viewType), table.playerId().eq(playerId));
+    return fetch(table, options, paging, table.fetch(viewType), table.playerId().eq(playerId));
   }
 
   public void saveEntities(Collection<PlayerTask> playerTasks, SaveMode saveMode) {

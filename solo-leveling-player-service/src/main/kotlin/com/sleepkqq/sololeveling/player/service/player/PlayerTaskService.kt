@@ -6,6 +6,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
+import com.sleepkqq.sololeveling.proto.player.RequestPaging
 import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
@@ -37,6 +38,7 @@ interface PlayerTaskService {
 	fun <V : View<PlayerTask>> searchView(
 		playerId: Long,
 		options: RequestQueryOptions,
+		paging: RequestPaging,
 		viewType: KClass<V>
 	): Page<V>
 }

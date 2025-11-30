@@ -3,6 +3,7 @@ package com.sleepkqq.sololeveling.player.service.player.impl
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerBalanceTransactionRepository
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceTransactionService
+import com.sleepkqq.sololeveling.proto.player.RequestPaging
 import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
@@ -24,6 +25,7 @@ class PlayerBalanceTransactionServiceImpl(
 	override fun <V : View<PlayerBalanceTransaction>> searchView(
 		playerId: Long,
 		options: RequestQueryOptions,
+		paging: RequestPaging,
 		viewType: KClass<V>
-	): Page<V> = playerBalanceTransactionRepository.searchView(playerId, options, viewType.java)
+	): Page<V> = playerBalanceTransactionRepository.searchView(playerId, options, paging, viewType.java)
 }

@@ -104,10 +104,8 @@ abstract class ProtoMapper {
 		target = "transactionsList.amount",
 		expression = "java(map(playerBalanceTransactionView.getAmount(), playerBalanceTransactionView.getCurrencyCode()))"
 	)
-	@Mapping(
-		target = "options",
-		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage, filters, sorts))"
-	)
+	@Mapping(target = "options", expression = "java(map(filters, sorts))")
+	@Mapping(target = "paging", expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage))")
 	abstract fun mapTransactions(
 		page: Page<PlayerBalanceTransactionView>,
 		currentPage: Int,
@@ -116,10 +114,8 @@ abstract class ProtoMapper {
 	): SearchPlayerBalanceTransactionsResponse
 
 	@Mapping(target = "tasksList", source = "page.rows")
-	@Mapping(
-		target = "options",
-		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage, filters, sorts))"
-	)
+	@Mapping(target = "options", expression = "java(map(filters, sorts))")
+	@Mapping(target = "paging", expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage))")
 	abstract fun mapTasks(
 		page: Page<PlayerTaskView>,
 		currentPage: Int,
@@ -129,12 +125,8 @@ abstract class ProtoMapper {
 
 	@Mapping(target = "filtersList", source = "filters")
 	@Mapping(target = "sortsList", source = "sorts")
+	abstract fun map(filters: List<LocalizedField>, sorts: Set<String>): ResponseQueryOptions
+
 	@Mapping(target = "hasMore", expression = "java(totalPageCount - 1 != currentPage)")
-	abstract fun map(
-		totalRowCount: Long,
-		totalPageCount: Long,
-		currentPage: Int,
-		filters: List<LocalizedField>,
-		sorts: Set<String>
-	): ResponseQueryOptions
+	abstract fun map(totalRowCount: Long, totalPageCount: Long, currentPage: Int): ResponsePaging
 }

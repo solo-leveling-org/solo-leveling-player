@@ -157,11 +157,12 @@ class PlayerApi(
 		val transactionsPage = playerBalanceTransactionService.searchView(
 			request.playerId,
 			request.options,
+			request.paging,
 			PlayerBalanceTransactionView::class
 		)
 		val response = protoMapper.mapTransactions(
 			transactionsPage,
-			request.options.page,
+			request.paging.page,
 			enumLocalizer.localize(
 				TABLES_PLAYER_BALANCE_TRANSACTIONS,
 				PlayerBalanceTransactionRepository.FIELD_ENUM_TYPES
@@ -182,11 +183,12 @@ class PlayerApi(
 		val tasksPage = playerTaskService.searchView(
 			request.playerId,
 			request.options,
+			request.paging,
 			PlayerTaskView::class
 		)
 		val response = protoMapper.mapTasks(
 			tasksPage,
-			request.options.page,
+			request.paging.page,
 			enumLocalizer.localize(
 				TABLES_PLAYER_TASKS,
 				PlayerTaskRepository.FIELD_ENUM_TYPES

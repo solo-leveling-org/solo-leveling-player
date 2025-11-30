@@ -98,4 +98,8 @@ class UserServiceImpl(
 			)
 		})
 	}
+
+	override fun getLeaderboardPage() {
+		TODO("Not yet implemented")
+	}
 }

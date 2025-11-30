@@ -9,6 +9,8 @@ import com.sleepkqq.sololeveling.proto.user.AuthUserRequest
 import com.sleepkqq.sololeveling.proto.user.GetUserLocaleRequest
 import com.sleepkqq.sololeveling.proto.user.GetUserRequest
 import com.sleepkqq.sololeveling.proto.user.GetUserResponse
+import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardRequest
+import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardResponse
 import com.sleepkqq.sololeveling.proto.user.UpdateUserLocaleRequest
 import com.sleepkqq.sololeveling.proto.user.UserLocaleResponse
 import com.sleepkqq.sololeveling.proto.user.UserServiceGrpc
@@ -87,5 +89,14 @@ class UserApi(
 
 		responseObserver.onNext(response)
 		responseObserver.onCompleted()
+	}
+
+	override fun getUsersLeaderboard(
+		request: GetUsersLeaderboardRequest,
+		responseObserver: StreamObserver<GetUsersLeaderboardResponse>
+	) {
+		log.info(">> getUsersLeaderboard called")
+
+
 	}
 }

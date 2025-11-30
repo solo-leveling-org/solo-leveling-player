@@ -2,15 +2,17 @@ package com.sleepkqq.sololeveling.player.model.repository.user
 
 import com.sleepkqq.sololeveling.player.BaseTestClass
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
-import com.sleepkqq.sololeveling.player.model.entity.leaderboard.enums.LeaderboardType
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.task.TaskRepository
+import com.sleepkqq.sololeveling.player.model.repository.user.UserRepository.LeaderboardRequestQueryOptions
+import com.sleepkqq.sololeveling.player.model.repository.user.UserRepository.RequestPaging
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
+import com.sleepkqq.sololeveling.proto.user.LeaderboardType
 import org.assertj.core.api.Assertions.assertThat
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.junit.jupiter.api.Disabled
@@ -70,7 +72,7 @@ class UserRepositoryTest : BaseTestClass() {
 		val player1Tasks = (0..4).map { idx ->
 			Immutables.createPlayerTask {
 				it.setId(java.util.UUID.randomUUID())
-				it.setTaskId(tasks[idx].id()) // Используем только ID
+				it.setTaskId(tasks[idx].id())
 				it.setPlayerId(player1.id())
 				it.setStatus(PlayerTaskStatus.COMPLETED)
 				it.setOrder(idx + 1)
@@ -82,7 +84,7 @@ class UserRepositoryTest : BaseTestClass() {
 		val player2Tasks = (0..2).map { idx ->
 			Immutables.createPlayerTask {
 				it.setId(java.util.UUID.randomUUID())
-				it.setTaskId(tasks[idx].id()) // Используем только ID
+				it.setTaskId(tasks[idx].id())
 				it.setPlayerId(player2.id())
 				it.setStatus(PlayerTaskStatus.COMPLETED)
 				it.setOrder(idx + 1)
@@ -94,7 +96,7 @@ class UserRepositoryTest : BaseTestClass() {
 		val player3Tasks = (0..3).map { idx ->
 			Immutables.createPlayerTask {
 				it.setId(java.util.UUID.randomUUID())
-				it.setTaskId(tasks[idx].id()) // Используем только ID
+				it.setTaskId(tasks[idx].id())
 				it.setPlayerId(player3.id())
 				it.setStatus(PlayerTaskStatus.COMPLETED)
 				it.setOrder(idx + 1)
@@ -105,7 +107,7 @@ class UserRepositoryTest : BaseTestClass() {
 		// Player 4: 1 completed task
 		val player4Task = Immutables.createPlayerTask {
 			it.setId(java.util.UUID.randomUUID())
-			it.setTaskId(tasks[0].id()) // Используем только ID
+			it.setTaskId(tasks[0].id())
 			it.setPlayerId(player4.id())
 			it.setStatus(PlayerTaskStatus.COMPLETED)
 			it.setOrder(1)
@@ -115,7 +117,7 @@ class UserRepositoryTest : BaseTestClass() {
 		// Player 5: 0 completed tasks (только IN_PROGRESS)
 		val player5Task = Immutables.createPlayerTask {
 			it.setId(java.util.UUID.randomUUID())
-			it.setTaskId(tasks[0].id()) // Используем только ID
+			it.setTaskId(tasks[0].id())
 			it.setPlayerId(player5.id())
 			it.setStatus(PlayerTaskStatus.IN_PROGRESS)
 			it.setOrder(1)
@@ -124,8 +126,13 @@ class UserRepositoryTest : BaseTestClass() {
 
 		// When: Получаем лидерборд по задачам (все время)
 		val (page, duration) = measureTimedValue {
-			userRepository.getLeaderboardPage(LeaderboardType.TASKS, null, 0, 10)
+			userRepository.getLeaderboardPage(
+				LeaderboardType.TASKS,
+				LeaderboardRequestQueryOptions(null, null, LeaderboardType.TASKS),
+				RequestPaging(0, 10)
+			)
 		}
+
 		println("getLeaderboardPage (TASKS all-time) took ${duration.inWholeMilliseconds} ms")
 
 		// Then: Проверяем корректность результата
@@ -161,6 +168,7 @@ class UserRepositoryTest : BaseTestClass() {
 		// Given: Создаем пользователей
 		val user1 = createUser(201, "today-champion")
 		val user2 = createUser(202, "yesterday-champion")
+
 		val player1 = user1.player()!!
 		val player2 = user2.player()!!
 
@@ -182,6 +190,7 @@ class UserRepositoryTest : BaseTestClass() {
 			it.setOrder(1)
 			it.setUpdatedAt(today.atTime(12, 0).atZone(ZoneId.of("UTC")).toInstant())
 		}
+
 		val pt2Today = Immutables.createPlayerTask {
 			it.setId(java.util.UUID.randomUUID())
 			it.setTask(task2)
@@ -204,7 +213,11 @@ class UserRepositoryTest : BaseTestClass() {
 		playerTaskService.insertAll(listOf(pt3Yesterday))
 
 		// When: Получаем лидерборд за сегодня
-		val page = userRepository.getLeaderboardPage(LeaderboardType.TASKS, today, 0, 10)
+		val page = userRepository.getLeaderboardPage(
+			LeaderboardType.TASKS,
+			LeaderboardRequestQueryOptions(today, today, LeaderboardType.TASKS),
+			RequestPaging(0, 10)
+		)
 
 		// Then: Только player1 должен быть в результатах
 		assertThat(page.rows).hasSize(1)
@@ -214,7 +227,7 @@ class UserRepositoryTest : BaseTestClass() {
 	}
 
 	@Test
-	fun `getLeaderboardPage returns correct order for CURRENCY leaderboard`() {
+	fun `getLeaderboardPage returns correct order for BALANCE leaderboard`() {
 		// Given: Создаем пользователей с разными балансами
 		val user1 = createUser(301, "rich-player")
 		val user2 = createUser(302, "poor-player")
@@ -248,8 +261,12 @@ class UserRepositoryTest : BaseTestClass() {
 		)
 		playerService.update(Immutables.createPlayer(player3) { it.setBalance(updatedBalance3) })
 
-		// When: Получаем лидерборд по валюте
-		val page = userRepository.getLeaderboardPage(LeaderboardType.CURRENCY, null, 0, 10)
+		// When: Получаем лидерборд по балансу
+		val page = userRepository.getLeaderboardPage(
+			LeaderboardType.BALANCE,
+			LeaderboardRequestQueryOptions(null, null, LeaderboardType.BALANCE),
+			RequestPaging(0, 10)
+		)
 
 		// Then: Проверяем порядок
 		assertThat(page.rows).hasSize(3)
@@ -272,16 +289,17 @@ class UserRepositoryTest : BaseTestClass() {
 
 	@Test
 	fun `getLeaderboardPage returns correct order for LEVEL leaderboard`() {
-		// Given: Создаем пользователей (уровни устанавливаются через createUser -> уровень по умолчанию)
+		// Given: Создаем пользователей
 		createUser(401, "level-50-player")
 		createUser(402, "level-30-player")
 		createUser(403, "level-40-player")
 
-		// Note: Нужно будет вручную обновить уровни через service или напрямую в БД
-		// Для примера предполагаем, что уровни уже установлены
-
 		// When: Получаем лидерборд по уровню
-		val page = userRepository.getLeaderboardPage(LeaderboardType.LEVEL, null, 0, 10)
+		val page = userRepository.getLeaderboardPage(
+			LeaderboardType.LEVEL,
+			LeaderboardRequestQueryOptions(null, null, LeaderboardType.LEVEL),
+			RequestPaging(0, 10)
+		)
 
 		// Then: Проверяем что запрос выполняется без ошибок
 		assertThat(page.rows).isNotEmpty
@@ -309,15 +327,22 @@ class UserRepositoryTest : BaseTestClass() {
 				val playerTask = createPlayerTask(task, player.id(), PlayerTaskStatus.COMPLETED, idx + 1)
 				playerTaskService.insertAll(listOf(playerTask))
 			}
-
 			user
 		}
 
 		// When: Получаем первую страницу (размер 10)
-		val page1 = userRepository.getLeaderboardPage(LeaderboardType.TASKS, null, 0, 10)
+		val page1 = userRepository.getLeaderboardPage(
+			LeaderboardType.TASKS,
+			LeaderboardRequestQueryOptions(null, null, LeaderboardType.TASKS),
+			RequestPaging(0, 10)
+		)
 
 		// When: Получаем вторую страницу
-		val page2 = userRepository.getLeaderboardPage(LeaderboardType.TASKS, null, 1, 10)
+		val page2 = userRepository.getLeaderboardPage(
+			LeaderboardType.TASKS,
+			LeaderboardRequestQueryOptions(null, null, LeaderboardType.TASKS),
+			RequestPaging(1, 10)
+		)
 
 		// Then: Первая страница содержит 10 элементов
 		assertThat(page1.rows).hasSize(10)

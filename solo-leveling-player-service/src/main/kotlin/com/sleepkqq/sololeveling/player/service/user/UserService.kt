@@ -23,4 +23,5 @@ interface UserService {
 	fun upsert(user: User): User
 	fun updateLocale(id: Long, locale: Locale)
 	fun register(user: User): User
+	fun getLeaderboardPage()
 }

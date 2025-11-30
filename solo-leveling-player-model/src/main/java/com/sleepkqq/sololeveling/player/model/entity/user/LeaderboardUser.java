@@ -12,5 +12,5 @@ public class LeaderboardUser {
 
   private final LeaderboardUserView user;
   private final Number score;
-  private final Integer position;
+  private final Long position;
 }

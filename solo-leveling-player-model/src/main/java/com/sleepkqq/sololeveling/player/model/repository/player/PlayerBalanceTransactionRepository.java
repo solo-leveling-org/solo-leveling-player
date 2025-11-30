@@ -10,6 +10,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransac
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransactionTable;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType;
+import com.sleepkqq.sololeveling.proto.player.RequestPaging;
 import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions;
 import java.util.Map;
 import org.babyfish.jimmer.Page;
@@ -44,12 +45,14 @@ public class PlayerBalanceTransactionRepository extends
   public <V extends View<PlayerBalanceTransaction>> Page<V> searchView(
       long playerId,
       RequestQueryOptions options,
+      RequestPaging paging,
       Class<V> viewType
   ) {
     var table = PLAYER_BALANCE_TRANSACTION_TABLE;
     return fetch(
         table,
         options,
+        paging,
         table.fetch(viewType),
         table.balance().playerId().eq(playerId)
     );
