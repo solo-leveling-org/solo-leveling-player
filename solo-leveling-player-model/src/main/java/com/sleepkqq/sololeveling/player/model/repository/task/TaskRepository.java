@@ -105,6 +105,7 @@ public class TaskRepository {
             .put("topics", StreamEx.of(p.task().topics())
                 .map(TaskTopicItem::topic)
                 .map(TaskTopic::ordinal)
+                .sorted()
                 .toList()
             )
         )
