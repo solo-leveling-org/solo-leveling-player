@@ -59,6 +59,7 @@ abstract class ProtoMapper {
 		.let { if (LocaleContextHolder.getLocale().language == "ru") it.ru() else it.en() }
 
 	@Mapping(target = "isActive", source = "active")
+	@Mapping(target = "isDisabled", expression = "java(input.getTaskTopic().isDisabled())")
 	abstract fun map(input: PlayerTaskTopicView): com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicView
 
 	@Mapping(target = "task.topicsList", source = "input.task.topics")

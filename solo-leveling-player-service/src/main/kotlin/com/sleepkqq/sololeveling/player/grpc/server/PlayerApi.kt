@@ -9,6 +9,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransac
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
+import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerBalanceTransactionRepository
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
@@ -78,6 +79,11 @@ class PlayerApi(
 		val receivedTopics = request.playerTaskTopicsList
 			.map(protoMapper::map)
 			.map { it.toEntity() }
+
+		val disabledTopics = TaskTopic.getDisabledTopics()
+		if (receivedTopics.any { it.taskTopic() in disabledTopics }) {
+			throw IllegalArgumentException("Cannot select disabled topics")
+		}
 
 		playerTaskTopicService.updateAll(receivedTopics)
 
@@ -149,7 +155,7 @@ class PlayerApi(
 	}
 
 	override fun searchPlayerBalanceTransactions(
-		request: SearchPlayerBalanceTransactionsRequest,
+		request: SearchEntitiesRequest,
 		responseObserver: StreamObserver<SearchPlayerBalanceTransactionsResponse>
 	) {
 		log.info(">> searchPlayerBalanceTransactions called by user={}", request.playerId)
@@ -175,7 +181,7 @@ class PlayerApi(
 	}
 
 	override fun searchPlayerTasks(
-		request: SearchPlayerTasksRequest,
+		request: SearchEntitiesRequest,
 		responseObserver: StreamObserver<SearchPlayerTasksResponse>
 	) {
 		log.info(">> searchPlayerTasks called by user={}", request.playerId)

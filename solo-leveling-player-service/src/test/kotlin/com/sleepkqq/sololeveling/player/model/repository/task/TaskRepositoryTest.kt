@@ -34,7 +34,7 @@ class TaskRepositoryTest : BaseTestClass() {
 			title = "Non-matching",
 			description = "With extra topic",
 			rarity = Rarity.EPIC,
-			topics = listOf(TaskTopic.MENTAL_HEALTH, TaskTopic.PRODUCTIVITY)
+			topics = listOf(TaskTopic.ADVENTURE, TaskTopic.PRODUCTIVITY)
 		)
 		taskRepository.saveEntities(listOf(nonMatchingTask), SaveMode.INSERT_ONLY)
 		val nonMatchingPlayerTask = createPlayerTask(nonMatchingTask, otherPlayer.id())
@@ -50,7 +50,7 @@ class TaskRepositoryTest : BaseTestClass() {
 			agility = 5,
 			strength = 10,
 			intelligence = 3,
-			topics = listOf(TaskTopic.MENTAL_HEALTH, TaskTopic.EDUCATION)
+			topics = listOf(TaskTopic.ADVENTURE, TaskTopic.NUTRITION)
 		)
 		taskRepository.saveEntities(listOf(matchingTask), SaveMode.INSERT_ONLY)
 		val matchingPlayerTask = createPlayerTask(matchingTask, otherPlayer.id())
@@ -63,7 +63,7 @@ class TaskRepositoryTest : BaseTestClass() {
 		playerTaskService.insertAll(listOf(excludedPlayerTask))
 
 		// When: find для testPlayer (должен найти matchingTask от otherPlayer)
-		val testTopics = listOf(TaskTopic.MENTAL_HEALTH, TaskTopic.EDUCATION)
+		val testTopics = listOf(TaskTopic.ADVENTURE, TaskTopic.NUTRITION)
 		val (foundTaskId, duration) = measureTimedValue {
 			taskRepository.findMatchingTasks(
 				testPlayer.id(),
@@ -84,7 +84,7 @@ class TaskRepositoryTest : BaseTestClass() {
 
 		assertThat(foundTask!!.rarity()).isEqualTo(Rarity.EPIC)
 		val taskTopics = foundTask.topics()!!.map { it.topic() }
-		assertThat(taskTopics).containsExactlyInAnyOrder(TaskTopic.MENTAL_HEALTH, TaskTopic.EDUCATION)
+		assertThat(taskTopics).containsExactlyInAnyOrder(TaskTopic.ADVENTURE, TaskTopic.NUTRITION)
 		assertThat(taskTopics.size).isEqualTo(2)
 	}
 
@@ -103,7 +103,7 @@ class TaskRepositoryTest : BaseTestClass() {
 			title = "Test Task 1",
 			description = "Player task 1",
 			rarity = Rarity.EPIC,
-			topics = listOf(TaskTopic.MENTAL_HEALTH, TaskTopic.EDUCATION)
+			topics = listOf(TaskTopic.ADVENTURE, TaskTopic.NUTRITION)
 		)
 		val testTask2 = createTask(
 			title = "Test Task 2",
@@ -115,7 +115,7 @@ class TaskRepositoryTest : BaseTestClass() {
 			title = "Test Task 3",
 			description = "Player task 3",
 			rarity = Rarity.LEGENDARY,
-			topics = listOf(TaskTopic.EXPERIMENTS, TaskTopic.TEAMWORK)
+			topics = listOf(TaskTopic.BRAIN, TaskTopic.PHYSICAL_ACTIVITY)
 		)
 		taskRepository.saveEntities(listOf(testTask1, testTask2, testTask3), SaveMode.INSERT_ONLY)
 
@@ -129,7 +129,7 @@ class TaskRepositoryTest : BaseTestClass() {
 			title = "Matching Task 1",
 			description = "Matches task 1",
 			rarity = Rarity.EPIC,
-			topics = listOf(TaskTopic.MENTAL_HEALTH, TaskTopic.EDUCATION)
+			topics = listOf(TaskTopic.ADVENTURE, TaskTopic.NUTRITION)
 		)
 		val matchingTask2 = createTask(
 			title = "Matching Task 2",
@@ -141,7 +141,7 @@ class TaskRepositoryTest : BaseTestClass() {
 			title = "Matching Task 3",
 			description = "Matches task 3",
 			rarity = Rarity.LEGENDARY,
-			topics = listOf(TaskTopic.EXPERIMENTS, TaskTopic.TEAMWORK)
+			topics = listOf(TaskTopic.BRAIN, TaskTopic.PHYSICAL_ACTIVITY)
 		)
 		taskRepository.saveEntities(
 			listOf(matchingTask1, matchingTask2, matchingTask3),
@@ -158,7 +158,7 @@ class TaskRepositoryTest : BaseTestClass() {
 			title = "Non-matching",
 			description = "Wrong topics",
 			rarity = Rarity.EPIC,
-			topics = listOf(TaskTopic.ECOLOGY, TaskTopic.CREATIVITY)
+			topics = listOf(TaskTopic.MUSIC, TaskTopic.CREATIVITY)
 		)
 		taskRepository.saveEntities(listOf(nonMatchingTask), SaveMode.INSERT_ONLY)
 		val nonMatchingPlayerTask = createPlayerTask(nonMatchingTask, otherPlayer.id(), order = 4)
@@ -187,7 +187,7 @@ class TaskRepositoryTest : BaseTestClass() {
 		)
 		assertThat(foundTask1!!.rarity()).isEqualTo(Rarity.EPIC)
 		assertThat(foundTask1.topics()!!.map { it.topic() })
-			.containsExactlyInAnyOrder(TaskTopic.MENTAL_HEALTH, TaskTopic.EDUCATION)
+			.containsExactlyInAnyOrder(TaskTopic.ADVENTURE, TaskTopic.NUTRITION)
 
 		val foundTask2 = taskRepository.findNullable(
 			result[playerTask2.id()],

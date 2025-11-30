@@ -30,7 +30,7 @@ class PlayerTaskServiceTest : BaseTestClass() {
 			agility = 5,
 			strength = 10,
 			intelligence = 3,
-			topics = listOf(TaskTopic.PRODUCTIVITY, TaskTopic.MENTAL_HEALTH)
+			topics = listOf(TaskTopic.PRODUCTIVITY, TaskTopic.NUTRITION)
 		)
 
 		val playerTask = createPlayerTask(task, player.id())
