@@ -114,7 +114,9 @@ class PlayerTaskServiceImpl(
 		val playerTask = get(
 			id,
 			Fetchers.PLAYER_TASK_FETCHER.allScalarFields()
-				.task(Fetchers.TASK_FETCHER.allScalarFields())
+				.task(Fetchers.TASK_FETCHER.allScalarFields()
+					.topics(Fetchers.TASK_TOPIC_ITEM_FETCHER.allScalarFields())
+				)
 				.player()
 		)
 
