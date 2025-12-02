@@ -7,6 +7,7 @@ import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskFetcher
+import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskProps
 import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
@@ -23,6 +24,7 @@ import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.task.TaskService
 import com.sleepkqq.sololeveling.proto.player.RequestPaging
 import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions
+import org.babyfish.jimmer.ImmutableObjects
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
@@ -114,8 +116,9 @@ class PlayerTaskServiceImpl(
 		val playerTask = get(
 			id,
 			Fetchers.PLAYER_TASK_FETCHER.allScalarFields()
-				.task(Fetchers.TASK_FETCHER.allScalarFields()
-					.topics(Fetchers.TASK_TOPIC_ITEM_FETCHER.allScalarFields())
+				.task(
+					Fetchers.TASK_FETCHER.allScalarFields()
+						.topics(Fetchers.TASK_TOPIC_ITEM_FETCHER.allScalarFields())
 				)
 				.player()
 		)
@@ -263,7 +266,7 @@ class PlayerTaskServiceImpl(
 
 			Immutables.createPlayerTask(it) { p ->
 
-				if (!saveTask) {
+				if (!saveTask && ImmutableObjects.isLoaded(it, PlayerTaskProps.TASK)) {
 					val task = it.task()!!
 					p.setTask(null).setTaskId(task.id())
 				}
