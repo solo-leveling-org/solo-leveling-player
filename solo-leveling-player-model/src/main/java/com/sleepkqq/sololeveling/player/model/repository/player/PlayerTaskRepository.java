@@ -9,6 +9,7 @@ import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
 import com.sleepkqq.sololeveling.jimmer.fetcher.PageFetcher;
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers;
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask;
+import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskFetcher;
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTable;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity;
@@ -26,10 +27,10 @@ import org.babyfish.jimmer.Page;
 import org.babyfish.jimmer.View;
 import org.babyfish.jimmer.sql.JSqlClient;
 import org.babyfish.jimmer.sql.JoinType;
-import org.babyfish.jimmer.sql.ast.Predicate;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
 import org.babyfish.jimmer.sql.ast.table.TableEx;
 import org.babyfish.jimmer.sql.fetcher.Fetcher;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -69,6 +70,15 @@ public class PlayerTaskRepository extends PageFetcher<PlayerTask, PlayerTaskTabl
         .execute();
   }
 
+  @Nullable
+  public PlayerTask find(UUID id, PlayerTaskFetcher fetcher) {
+    var table = PLAYER_TASK_TABLE;
+    return sql.createQuery(table)
+        .where(table.id().eq(id))
+        .select(table.fetch(fetcher))
+        .fetchFirstOrNull();
+  }
+
   public <V extends View<PlayerTask>> List<V> findByPlayerIdAndStatusIn(
       long playerId,
       Collection<PlayerTaskStatus> statuses,
@@ -76,10 +86,10 @@ public class PlayerTaskRepository extends PageFetcher<PlayerTask, PlayerTaskTabl
   ) {
     var table = PLAYER_TASK_TABLE;
     return sql.createQuery(table)
-        .where(Predicate.and(
+        .where(
             table.playerId().eq(playerId),
             table.status().in(statuses)
-        ))
+        )
         .select(table.fetch(viewType))
         .execute();
   }
@@ -91,10 +101,10 @@ public class PlayerTaskRepository extends PageFetcher<PlayerTask, PlayerTaskTabl
   ) {
     var table = PLAYER_TASK_TABLE;
     return sql.createQuery(table)
-        .where(Predicate.and(
+        .where(
             table.playerId().eq(playerId),
             table.status().in(statuses)
-        ))
+        )
         .select(table.fetch(fetcher))
         .execute();
   }

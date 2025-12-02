@@ -4,16 +4,16 @@ import static com.sleepkqq.sololeveling.player.model.entity.Tables.PLAYER_TABLE;
 import static com.sleepkqq.sololeveling.player.model.entity.Tables.PLAYER_TASK_TABLE;
 import static com.sleepkqq.sololeveling.player.model.entity.Tables.USER_TABLE;
 
+import com.sleepkqq.sololeveling.jimmer.predicate.filter.DateFilter.DayRange;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus;
 import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser;
 import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUserMapper;
 import com.sleepkqq.sololeveling.player.model.entity.user.User;
 import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher;
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.LeaderboardUserView;
+import com.sleepkqq.sololeveling.proto.player.RequestPaging;
 import com.sleepkqq.sololeveling.proto.user.LeaderboardType;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.babyfish.jimmer.Page;
@@ -68,7 +68,7 @@ public class UserRepository {
   @SuppressWarnings("unchecked")
   public Page<LeaderboardUser> getLeaderboardPage(
       LeaderboardType type,
-      LeaderboardRequestQueryOptions options,
+      DayRange range,
       RequestPaging paging
   ) {
     var p = PLAYER_TABLE;
@@ -86,14 +86,10 @@ public class UserRepository {
                 pt.status().eq(PlayerTaskStatus.COMPLETED)
             );
 
-        if (options.from != null && options.to != null) {
-          var utc = ZoneId.of("UTC");
-          var startOfDay = options.from.atStartOfDay(utc).toInstant();
-          var endOfDay = options.to.plusDays(1).atStartOfDay(utc).toInstant();
-
+        if (!range.isEmpty()) {
           query = query.where(
-              pt.updatedAt().ge(startOfDay),
-              pt.updatedAt().lt(endOfDay)
+              pt.updatedAt().ge(range.from()),
+              pt.updatedAt().lt(range.to())
           );
         }
 
@@ -136,14 +132,6 @@ public class UserRepository {
             .score((Selection<Number>) baseUser.get_2())
             .position(baseUser.get_3())
         )
-        .fetchPage(paging.page, paging.pageSize);
-  }
-
-  public record LeaderboardRequestQueryOptions(LocalDate from, LocalDate to, LeaderboardType type) {
-
-  }
-
-  public record RequestPaging(int page, int pageSize) {
-
+        .fetchPage(paging.getPage(), paging.getPageSize());
   }
 }

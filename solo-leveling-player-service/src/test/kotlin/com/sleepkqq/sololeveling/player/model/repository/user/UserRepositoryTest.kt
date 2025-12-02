@@ -1,5 +1,6 @@
 package com.sleepkqq.sololeveling.player.model.repository.user
 
+import com.sleepkqq.sololeveling.jimmer.predicate.filter.DateFilter
 import com.sleepkqq.sololeveling.player.BaseTestClass
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
@@ -7,11 +8,10 @@ import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStat
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.task.TaskRepository
-import com.sleepkqq.sololeveling.player.model.repository.user.UserRepository.LeaderboardRequestQueryOptions
-import com.sleepkqq.sololeveling.player.model.repository.user.UserRepository.RequestPaging
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
+import com.sleepkqq.sololeveling.proto.player.RequestPaging
 import com.sleepkqq.sololeveling.proto.user.LeaderboardType
 import org.assertj.core.api.Assertions.assertThat
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import kotlin.time.measureTimedValue
 
 class UserRepositoryTest : BaseTestClass() {
@@ -128,8 +128,11 @@ class UserRepositoryTest : BaseTestClass() {
 		val (page, duration) = measureTimedValue {
 			userRepository.getLeaderboardPage(
 				LeaderboardType.TASKS,
-				LeaderboardRequestQueryOptions(null, null, LeaderboardType.TASKS),
-				RequestPaging(0, 10)
+				DateFilter.DayRange.empty(),
+				RequestPaging.newBuilder()
+					.setPage(0)
+					.setPageSize(10)
+					.build()
 			)
 		}
 
@@ -178,7 +181,7 @@ class UserRepositoryTest : BaseTestClass() {
 		val task3 = createTask(title = "Yesterday Task", rarity = Rarity.COMMON)
 		taskRepository.saveEntities(listOf(task1, task2, task3), SaveMode.INSERT_ONLY)
 
-		val today = LocalDate.now(ZoneId.of("UTC"))
+		val today = ZonedDateTime.now(ZoneOffset.UTC).toLocalDate()
 		val yesterday = today.minusDays(1)
 
 		// Given: Player1 выполнил 2 задачи сегодня
@@ -188,7 +191,7 @@ class UserRepositoryTest : BaseTestClass() {
 			it.setPlayerId(player1.id())
 			it.setStatus(PlayerTaskStatus.COMPLETED)
 			it.setOrder(1)
-			it.setUpdatedAt(today.atTime(12, 0).atZone(ZoneId.of("UTC")).toInstant())
+			it.setUpdatedAt(today.atTime(12, 0).atZone(ZoneOffset.UTC).toInstant())
 		}
 
 		val pt2Today = Immutables.createPlayerTask {
@@ -197,7 +200,7 @@ class UserRepositoryTest : BaseTestClass() {
 			it.setPlayerId(player1.id())
 			it.setStatus(PlayerTaskStatus.COMPLETED)
 			it.setOrder(2)
-			it.setUpdatedAt(today.atTime(14, 0).atZone(ZoneId.of("UTC")).toInstant())
+			it.setUpdatedAt(today.atTime(14, 0).atZone(ZoneOffset.UTC).toInstant())
 		}
 		playerTaskService.insertAll(listOf(pt1Today, pt2Today))
 
@@ -208,15 +211,20 @@ class UserRepositoryTest : BaseTestClass() {
 			it.setPlayerId(player2.id())
 			it.setStatus(PlayerTaskStatus.COMPLETED)
 			it.setOrder(1)
-			it.setUpdatedAt(yesterday.atTime(10, 0).atZone(ZoneId.of("UTC")).toInstant())
+			it.setUpdatedAt(yesterday.atTime(10, 0).atZone(ZoneOffset.UTC).toInstant())
 		}
 		playerTaskService.insertAll(listOf(pt3Yesterday))
+
+		val instant = today.atStartOfDay(ZoneOffset.UTC).toInstant()
 
 		// When: Получаем лидерборд за сегодня
 		val page = userRepository.getLeaderboardPage(
 			LeaderboardType.TASKS,
-			LeaderboardRequestQueryOptions(today, today, LeaderboardType.TASKS),
-			RequestPaging(0, 10)
+			DateFilter.DayRange(instant, instant),
+			RequestPaging.newBuilder()
+				.setPage(0)
+				.setPageSize(10)
+				.build()
 		)
 
 		// Then: Только player1 должен быть в результатах
@@ -225,6 +233,7 @@ class UserRepositoryTest : BaseTestClass() {
 		assertThat(page.rows[0].score).isEqualTo(2L) // 2 tasks today
 		assertThat(page.rows[0].position).isEqualTo(1) // place = 1
 	}
+
 
 	@Test
 	fun `getLeaderboardPage returns correct order for BALANCE leaderboard`() {
@@ -264,8 +273,11 @@ class UserRepositoryTest : BaseTestClass() {
 		// When: Получаем лидерборд по балансу
 		val page = userRepository.getLeaderboardPage(
 			LeaderboardType.BALANCE,
-			LeaderboardRequestQueryOptions(null, null, LeaderboardType.BALANCE),
-			RequestPaging(0, 10)
+			DateFilter.DayRange.empty(),
+			RequestPaging.newBuilder()
+				.setPage(0)
+				.setPageSize(10)
+				.build()
 		)
 
 		// Then: Проверяем порядок
@@ -297,8 +309,11 @@ class UserRepositoryTest : BaseTestClass() {
 		// When: Получаем лидерборд по уровню
 		val page = userRepository.getLeaderboardPage(
 			LeaderboardType.LEVEL,
-			LeaderboardRequestQueryOptions(null, null, LeaderboardType.LEVEL),
-			RequestPaging(0, 10)
+			DateFilter.DayRange.empty(),
+			RequestPaging.newBuilder()
+				.setPage(0)
+				.setPageSize(10)
+				.build()
 		)
 
 		// Then: Проверяем что запрос выполняется без ошибок
@@ -333,15 +348,21 @@ class UserRepositoryTest : BaseTestClass() {
 		// When: Получаем первую страницу (размер 10)
 		val page1 = userRepository.getLeaderboardPage(
 			LeaderboardType.TASKS,
-			LeaderboardRequestQueryOptions(null, null, LeaderboardType.TASKS),
-			RequestPaging(0, 10)
+			DateFilter.DayRange.empty(),
+			RequestPaging.newBuilder()
+				.setPage(0)
+				.setPageSize(10)
+				.build()
 		)
 
 		// When: Получаем вторую страницу
 		val page2 = userRepository.getLeaderboardPage(
 			LeaderboardType.TASKS,
-			LeaderboardRequestQueryOptions(null, null, LeaderboardType.TASKS),
-			RequestPaging(1, 10)
+			DateFilter.DayRange.empty(),
+			RequestPaging.newBuilder()
+				.setPage(1)
+				.setPageSize(10)
+				.build()
 		)
 
 		// Then: Первая страница содержит 10 элементов

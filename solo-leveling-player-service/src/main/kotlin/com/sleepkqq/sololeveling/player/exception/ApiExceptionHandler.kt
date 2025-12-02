@@ -24,6 +24,8 @@ class ApiExceptionHandler : GrpcExceptionHandler {
 			is IllegalStateException -> Status.FAILED_PRECONDITION
 				.withDescription(e.message)
 
+			is AccessDeniedException -> Status.PERMISSION_DENIED
+
 			else -> Status.INTERNAL
 				.withDescription("Internal server error")
 		}

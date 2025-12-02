@@ -1,9 +1,14 @@
 package com.sleepkqq.sololeveling.player.service.user
 
+import com.sleepkqq.sololeveling.jimmer.predicate.filter.DateFilter
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.user.User
 import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher
 import com.sleepkqq.sololeveling.player.exception.ModelNotFoundException
+import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser
+import com.sleepkqq.sololeveling.proto.player.RequestPaging
+import com.sleepkqq.sololeveling.proto.user.LeaderboardType
+import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
 import java.util.Locale
 import kotlin.reflect.KClass
@@ -23,5 +28,9 @@ interface UserService {
 	fun upsert(user: User): User
 	fun updateLocale(id: Long, locale: Locale)
 	fun register(user: User): User
-	fun getLeaderboardPage()
+	fun getLeaderboardPage(
+		type: LeaderboardType,
+		range: DateFilter.DayRange,
+		paging: RequestPaging
+	): Page<LeaderboardUser>
 }

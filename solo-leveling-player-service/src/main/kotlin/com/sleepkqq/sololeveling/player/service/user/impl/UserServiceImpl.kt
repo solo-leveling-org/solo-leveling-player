@@ -1,9 +1,11 @@
 package com.sleepkqq.sololeveling.player.service.user.impl
 
+import com.sleepkqq.sololeveling.jimmer.predicate.filter.DateFilter
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.LevelType
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
+import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser
 import com.sleepkqq.sololeveling.player.model.entity.user.User
 import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher
 import com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole
@@ -14,6 +16,9 @@ import com.sleepkqq.sololeveling.player.service.player.LevelService
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
 import com.sleepkqq.sololeveling.player.service.user.UserService
+import com.sleepkqq.sololeveling.proto.player.RequestPaging
+import com.sleepkqq.sololeveling.proto.user.LeaderboardType
+import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Service
@@ -36,9 +41,11 @@ class UserServiceImpl(
 		const val INITIAL_PLAYER_MAX_TASKS = 5
 	}
 
+	@Transactional(readOnly = true)
 	override fun find(id: Long, fetcher: UserFetcher): User? =
 		userRepository.findNullable(id, fetcher)
 
+	@Transactional(readOnly = true)
 	override fun <V : View<User>> findView(id: Long, viewType: KClass<V>): V? =
 		userRepository.findView(id, viewType.java)
 
@@ -99,7 +106,10 @@ class UserServiceImpl(
 		})
 	}
 
-	override fun getLeaderboardPage() {
-		TODO("Not yet implemented")
-	}
+	@Transactional(readOnly = true)
+	override fun getLeaderboardPage(
+		type: LeaderboardType,
+		range: DateFilter.DayRange,
+		paging: RequestPaging
+	): Page<LeaderboardUser> = userRepository.getLeaderboardPage(type, range, paging)
 }

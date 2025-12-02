@@ -1,12 +1,12 @@
 package com.sleepkqq.sololeveling.player.grpc.server
 
 import com.google.protobuf.Empty
+import com.sleepkqq.sololeveling.config.interceptor.UserContextHolder
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.service.user.UserService
 import com.sleepkqq.sololeveling.proto.user.AuthUserRequest
-import com.sleepkqq.sololeveling.proto.user.GetUserLocaleRequest
 import com.sleepkqq.sololeveling.proto.user.GetUserRequest
 import com.sleepkqq.sololeveling.proto.user.GetUserResponse
 import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardRequest
@@ -15,7 +15,6 @@ import com.sleepkqq.sololeveling.proto.user.UpdateUserLocaleRequest
 import com.sleepkqq.sololeveling.proto.user.UserLocaleResponse
 import com.sleepkqq.sololeveling.proto.user.UserServiceGrpc
 import io.grpc.stub.StreamObserver
-import org.slf4j.LoggerFactory
 import org.springframework.grpc.server.service.GrpcService
 import java.util.Locale
 
@@ -25,14 +24,10 @@ class UserApi(
 	private val protoMapper: ProtoMapper
 ) : UserServiceGrpc.UserServiceImplBase() {
 
-	private val log = LoggerFactory.getLogger(javaClass)
-
 	override fun getUser(
 		request: GetUserRequest,
 		responseObserver: StreamObserver<GetUserResponse>
 	) {
-		log.info(">> getUser called by user={}", request.userId)
-
 		val user = userService.getView(request.userId, UserView::class)
 		val response = GetUserResponse.newBuilder()
 			.setUser(protoMapper.map(user))
@@ -46,8 +41,6 @@ class UserApi(
 		request: AuthUserRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
-		log.info(">> authUser called by user={}", request.user.id)
-
 		val user = protoMapper.map(request.user)
 		userService.upsert(user.toEntity())
 		val response = Empty.newBuilder().build()
@@ -57,12 +50,13 @@ class UserApi(
 	}
 
 	override fun getUserLocale(
-		request: GetUserLocaleRequest,
+		request: Empty,
 		responseObserver: StreamObserver<UserLocaleResponse>
 	) {
-		log.info(">> getUserLocale called by user={}", request.userId)
-
-		val user = userService.get(request.userId, Fetchers.USER_FETCHER.locale().manualLocale())
+		val user = userService.get(
+			UserContextHolder.getUserId()!!,
+			Fetchers.USER_FETCHER.locale().manualLocale()
+		)
 		val locale = user.manualLocale() ?: user.locale()
 		val isManual = user.manualLocale() != null
 
@@ -79,9 +73,10 @@ class UserApi(
 		request: UpdateUserLocaleRequest,
 		responseObserver: StreamObserver<UserLocaleResponse>
 	) {
-		log.info(">> updateUserLocale called by user={}", request.userId)
-
-		userService.updateLocale(request.userId, Locale.forLanguageTag(request.locale))
+		userService.updateLocale(
+			UserContextHolder.getUserId()!!,
+			Locale.forLanguageTag(request.locale)
+		)
 		val response = UserLocaleResponse.newBuilder()
 			.setLocale(request.locale)
 			.setIsManual(true)
@@ -95,8 +90,14 @@ class UserApi(
 		request: GetUsersLeaderboardRequest,
 		responseObserver: StreamObserver<GetUsersLeaderboardResponse>
 	) {
-		log.info(">> getUsersLeaderboard called")
+		val leaderboardPage = userService.getLeaderboardPage(
+			request.type,
+			protoMapper.map(request.range),
+			request.paging
+		)
+		val response = protoMapper.map(leaderboardPage, request.paging.page)
 
-
+		responseObserver.onNext(response)
+		responseObserver.onCompleted()
 	}
 }

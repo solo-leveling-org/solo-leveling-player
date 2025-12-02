@@ -6,7 +6,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
 
-fun BigDecimal.toMoney(currencyCode: CurrencyCode): Money {
+fun BigDecimal.toMoney(currencyCode: CurrencyCode? = null): Money {
 	require(this.scale() <= 9) { "Scale cannot exceed 9 digits" }
 
 	// Нормализуем к 9 знакам
@@ -24,9 +24,28 @@ fun BigDecimal.toMoney(currencyCode: CurrencyCode): Money {
 		"Nanos part out of range: ${nanos.toInt()}"
 	}
 
-	return Money.newBuilder()
-		.setCurrencyCode(currencyCode.name)
+	val builder = Money.newBuilder()
 		.setUnits(units.toLong())
 		.setNanos(nanos.toInt())
-		.build()
+
+	if (currencyCode != null) {
+		builder.currencyCode = currencyCode.name
+	}
+
+	return builder.build()
+}
+
+fun Number.toMoney(currencyCode: CurrencyCode? = null): Money {
+	val bigDecimal = when (this) {
+		is Int -> BigDecimal(this)
+		is Long -> BigDecimal(this)
+		is Double -> BigDecimal.valueOf(this)
+		is Float -> BigDecimal.valueOf(this.toDouble())
+		is Short -> BigDecimal(this.toInt())
+		is Byte -> BigDecimal(this.toInt())
+		is BigDecimal -> this
+		else -> BigDecimal(this.toString())
+	}
+
+	return bigDecimal.toMoney(currencyCode)
 }
