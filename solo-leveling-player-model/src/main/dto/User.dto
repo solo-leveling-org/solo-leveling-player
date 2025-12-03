@@ -28,6 +28,8 @@ UserView {
 }
 
 LeaderboardUserView {
+  id
+
   firstName
 
   lastName

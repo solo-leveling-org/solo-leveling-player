@@ -121,6 +121,7 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 	)
 	abstract fun map(page: Page<LeaderboardUser>, currentPage: Int): GetUsersLeaderboardResponse
 
+	@Mapping(target = "id", source = "input.user.id")
 	@Mapping(target = "firstName", source = "input.user.firstName")
 	@Mapping(target = "lastName", source = "input.user.lastName")
 	@Mapping(target = "photoUrl", source = "input.user.photoUrl")
