@@ -105,8 +105,9 @@ public class UserRepository {
       }
 
       case LEVEL -> {
-        expression = p.level().level();
-        predicate = null;
+        var level = p.level();
+        expression = level.level();
+        predicate = level.totalExperience().gt(0);
       }
 
       default -> throw new IllegalArgumentException("Unknown leaderboard type: " + type);
