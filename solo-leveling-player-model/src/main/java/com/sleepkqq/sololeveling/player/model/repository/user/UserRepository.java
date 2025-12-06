@@ -65,16 +65,12 @@ public class UserRepository {
         .execute();
   }
 
-  @SuppressWarnings("unchecked")
-  public Page<LeaderboardUser> getLeaderboardPage(
+  private LeaderboardQueryData getLeaderboardQueryData(
       LeaderboardType type,
       DayRange range,
-      RequestPaging paging
+      Long id
   ) {
     var p = PLAYER_TABLE;
-
-    Expression<? extends Number> expression;
-    Predicate predicate;
 
     switch (type) {
       case TASKS -> {
@@ -82,7 +78,7 @@ public class UserRepository {
 
         var query = sql.createSubQuery(pt)
             .where(
-                pt.player().id().eq(p.id()),
+                pt.player().id().eq(id),
                 pt.status().eq(PlayerTaskStatus.COMPLETED)
             );
 
@@ -94,34 +90,41 @@ public class UserRepository {
         }
 
         var taskCount = query.selectCount();
-        expression = taskCount;
-        predicate = taskCount.gt(0L);
+        return new LeaderboardQueryData(taskCount, taskCount.gt(0L));
       }
 
       case BALANCE -> {
         var balance = p.balance().balance();
-        expression = balance;
-        predicate = balance.gt(BigDecimal.ZERO);
+        return new LeaderboardQueryData(balance, balance.gt(BigDecimal.ZERO));
       }
 
       case LEVEL -> {
         var level = p.level();
-        expression = level.level();
-        predicate = level.totalExperience().gt(0);
+        return new LeaderboardQueryData(level.level(), level.totalExperience().gt(0));
       }
 
       default -> throw new IllegalArgumentException("Unknown leaderboard type: " + type);
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  public Page<LeaderboardUser> getLeaderboardPage(
+      LeaderboardType type,
+      DayRange range,
+      RequestPaging paging
+  ) {
+    var p = PLAYER_TABLE;
+    var queryData = getLeaderboardQueryData(type, range, null);
 
     var baseUser = sql.createBaseQuery(p)
-        .where(predicate)
+        .where(queryData.predicate())
         .addSelect(p.user())
-        .addSelect(expression)
+        .addSelect(queryData.expression())
         .addSelect(
             Expression.numeric().sql(
                 Long.class,
                 "row_number() over(order by %e desc, %e asc)",
-                expression,
+                queryData.expression(),
                 p.id()
             )
         )
@@ -134,5 +137,41 @@ public class UserRepository {
             .position(baseUser.get_3())
         )
         .fetchPage(paging.getPage(), paging.getPageSize());
+  }
+
+  @SuppressWarnings("unchecked")
+  @Nullable
+  public LeaderboardUser findLeaderboardUser(long id, LeaderboardType type, DayRange range) {
+    var p = PLAYER_TABLE;
+    var queryData = getLeaderboardQueryData(type, range, id);
+
+    var baseUser = sql.createBaseQuery(p)
+        .where(queryData.predicate(), p.id().eq(id))
+        .addSelect(p.user())
+        .addSelect(queryData.expression())
+        .addSelect(
+            Expression.numeric().sql(
+                Long.class,
+                "row_number() over(order by %e desc, %e asc)",
+                queryData.expression(),
+                p.id()
+            )
+        )
+        .asBaseTable();
+
+    return sql.createQuery(baseUser)
+        .select(LeaderboardUserMapper
+            .user(baseUser.get_1().fetch(LeaderboardUserView.class))
+            .score((Selection<Number>) baseUser.get_2())
+            .position(baseUser.get_3())
+        )
+        .fetchFirstOrNull();
+  }
+
+  private record LeaderboardQueryData(
+      Expression<? extends Number> expression,
+      Predicate predicate
+  ) {
+
   }
 }

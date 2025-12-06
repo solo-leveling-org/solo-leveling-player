@@ -36,9 +36,6 @@ app:
     preparing-tasks-retry:
       enabled: true
       cron: "0 * * * * *"
-    leaderboard-snapshot:
-      enabled: true
-      cron: "0 0 3 * * *"
 logging:
   level:
     org.apache.kafka.clients.consumer.ConsumerConfig: WARN

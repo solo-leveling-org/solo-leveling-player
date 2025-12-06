@@ -7,6 +7,8 @@ import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.service.user.UserService
 import com.sleepkqq.sololeveling.proto.user.AuthUserRequest
+import com.sleepkqq.sololeveling.proto.user.GetUserLeaderboardRequest
+import com.sleepkqq.sololeveling.proto.user.GetUserLeaderboardResponse
 import com.sleepkqq.sololeveling.proto.user.GetUserRequest
 import com.sleepkqq.sololeveling.proto.user.GetUserResponse
 import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardRequest
@@ -96,6 +98,23 @@ class UserApi(
 			request.paging
 		)
 		val response = protoMapper.map(leaderboardPage, request.paging.page)
+
+		responseObserver.onNext(response)
+		responseObserver.onCompleted()
+	}
+
+	override fun getUserLeaderboard(
+		request: GetUserLeaderboardRequest,
+		responseObserver: StreamObserver<GetUserLeaderboardResponse>
+	) {
+		val leaderboardUser = userService.getLeaderboardUser(
+			UserContextHolder.getUserId()!!,
+			request.type,
+			protoMapper.map(request.range)
+		)
+		val response = GetUserLeaderboardResponse.newBuilder()
+			.setUser(protoMapper.map(leaderboardUser))
+			.build()
 
 		responseObserver.onNext(response)
 		responseObserver.onCompleted()

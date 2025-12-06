@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.user
 
 import com.sleepkqq.sololeveling.jimmer.predicate.filter.DateFilter
+import com.sleepkqq.sololeveling.player.exception.LeaderboardUserNotFoundException
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.user.User
 import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher
@@ -33,4 +34,17 @@ interface UserService {
 		range: DateFilter.DayRange,
 		paging: RequestPaging
 	): Page<LeaderboardUser>
+
+	fun findLeaderboardUser(
+		id: Long,
+		type: LeaderboardType,
+		range: DateFilter.DayRange
+	): LeaderboardUser?
+
+	fun getLeaderboardUser(
+		id: Long,
+		type: LeaderboardType,
+		range: DateFilter.DayRange
+	): LeaderboardUser = findLeaderboardUser(id, type, range)
+		?: throw LeaderboardUserNotFoundException()
 }

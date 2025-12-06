@@ -112,4 +112,11 @@ class UserServiceImpl(
 		range: DateFilter.DayRange,
 		paging: RequestPaging
 	): Page<LeaderboardUser> = userRepository.getLeaderboardPage(type, range, paging)
+
+	@Transactional(readOnly = true)
+	override fun findLeaderboardUser(
+		id: Long,
+		type: LeaderboardType,
+		range: DateFilter.DayRange
+	): LeaderboardUser? = userRepository.findLeaderboardUser(id, type, range)
 }
