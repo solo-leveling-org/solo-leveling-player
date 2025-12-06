@@ -7,14 +7,6 @@ input PlayerTaskTopicInput {
   -updatedAt
 
   -createdAt
-
-  level {
-    #allScalars
-
-    -updatedAt
-
-    -createdAt
-  }
 }
 
 PlayerTaskTopicView {

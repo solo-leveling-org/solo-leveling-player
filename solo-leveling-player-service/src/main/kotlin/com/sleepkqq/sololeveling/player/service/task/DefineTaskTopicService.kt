@@ -26,11 +26,13 @@ class DefineTaskTopicService {
 			return getFirstTopic(topicsList)
 		}
 
-		return topics.firstNotNullOfOrNull {
-			it.compatibleTopics
-				.firstOrNull { c -> topics.contains(c) }
-				?.let { c -> listOf(it, c) }
-		}
+		return topics.randomOrNull()
+			?.let {
+				it.compatibleTopics
+					.filter { c -> !c.isDisabled && topics.contains(c) }
+					.randomOrNull()
+					?.let { c -> listOf(it, c) }
+			}
 			?: getFirstTopic(topicsList)
 	}
 

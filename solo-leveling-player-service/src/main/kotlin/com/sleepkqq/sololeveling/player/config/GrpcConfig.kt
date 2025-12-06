@@ -1,7 +1,7 @@
 package com.sleepkqq.sololeveling.player.config
 
 import com.sleepkqq.sololeveling.jimmer.enums.EnumLocalizer
-import com.sleepkqq.sololeveling.proto.config.interceptor.LocaleServerInterceptor
+import com.sleepkqq.sololeveling.proto.config.interceptor.UserServerInterceptor
 import io.grpc.ServerInterceptor
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
@@ -15,7 +15,7 @@ class GrpcConfig {
 	@Bean
 	@Order(100)
 	@GlobalServerInterceptor
-	fun localeServerInterceptor(): ServerInterceptor = LocaleServerInterceptor()
+	fun localeServerInterceptor(): ServerInterceptor = UserServerInterceptor()
 
 	@Bean
 	fun enumLocalizer(messageSource: MessageSource): EnumLocalizer = EnumLocalizer(messageSource)

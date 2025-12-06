@@ -7,6 +7,7 @@ import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.proto.player.EnumFilter
 import com.sleepkqq.sololeveling.proto.player.Filter
+import com.sleepkqq.sololeveling.proto.player.RequestPaging
 import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -29,7 +30,7 @@ class PlayerTaskServiceTest : BaseTestClass() {
 			agility = 5,
 			strength = 10,
 			intelligence = 3,
-			topics = listOf(TaskTopic.PRODUCTIVITY, TaskTopic.MENTAL_HEALTH)
+			topics = listOf(TaskTopic.PRODUCTIVITY, TaskTopic.NUTRITION)
 		)
 
 		val playerTask = createPlayerTask(task, player.id())
@@ -37,8 +38,6 @@ class PlayerTaskServiceTest : BaseTestClass() {
 
 		// When
 		val options = RequestQueryOptions.newBuilder()
-			.setPage(0)
-			.setPageSize(1)
 			.setFilter(
 				Filter.newBuilder()
 					.addEnumFilters(
@@ -54,7 +53,17 @@ class PlayerTaskServiceTest : BaseTestClass() {
 			)
 			.build()
 
-		val searchedTasks = playerTaskService.searchView(player.id(), options, PlayerTaskView::class)
+		val paging = RequestPaging.newBuilder()
+			.setPage(0)
+			.setPageSize(1)
+			.build()
+
+		val searchedTasks = playerTaskService.searchView(
+			player.id(),
+			options,
+			paging,
+			PlayerTaskView::class
+		)
 
 		assertThat(searchedTasks.totalRowCount.toInt()).isEqualTo(1)
 	}

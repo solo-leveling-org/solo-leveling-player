@@ -20,7 +20,7 @@ class PreparingTasksRetryScheduler(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	@Transactional(readOnly = true)
-	@Scheduled(cron = $$"${app.scheduler.preparing-tasks-retry.cron}")
+	@Scheduled(cron = $$"${app.scheduler.preparing-tasks-retry.cron}", zone = "UTC")
 	fun call() {
 		if (!preparingTasksRetrySchedulerProperties.enabled) {
 			log.warn("Preparing tasks retry scheduler is disabled")

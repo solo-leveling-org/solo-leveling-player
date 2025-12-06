@@ -15,7 +15,8 @@ class ApiExceptionHandler : GrpcExceptionHandler {
 		log.error("Unexpected error occurred", e)
 
 		val status = when (e) {
-			is ModelNotFoundException -> Status.NOT_FOUND
+			is ModelNotFoundException,
+			is LeaderboardUserNotFoundException -> Status.NOT_FOUND
 				.withDescription(e.message)
 
 			is IllegalArgumentException -> Status.INVALID_ARGUMENT
@@ -23,6 +24,8 @@ class ApiExceptionHandler : GrpcExceptionHandler {
 
 			is IllegalStateException -> Status.FAILED_PRECONDITION
 				.withDescription(e.message)
+
+			is AccessDeniedException -> Status.PERMISSION_DENIED
 
 			else -> Status.INTERNAL
 				.withDescription("Internal server error")

@@ -26,3 +26,13 @@ UserView {
     }
   }
 }
+
+LeaderboardUserView {
+  id
+
+  firstName
+
+  lastName
+
+  photoUrl
+}

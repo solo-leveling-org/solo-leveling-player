@@ -2,6 +2,7 @@ package com.sleepkqq.sololeveling.player.mapper
 
 import com.google.protobuf.Timestamp
 import com.google.type.Money
+import com.sleepkqq.sololeveling.jimmer.mapper.JimmerProtoMapper
 import com.sleepkqq.sololeveling.player.extenstions.toMoney
 import com.sleepkqq.sololeveling.player.extenstions.toTimestamp
 import com.sleepkqq.sololeveling.player.model.entity.localization.LocalizationItem
@@ -12,13 +13,12 @@ import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicV
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity
+import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.proto.player.*
-import com.sleepkqq.sololeveling.proto.player.PlayerTaskInput
 import com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicInput
+import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardResponse
 import com.sleepkqq.sololeveling.proto.user.UserInput
-import com.sleepkqq.sololeveling.proto.user.UserRole
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
 import org.mapstruct.*
@@ -34,22 +34,10 @@ import java.time.Instant
 	nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_DEFAULT,
 	nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS
 )
-abstract class ProtoMapper {
-
-	fun map(input: PlayerTaskStatus): com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus =
-		com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus.valueOf(input.name)
-
-	fun map(input: TaskRarity): Rarity =
-		Rarity.valueOf(input.name)
+abstract class ProtoMapper : JimmerProtoMapper() {
 
 	fun map(input: TaskTopic): com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic =
 		com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic.valueOf(input.name)
-
-	fun map(input: UserRole): com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole =
-		com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole.valueOf(input.name)
-
-	fun map(input: Assessment): com.sleepkqq.sololeveling.player.model.entity.player.enums.Assessment =
-		com.sleepkqq.sololeveling.player.model.entity.player.enums.Assessment.valueOf(input.name)
 
 	fun map(input: View<TaskTopicItem>): TaskTopic = TaskTopic.valueOf(input.toEntity().topic().name)
 
@@ -59,12 +47,15 @@ abstract class ProtoMapper {
 		.let { if (LocaleContextHolder.getLocale().language == "ru") it.ru() else it.en() }
 
 	@Mapping(target = "isActive", source = "active")
+	@Mapping(target = "isDisabled", expression = "java(input.getTaskTopic().isDisabled())")
 	abstract fun map(input: PlayerTaskTopicView): com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicView
 
 	@Mapping(target = "task.topicsList", source = "input.task.topics")
 	abstract fun map(input: PlayerTaskView): com.sleepkqq.sololeveling.proto.player.PlayerTaskView
 
 	fun map(balance: BigDecimal, currencyCode: CurrencyCode): Money = balance.toMoney(currencyCode)
+
+	fun map(input: Number): Money = input.toMoney()
 
 	abstract fun map(input: UserView): com.sleepkqq.sololeveling.proto.user.UserView
 
@@ -81,19 +72,6 @@ abstract class ProtoMapper {
 	@Mapping(target = "taskTopicsList", source = "taskTopics")
 	abstract fun map(input: PlayerView): com.sleepkqq.sololeveling.proto.player.PlayerView
 
-	@Mapping(target = "taskId", source = "input.task.id")
-	abstract fun map(input: PlayerTaskInput): com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskInput
-
-	@Mapping(target = "title", ignore = true)
-	@Mapping(target = "description", ignore = true)
-	@Mapping(target = "topics", source = "topicsList")
-	abstract fun map(input: TaskInput): com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput
-
-	protected fun taskTopicToTargetOf_topics(input: TaskTopic):
-			com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput.TargetOf_topics =
-		com.sleepkqq.sololeveling.player.model.entity.task.dto.TaskInput.TargetOf_topics()
-			.apply { topic = map(input) }
-
 	abstract fun map(input: UserInput): com.sleepkqq.sololeveling.player.model.entity.user.dto.UserInput
 
 	@Mapping(target = "active", source = "isActive")
@@ -104,9 +82,10 @@ abstract class ProtoMapper {
 		target = "transactionsList.amount",
 		expression = "java(map(playerBalanceTransactionView.getAmount(), playerBalanceTransactionView.getCurrencyCode()))"
 	)
+	@Mapping(target = "options", expression = "java(map(filters, sorts))")
 	@Mapping(
-		target = "options",
-		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage, filters, sorts))"
+		target = "paging",
+		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage))"
 	)
 	abstract fun mapTransactions(
 		page: Page<PlayerBalanceTransactionView>,
@@ -116,9 +95,10 @@ abstract class ProtoMapper {
 	): SearchPlayerBalanceTransactionsResponse
 
 	@Mapping(target = "tasksList", source = "page.rows")
+	@Mapping(target = "options", expression = "java(map(filters, sorts))")
 	@Mapping(
-		target = "options",
-		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage, filters, sorts))"
+		target = "paging",
+		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage))"
 	)
 	abstract fun mapTasks(
 		page: Page<PlayerTaskView>,
@@ -129,12 +109,21 @@ abstract class ProtoMapper {
 
 	@Mapping(target = "filtersList", source = "filters")
 	@Mapping(target = "sortsList", source = "sorts")
+	abstract fun map(filters: List<LocalizedField>, sorts: Set<String>): ResponseQueryOptions
+
 	@Mapping(target = "hasMore", expression = "java(totalPageCount - 1 != currentPage)")
-	abstract fun map(
-		totalRowCount: Long,
-		totalPageCount: Long,
-		currentPage: Int,
-		filters: List<LocalizedField>,
-		sorts: Set<String>
-	): ResponseQueryOptions
+	abstract fun map(totalRowCount: Long, totalPageCount: Long, currentPage: Int): ResponsePaging
+
+	@Mapping(target = "usersList", source = "page.rows")
+	@Mapping(
+		target = "paging",
+		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage))"
+	)
+	abstract fun map(page: Page<LeaderboardUser>, currentPage: Int): GetUsersLeaderboardResponse
+
+	@Mapping(target = "id", source = "input.user.id")
+	@Mapping(target = "firstName", source = "input.user.firstName")
+	@Mapping(target = "lastName", source = "input.user.lastName")
+	@Mapping(target = "photoUrl", source = "input.user.photoUrl")
+	abstract fun map(input: LeaderboardUser): com.sleepkqq.sololeveling.proto.user.LeaderboardUser
 }

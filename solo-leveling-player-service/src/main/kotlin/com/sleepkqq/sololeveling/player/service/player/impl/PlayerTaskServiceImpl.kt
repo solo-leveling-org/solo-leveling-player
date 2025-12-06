@@ -1,10 +1,13 @@
 package com.sleepkqq.sololeveling.player.service.player.impl
 
+import com.sleepkqq.sololeveling.player.exception.AccessDeniedException
 import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
+import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskFetcher
+import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskProps
 import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
@@ -19,7 +22,9 @@ import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.task.TaskService
+import com.sleepkqq.sololeveling.proto.player.RequestPaging
 import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions
+import org.babyfish.jimmer.ImmutableObjects
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
@@ -45,11 +50,12 @@ class PlayerTaskServiceImpl(
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	private companion object {
-		val ACTIVE_TASKS_STATUSES = setOf(
-			PlayerTaskStatus.PREPARING,
-			PlayerTaskStatus.IN_PROGRESS
-		)
+		val ACTIVE_TASKS_STATUSES = setOf(PlayerTaskStatus.PREPARING, PlayerTaskStatus.IN_PROGRESS)
 	}
+
+	@Transactional(readOnly = true)
+	override fun find(id: UUID, fetcher: PlayerTaskFetcher): PlayerTask? =
+		playerTaskRepository.find(id, fetcher)
 
 	@Transactional(readOnly = true)
 	override fun find(playerId: Long, taskIds: Collection<UUID>): List<PlayerTask> =
@@ -86,8 +92,18 @@ class PlayerTaskServiceImpl(
 		}
 
 	@Transactional
-	override fun skipTask(playerId: Long, playerTask: PlayerTask) {
-		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED)
+	override fun skipTask(playerId: Long, id: UUID) {
+		val playerTask = get(
+			id,
+			Fetchers.PLAYER_TASK_FETCHER.allScalarFields()
+				.player()
+		)
+
+		if (playerTask.player().id() != playerId) {
+			throw AccessDeniedException()
+		}
+
+		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED, false)
 
 		generateTasks(playerId, replaceOrders = setOf(playerTask.order()))
 	}
@@ -95,11 +111,25 @@ class PlayerTaskServiceImpl(
 	@Transactional
 	override fun completeTask(
 		playerId: Long,
-		playerTask: PlayerTask,
-		task: Task
+		id: UUID
 	): Pair<PlayerView, PlayerView> {
+		val playerTask = get(
+			id,
+			Fetchers.PLAYER_TASK_FETCHER.allScalarFields()
+				.task(
+					Fetchers.TASK_FETCHER.allScalarFields()
+						.topics(Fetchers.TASK_TOPIC_ITEM_FETCHER.allScalarFields())
+				)
+				.player()
+		)
 
-		setStatus(listOf(playerTask), PlayerTaskStatus.COMPLETED)
+		if (playerTask.player().id() != playerId) {
+			throw AccessDeniedException()
+		}
+
+		val task = playerTask.task()!!
+
+		setStatus(listOf(playerTask), PlayerTaskStatus.COMPLETED, false)
 
 		val playerView = playerService.getView(playerId, PlayerView::class)
 		val player = playerView.toEntity()
@@ -136,8 +166,9 @@ class PlayerTaskServiceImpl(
 	override fun <V : View<PlayerTask>> searchView(
 		playerId: Long,
 		options: RequestQueryOptions,
+		paging: RequestPaging,
 		viewType: KClass<V>
-	): Page<V> = playerTaskRepository.searchView(playerId, options, viewType.java)
+	): Page<V> = playerTaskRepository.searchView(playerId, options, paging, viewType.java)
 
 	@Transactional
 	override fun generateTasks(
@@ -159,10 +190,14 @@ class PlayerTaskServiceImpl(
 		)
 
 		val activeTasks = getActiveTasks(playerId, Fetchers.PLAYER_TASK_FETCHER.order())
+
+		activeTasks.firstOrNull { it.order() in replaceOrders }
+			?.let { throw IllegalArgumentException("Incorrect replacement order ${it.order()}") }
+
 		val maxTasks = resolvedPlayer.maxTasks()
 		val additionalTasksNeeded = maxTasks - activeTasks.size
 
-		if (additionalTasksNeeded < 0) {
+		if (additionalTasksNeeded <= 0) {
 			log.warn(
 				"Invalid state: activeTasksCount={} exceeds maxTasks={} for playerId={}, skipping generation",
 				activeTasks, maxTasks, playerId
@@ -172,13 +207,9 @@ class PlayerTaskServiceImpl(
 
 		val usedOrders = activeTasks.map { it.order() }.toSet()
 
-		val additionalOrders = if (additionalTasksNeeded > 0) {
-			(0 until maxTasks)
-				.filterNot { it in usedOrders }
-				.take(additionalTasksNeeded)
-		} else {
-			emptyList()
-		}
+		val additionalOrders = (0 until maxTasks)
+			.filterNot { it in usedOrders }
+			.take(additionalTasksNeeded)
 
 		val allNewTasks = (replaceOrders + additionalOrders).map {
 			val task = taskService.initialize(resolvedPlayer.taskTopics())
@@ -211,14 +242,39 @@ class PlayerTaskServiceImpl(
 		generateTasksProducer.send(playerId, tasksToGenerate)
 	}
 
-	private fun setStatus(playerTasks: Collection<PlayerTask>, status: PlayerTaskStatus) {
-		playerTaskRepository.saveEntities(
-			playerTasks.map {
-				Immutables.createPlayerTask(it) { p ->
-					p.setStatus(status)
+	private fun setStatus(
+		playerTasks: Collection<PlayerTask>,
+		status: PlayerTaskStatus,
+		saveTask: Boolean = true
+	) {
+		if (playerTasks.isEmpty()) {
+			return
+		}
+
+		val expectedStatus = when (status) {
+			PlayerTaskStatus.IN_PROGRESS -> PlayerTaskStatus.PREPARING
+			PlayerTaskStatus.COMPLETED,
+			PlayerTaskStatus.SKIPPED -> PlayerTaskStatus.IN_PROGRESS
+
+			else -> throw IllegalArgumentException("Incorrect status=$status")
+		}
+
+		val updatedTasks = playerTasks.map {
+			require(it.status() == expectedStatus) {
+				"PlayerTask=${it.id()} status must be $expectedStatus"
+			}
+
+			Immutables.createPlayerTask(it) { p ->
+
+				if (!saveTask && ImmutableObjects.isLoaded(it, PlayerTaskProps.TASK)) {
+					val task = it.task()!!
+					p.setTask(null).setTaskId(task.id())
 				}
-			},
-			SaveMode.UPDATE_ONLY
-		)
+
+				p.setStatus(status)
+			}
+		}
+
+		playerTaskRepository.saveEntities(updatedTasks, SaveMode.UPDATE_ONLY)
 	}
 }

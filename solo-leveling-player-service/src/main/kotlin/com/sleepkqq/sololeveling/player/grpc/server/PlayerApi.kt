@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.grpc.server
 
 import com.google.protobuf.Empty
+import com.sleepkqq.sololeveling.config.interceptor.UserContextHolder
 import com.sleepkqq.sololeveling.jimmer.enums.EnumLocalizer
 import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_BALANCE_TRANSACTIONS
 import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_TASKS
@@ -9,6 +10,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransac
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
+import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerBalanceTransactionRepository
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
@@ -17,8 +19,8 @@ import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
 import com.sleepkqq.sololeveling.proto.player.*
 import io.grpc.stub.StreamObserver
-import org.slf4j.LoggerFactory
 import org.springframework.grpc.server.service.GrpcService
+import java.util.UUID
 
 @GrpcService
 class PlayerApi(
@@ -30,15 +32,11 @@ class PlayerApi(
 	private val enumLocalizer: EnumLocalizer
 ) : PlayerServiceGrpc.PlayerServiceImplBase() {
 
-	private val log = LoggerFactory.getLogger(javaClass)
-
 	override fun getActiveTasks(
-		request: GetActiveTasksRequest,
+		request: Empty,
 		responseObserver: StreamObserver<GetActiveTasksResponse>
 	) {
-		log.info(">> getActiveTasks called by user={}", request.playerId)
-
-		val activeTasks = playerTaskService.getActiveTasks(request.playerId)
+		val activeTasks = playerTaskService.getActiveTasks(UserContextHolder.getUserId()!!)
 			.map { protoMapper.map(it) }
 
 		val isFirstTime = activeTasks.isEmpty()
@@ -53,12 +51,10 @@ class PlayerApi(
 	}
 
 	override fun getPlayerTopics(
-		request: GetPlayerTopicsRequest,
+		request: Empty,
 		responseObserver: StreamObserver<GetPlayerTopicsResponse>
 	) {
-		log.info(">> getPlayerTopics called by user={}", request.playerId)
-
-		val topics = playerTaskTopicService.getByPlayerId(request.playerId)
+		val topics = playerTaskTopicService.getByPlayerId(UserContextHolder.getUserId()!!)
 			.map { protoMapper.map(it) }
 
 		val response = GetPlayerTopicsResponse.newBuilder()
@@ -73,11 +69,14 @@ class PlayerApi(
 		request: SavePlayerTopicsRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
-		log.info(">> savePlayerTopics called by user={}", request.playerId)
-
 		val receivedTopics = request.playerTaskTopicsList
 			.map(protoMapper::map)
 			.map { it.toEntity() }
+
+		val disabledTopics = TaskTopic.getDisabledTopics()
+		if (receivedTopics.any { it.taskTopic() in disabledTopics }) {
+			throw IllegalArgumentException("Cannot select disabled topics")
+		}
 
 		playerTaskTopicService.updateAll(receivedTopics)
 
@@ -86,12 +85,10 @@ class PlayerApi(
 	}
 
 	override fun generateTasks(
-		request: GenerateTasksRequest,
+		request: Empty,
 		responseObserver: StreamObserver<Empty>
 	) {
-		log.info(">> generateTasks called by user={}", request.playerId)
-
-		playerTaskService.generateTasks(request.playerId)
+		playerTaskService.generateTasks(UserContextHolder.getUserId()!!)
 
 		responseObserver.onNext(Empty.newBuilder().build())
 		responseObserver.onCompleted()
@@ -101,14 +98,10 @@ class PlayerApi(
 		request: CompleteTaskRequest,
 		responseObserver: StreamObserver<CompleteTaskResponse>
 	) {
-		log.info(">> completeTask task={} called by user={}", request.playerTask.id, request.playerId)
-
-		val playerTask = protoMapper.map(request.playerTask)
-			.toEntity()
-		val task = protoMapper.map(request.playerTask.task)
-			.toEntity()
-
-		val playerStates = playerTaskService.completeTask(request.playerId, playerTask, task)
+		val playerStates = playerTaskService.completeTask(
+			UserContextHolder.getUserId()!!,
+			UUID.fromString(request.playerTaskId)
+		)
 
 		val response = CompleteTaskResponse.newBuilder()
 			.setPlayerBefore(protoMapper.map(playerStates.first))
@@ -123,23 +116,23 @@ class PlayerApi(
 		request: SkipTaskRequest,
 		responseObserver: StreamObserver<Empty>
 	) {
-		log.info(">> skipTask task={} called by user={}", request.playerTask.id, request.playerId)
-
-		val playerTask = protoMapper.map(request.playerTask)
-			.toEntity()
-		playerTaskService.skipTask(request.playerId, playerTask)
+		playerTaskService.skipTask(
+			UserContextHolder.getUserId()!!,
+			UUID.fromString(request.playerTaskId)
+		)
 
 		responseObserver.onNext(Empty.newBuilder().build())
 		responseObserver.onCompleted()
 	}
 
 	override fun getPlayerBalance(
-		request: GetPlayerBalanceRequest,
+		request: Empty,
 		responseObserver: StreamObserver<GetPlayerBalanceResponse>
 	) {
-		log.info(">> getPlayerBalance called by user={}", request.playerId)
-
-		val playerBalance = playerBalanceService.getView(request.playerId, PlayerBalanceView::class)
+		val playerBalance = playerBalanceService.getView(
+			UserContextHolder.getUserId()!!,
+			PlayerBalanceView::class
+		)
 		val grpcResponse = GetPlayerBalanceResponse.newBuilder()
 			.setBalance(protoMapper.map(playerBalance))
 			.build()
@@ -149,19 +142,18 @@ class PlayerApi(
 	}
 
 	override fun searchPlayerBalanceTransactions(
-		request: SearchPlayerBalanceTransactionsRequest,
+		request: SearchEntitiesRequest,
 		responseObserver: StreamObserver<SearchPlayerBalanceTransactionsResponse>
 	) {
-		log.info(">> searchPlayerBalanceTransactions called by user={}", request.playerId)
-
 		val transactionsPage = playerBalanceTransactionService.searchView(
-			request.playerId,
+			UserContextHolder.getUserId()!!,
 			request.options,
+			request.paging,
 			PlayerBalanceTransactionView::class
 		)
 		val response = protoMapper.mapTransactions(
 			transactionsPage,
-			request.options.page,
+			request.paging.page,
 			enumLocalizer.localize(
 				TABLES_PLAYER_BALANCE_TRANSACTIONS,
 				PlayerBalanceTransactionRepository.FIELD_ENUM_TYPES
@@ -174,19 +166,18 @@ class PlayerApi(
 	}
 
 	override fun searchPlayerTasks(
-		request: SearchPlayerTasksRequest,
+		request: SearchEntitiesRequest,
 		responseObserver: StreamObserver<SearchPlayerTasksResponse>
 	) {
-		log.info(">> searchPlayerTasks called by user={}", request.playerId)
-
 		val tasksPage = playerTaskService.searchView(
-			request.playerId,
+			UserContextHolder.getUserId()!!,
 			request.options,
+			request.paging,
 			PlayerTaskView::class
 		)
 		val response = protoMapper.mapTasks(
 			tasksPage,
-			request.options.page,
+			request.paging.page,
 			enumLocalizer.localize(
 				TABLES_PLAYER_TASKS,
 				PlayerTaskRepository.FIELD_ENUM_TYPES

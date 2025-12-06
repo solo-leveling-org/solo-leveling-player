@@ -1,60 +1,82 @@
 package com.sleepkqq.sololeveling.player.model.entity.task.enums;
 
+import static java.util.Map.entry;
+
 import com.sleepkqq.sololeveling.jimmer.enums.EnumPathGenerator;
 import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
 import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import one.util.streamex.StreamEx;
 import org.babyfish.jimmer.sql.EnumItem;
 
 @Getter
+@RequiredArgsConstructor
 public enum TaskTopic implements LocalizableEnum {
+
   @EnumItem(ordinal = 0)
-  PHYSICAL_ACTIVITY,
+  PHYSICAL_ACTIVITY(false),
 
   @EnumItem(ordinal = 1)
-  MENTAL_HEALTH,
+  CREATIVITY(false),
 
   @EnumItem(ordinal = 2)
-  EDUCATION,
+  SOCIAL_SKILLS(false),
 
   @EnumItem(ordinal = 3)
-  CREATIVITY,
+  NUTRITION(false),
 
   @EnumItem(ordinal = 4)
-  SOCIAL_SKILLS,
+  PRODUCTIVITY(false),
 
   @EnumItem(ordinal = 5)
-  HEALTHY_EATING,
+  ADVENTURE(false),
 
   @EnumItem(ordinal = 6)
-  PRODUCTIVITY,
+  MUSIC(false),
 
   @EnumItem(ordinal = 7)
-  EXPERIMENTS,
+  BRAIN(false),
 
   @EnumItem(ordinal = 8)
-  ECOLOGY,
+  CYBERSPORT(true),
 
   @EnumItem(ordinal = 9)
-  TEAMWORK;
+  DEVELOPMENT(true),
 
-  private static final Map<TaskTopic, Set<TaskTopic>> COMPATIBLE_TOPICS = Map.of(
-      PHYSICAL_ACTIVITY, Set.of(MENTAL_HEALTH, HEALTHY_EATING, ECOLOGY),
-      MENTAL_HEALTH, Set.of(PHYSICAL_ACTIVITY, CREATIVITY, SOCIAL_SKILLS),
-      EDUCATION, Set.of(CREATIVITY, PRODUCTIVITY, EXPERIMENTS),
-      CREATIVITY, Set.of(EDUCATION, MENTAL_HEALTH, SOCIAL_SKILLS),
-      SOCIAL_SKILLS, Set.of(MENTAL_HEALTH, CREATIVITY, TEAMWORK),
-      HEALTHY_EATING, Set.of(PHYSICAL_ACTIVITY, ECOLOGY),
-      PRODUCTIVITY, Set.of(EDUCATION, TEAMWORK),
-      EXPERIMENTS, Set.of(EDUCATION, ECOLOGY),
-      ECOLOGY, Set.of(PHYSICAL_ACTIVITY, HEALTHY_EATING, EXPERIMENTS),
-      TEAMWORK, Set.of(SOCIAL_SKILLS, PRODUCTIVITY)
+  @EnumItem(ordinal = 10)
+  READING(true),
+
+  @EnumItem(ordinal = 11)
+  LANGUAGE_LEARNING(true);
+
+  private static final Map<TaskTopic, Set<TaskTopic>> COMPATIBLE_TOPICS = Map.ofEntries(
+      entry(PHYSICAL_ACTIVITY, Set.of(ADVENTURE, SOCIAL_SKILLS, MUSIC)),
+      entry(CREATIVITY, Set.of(NUTRITION, BRAIN)),
+      entry(
+          SOCIAL_SKILLS,
+          Set.of(PHYSICAL_ACTIVITY, ADVENTURE, MUSIC, CYBERSPORT, READING, LANGUAGE_LEARNING)
+      ),
+      entry(NUTRITION, Set.of(CREATIVITY)),
+      entry(PRODUCTIVITY, Set.of(DEVELOPMENT, READING, LANGUAGE_LEARNING)),
+      entry(ADVENTURE, Set.of(PHYSICAL_ACTIVITY, SOCIAL_SKILLS)),
+      entry(MUSIC, Set.of(SOCIAL_SKILLS, PHYSICAL_ACTIVITY)),
+      entry(BRAIN, Set.of(CREATIVITY, READING, LANGUAGE_LEARNING, CYBERSPORT)),
+      entry(CYBERSPORT, Set.of(SOCIAL_SKILLS, BRAIN)),
+      entry(DEVELOPMENT, Set.of(PRODUCTIVITY)),
+      entry(READING, Set.of(SOCIAL_SKILLS, PRODUCTIVITY, BRAIN)),
+      entry(LANGUAGE_LEARNING, Set.of(BRAIN, READING, PRODUCTIVITY, SOCIAL_SKILLS))
   );
 
+  private final boolean isDisabled;
   private final String path = EnumPathGenerator.generatePath(this);
 
   public Set<TaskTopic> getCompatibleTopics() {
     return COMPATIBLE_TOPICS.getOrDefault(this, Set.of());
+  }
+
+  public static Set<TaskTopic> getDisabledTopics() {
+    return StreamEx.of(values()).filter(TaskTopic::isDisabled).toSet();
   }
 }
