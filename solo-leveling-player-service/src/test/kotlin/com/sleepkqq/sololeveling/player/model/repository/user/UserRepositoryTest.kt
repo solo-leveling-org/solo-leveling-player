@@ -302,9 +302,25 @@ class UserRepositoryTest : BaseTestClass() {
 	@Test
 	fun `getLeaderboardPage returns correct order for LEVEL leaderboard`() {
 		// Given: Создаем пользователей
-		createUser(401, "level-50-player")
-		createUser(402, "level-30-player")
-		createUser(403, "level-40-player")
+		val user1 = createUser(401, "level-50-player")
+		val user2 = createUser(402, "level-30-player")
+		val user3 = createUser(403, "level-40-player")
+
+		val player1 = user1.player()!!
+		val player2 = user2.player()!!
+		val player3 = user3.player()!!
+
+		playerService.update(Immutables.createPlayer(player1) {
+			it.setLevel(Immutables.createLevel(player1.level()) { l ->  l.setTotalExperience(50) })
+		})
+
+		playerService.update(Immutables.createPlayer(player2) {
+			it.setLevel(Immutables.createLevel(player2.level()) { l ->  l.setTotalExperience(50) })
+		})
+
+		playerService.update(Immutables.createPlayer(player3) {
+			it.setLevel(Immutables.createLevel(player3.level()) { l ->  l.setTotalExperience(50) })
+		})
 
 		// When: Получаем лидерборд по уровню
 		val page = userRepository.getLeaderboardPage(
