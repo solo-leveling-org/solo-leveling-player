@@ -146,7 +146,7 @@ public class UserRepository {
     var queryData = getLeaderboardQueryData(type, range, id);
 
     var baseUser = sql.createBaseQuery(p)
-        .where(queryData.predicate(), p.id().eq(id))
+        .where(queryData.predicate())
         .addSelect(p.user())
         .addSelect(queryData.expression())
         .addSelect(
@@ -160,6 +160,7 @@ public class UserRepository {
         .asBaseTable();
 
     return sql.createQuery(baseUser)
+        .where(baseUser.get_1().id().eq(id))
         .select(LeaderboardUserMapper
             .user(baseUser.get_1().fetch(LeaderboardUserView.class))
             .score((Selection<Number>) baseUser.get_2())
