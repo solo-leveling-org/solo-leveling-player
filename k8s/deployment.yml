@@ -13,6 +13,9 @@ spec:
         app: solo-leveling-player
       annotations:
         commit.sha: "${DEPLOY_IMAGE}"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
     spec:
       containers:
         - name: app

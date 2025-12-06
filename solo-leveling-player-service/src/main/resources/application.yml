@@ -36,16 +36,16 @@ app:
     preparing-tasks-retry:
       enabled: true
       cron: "0 * * * * *"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+server:
+  port: 10001
 logging:
   level:
     org.apache.kafka.clients.consumer.ConsumerConfig: WARN
     org.apache.kafka.clients.producer.ProducerConfig: WARN
     io.confluent.kafka.serializers.KafkaAvroDeserializerConfig: WARN
     io.confluent.kafka.serializers.KafkaAvroSerializerConfig: WARN
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
-server:
-  port: 10001
