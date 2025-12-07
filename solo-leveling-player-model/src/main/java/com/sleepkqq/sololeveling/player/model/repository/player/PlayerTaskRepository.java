@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import org.babyfish.jimmer.Page;
 import org.babyfish.jimmer.View;
 import org.babyfish.jimmer.sql.JSqlClient;
@@ -40,6 +41,12 @@ public class PlayerTaskRepository extends PageFetcher<PlayerTask, PlayerTaskTabl
       RARITY_FIELD, Rarity.class,
       TOPIC_FIELD, TaskTopic.class,
       STATUS_FIELD, PlayerTaskStatus.class
+  );
+
+  public static final Map<Class<? extends LocalizableEnum>, Predicate<? extends LocalizableEnum>> ENUM_TYPE_PREDICATES
+      = Map.of(
+      PlayerTaskStatus.class,
+      s -> s != PlayerTaskStatus.PREPARING && s != PlayerTaskStatus.IN_PROGRESS
   );
 
   private static final Map<String, Function<PlayerTaskTable, TableEx<?>>> FIELD_TABLES = Map.of(
