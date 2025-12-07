@@ -67,8 +67,7 @@ public class UserRepository {
 
   private LeaderboardQueryData getLeaderboardQueryData(
       LeaderboardType type,
-      DayRange range,
-      Long id
+      DayRange range
   ) {
     var p = PLAYER_TABLE;
 
@@ -78,7 +77,7 @@ public class UserRepository {
 
         var query = sql.createSubQuery(pt)
             .where(
-                pt.player().id().eq(id),
+                pt.player().eq(p),
                 pt.status().eq(PlayerTaskStatus.COMPLETED)
             );
 
@@ -114,7 +113,7 @@ public class UserRepository {
       RequestPaging paging
   ) {
     var p = PLAYER_TABLE;
-    var queryData = getLeaderboardQueryData(type, range, null);
+    var queryData = getLeaderboardQueryData(type, range);
 
     var baseUser = sql.createBaseQuery(p)
         .where(queryData.predicate())
@@ -143,7 +142,7 @@ public class UserRepository {
   @Nullable
   public LeaderboardUser findLeaderboardUser(long id, LeaderboardType type, DayRange range) {
     var p = PLAYER_TABLE;
-    var queryData = getLeaderboardQueryData(type, range, id);
+    var queryData = getLeaderboardQueryData(type, range);
 
     var baseUser = sql.createBaseQuery(p)
         .where(queryData.predicate())
