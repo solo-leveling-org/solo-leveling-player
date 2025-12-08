@@ -180,7 +180,8 @@ class PlayerApi(
 			request.paging.page,
 			enumLocalizer.localize(
 				TABLES_PLAYER_TASKS,
-				PlayerTaskRepository.FIELD_ENUM_TYPES
+				PlayerTaskRepository.FIELD_ENUM_TYPES,
+				PlayerTaskRepository.ENUM_TYPE_PREDICATES
 			)
 		)
 
