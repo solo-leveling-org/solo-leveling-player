@@ -39,6 +39,7 @@ matching_tasks AS (
     FROM tasks t
     JOIN task_topic_agg tta ON tta.task_id = t.id
     WHERE t.version <> 0
+      AND t.is_deprecated = false
       AND EXISTS (
         SELECT 1
         FROM input_players ip

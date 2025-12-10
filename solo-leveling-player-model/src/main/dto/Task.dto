@@ -8,6 +8,8 @@ input TaskInput {
 
   -updatedAt
 
+  -deprecated
+
   title {
     #allScalars
   }
@@ -27,6 +29,8 @@ input SaveTaskInput {
   -createdAt
 
   -updatedAt
+
+  -deprecated
 
   title {
     #allScalars

@@ -7,6 +7,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity;
 import java.util.List;
 import java.util.UUID;
+import org.babyfish.jimmer.sql.Column;
 import org.babyfish.jimmer.sql.Entity;
 import org.babyfish.jimmer.sql.GeneratedValue;
 import org.babyfish.jimmer.sql.Id;
@@ -52,6 +53,9 @@ public interface Task extends Model {
 
   @Nullable
   Integer intelligence();
+
+  @Column(name = "is_deprecated")
+  boolean deprecated();
 
   @OneToMany(mappedBy = "task")
   List<TaskTopicItem> topics();

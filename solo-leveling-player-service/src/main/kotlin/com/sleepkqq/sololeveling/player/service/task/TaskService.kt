@@ -5,6 +5,7 @@ import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
+import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import org.babyfish.jimmer.sql.fetcher.Fetcher
 import java.util.UUID
 
@@ -19,4 +20,6 @@ interface TaskService {
 	fun update(task: Task): Task
 	fun findMatchingTasks(playerId: Long, playerTasks: List<PlayerTask>): List<PlayerTask>
 	fun initialize(playerTaskTopics: List<PlayerTaskTopic>): Task
+	fun deprecateAll(): Int
+	fun deprecateByTopic(topic: TaskTopic): Int
 }

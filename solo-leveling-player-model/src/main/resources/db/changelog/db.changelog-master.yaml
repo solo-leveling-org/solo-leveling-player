@@ -36,3 +36,7 @@ databaseChangeLog:
       file: db/changelog/v7/17-11-2025--timestamptz-date-time-fields.yml
   - include:
       file: db/changelog/v7/18-11-2025--find-matching-tasks-indexes.yml
+
+  # v8
+  - include:
+      file: db/changelog/v8/10-12-2025--deprecated-tasks.yml

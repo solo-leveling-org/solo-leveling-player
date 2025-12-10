@@ -17,6 +17,7 @@ import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceTransactionService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
+import com.sleepkqq.sololeveling.player.service.task.TaskService
 import com.sleepkqq.sololeveling.proto.player.*
 import io.grpc.stub.StreamObserver
 import org.springframework.grpc.server.service.GrpcService
@@ -29,6 +30,7 @@ class PlayerApi(
 	private val protoMapper: ProtoMapper,
 	private val playerBalanceTransactionService: PlayerBalanceTransactionService,
 	private val playerBalanceService: PlayerBalanceService,
+	private val taskService: TaskService,
 	private val enumLocalizer: EnumLocalizer
 ) : PlayerServiceGrpc.PlayerServiceImplBase() {
 
@@ -184,6 +186,34 @@ class PlayerApi(
 				PlayerTaskRepository.ENUM_TYPE_PREDICATES
 			)
 		)
+
+		responseObserver.onNext(response)
+		responseObserver.onCompleted()
+	}
+
+	override fun deprecateTasksByTopic(
+		request: DeprecateTasksByTopicRequest,
+		responseObserver: StreamObserver<DeprecateTasksResponse>
+	) {
+		val affectedRows = taskService.deprecateByTopic(protoMapper.map(request.taskTopic))
+
+		val response = DeprecateTasksResponse.newBuilder()
+			.setAffectedRows(affectedRows)
+			.build()
+
+		responseObserver.onNext(response)
+		responseObserver.onCompleted()
+	}
+
+	override fun deprecateAllTasks(
+		request: Empty,
+		responseObserver: StreamObserver<DeprecateTasksResponse>
+	) {
+		val affectedRows = taskService.deprecateAll()
+
+		val response = DeprecateTasksResponse.newBuilder()
+			.setAffectedRows(affectedRows)
+			.build()
 
 		responseObserver.onNext(response)
 		responseObserver.onCompleted()

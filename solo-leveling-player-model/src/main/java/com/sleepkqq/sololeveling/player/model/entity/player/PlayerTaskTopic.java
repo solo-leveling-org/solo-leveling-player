@@ -25,7 +25,7 @@ public interface PlayerTaskTopic extends Model {
   TaskTopic taskTopic();
 
   @Column(name = "is_active")
-  boolean isActive();
+  boolean active();
 
   @ManyToOne
   @JoinColumn(name = "player_id")

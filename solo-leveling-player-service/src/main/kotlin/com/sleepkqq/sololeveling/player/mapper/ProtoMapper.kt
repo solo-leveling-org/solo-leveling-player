@@ -14,11 +14,13 @@ import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
 import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser
+import com.sleepkqq.sololeveling.player.model.entity.user.UserRoleItem
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.proto.player.*
 import com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicInput
 import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardResponse
 import com.sleepkqq.sololeveling.proto.user.UserInput
+import com.sleepkqq.sololeveling.proto.user.UserRole
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
 import org.mapstruct.*
@@ -38,6 +40,10 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 
 	fun map(input: TaskTopic): com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic =
 		com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic.valueOf(input.name)
+
+	fun map(input: UserRoleItem): UserRole = UserRole.valueOf(input.role().name)
+
+	abstract fun map(input: Collection<UserRoleItem>): List<UserRole>
 
 	fun map(input: View<TaskTopicItem>): TaskTopic = TaskTopic.valueOf(input.toEntity().topic().name)
 
@@ -126,4 +132,5 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 	@Mapping(target = "lastName", source = "input.user.lastName")
 	@Mapping(target = "photoUrl", source = "input.user.photoUrl")
 	abstract fun map(input: LeaderboardUser): com.sleepkqq.sololeveling.proto.user.LeaderboardUser
+
 }

@@ -1,16 +1,6 @@
 export com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
   -> package com.sleepkqq.sololeveling.player.model.entity.player.dto
 
-input PlayerTaskInput {
-  #allScalars
-
-  -createdAt
-
-  -updatedAt
-
-  id(task)
-}
-
 PlayerTaskView {
   #allScalars
 
@@ -20,6 +10,8 @@ PlayerTaskView {
     -createdAt
 
     -updatedAt
+
+    -deprecated
 
     title {
       #allScalars
