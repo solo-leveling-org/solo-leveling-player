@@ -96,11 +96,11 @@ class LevelServiceImpl(
 
 
 	private fun resolveAssessment(level: Int): Assessment = when {
-		level > 100 -> Assessment.S
-		level > 80 -> Assessment.A
-		level > 60 -> Assessment.B
-		level > 40 -> Assessment.C
-		level > 20 -> Assessment.D
+		level >= 50 -> Assessment.S
+		level >= 40 -> Assessment.A
+		level >= 30 -> Assessment.B
+		level >= 20 -> Assessment.C
+		level >= 10 -> Assessment.D
 		else -> Assessment.E
 	}
 }
