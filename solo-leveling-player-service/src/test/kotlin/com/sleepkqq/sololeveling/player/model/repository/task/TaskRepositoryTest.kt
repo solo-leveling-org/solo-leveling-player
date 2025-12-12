@@ -65,7 +65,7 @@ class TaskRepositoryTest : BaseTestClass() {
 		// When: find для testPlayer (должен найти matchingTask от otherPlayer)
 		val testTopics = listOf(TaskTopic.ADVENTURE, TaskTopic.NUTRITION)
 		val (foundTaskId, duration) = measureTimedValue {
-			taskRepository.findMatchingTasks(
+			taskRepository.findMatchingTask(
 				testPlayer.id(),
 				createTask(rarity = Rarity.EPIC, topics = testTopics)
 			)

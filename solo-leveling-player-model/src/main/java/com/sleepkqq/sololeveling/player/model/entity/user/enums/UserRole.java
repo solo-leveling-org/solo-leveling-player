@@ -11,7 +11,13 @@ public enum UserRole implements LocalizableEnum {
   USER,
 
   @EnumItem(ordinal = 1)
-  ADMIN;
+  ADMIN,
+
+  @EnumItem(ordinal = 2)
+  DEVELOPER,
+
+  @EnumItem(ordinal = 3)
+  MANAGER;
 
   private final String path = EnumPathGenerator.generatePath(this);
 }

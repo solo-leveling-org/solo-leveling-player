@@ -5,6 +5,13 @@ spring:
     url: jdbc:postgresql://localhost:5432/solo_leveling
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: PlayerHikariCP
   kafka:
     bootstrap-servers: localhost:29092
     properties:

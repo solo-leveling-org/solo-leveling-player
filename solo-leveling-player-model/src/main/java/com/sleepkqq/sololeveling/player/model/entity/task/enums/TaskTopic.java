@@ -52,7 +52,7 @@ public enum TaskTopic implements LocalizableEnum {
   LANGUAGE_LEARNING(true);
 
   private static final Map<TaskTopic, Set<TaskTopic>> COMPATIBLE_TOPICS = Map.ofEntries(
-      entry(PHYSICAL_ACTIVITY, Set.of(ADVENTURE, SOCIAL_SKILLS, MUSIC)),
+      entry(PHYSICAL_ACTIVITY, Set.of(ADVENTURE, MUSIC)),
       entry(CREATIVITY, Set.of(NUTRITION, BRAIN)),
       entry(
           SOCIAL_SKILLS,

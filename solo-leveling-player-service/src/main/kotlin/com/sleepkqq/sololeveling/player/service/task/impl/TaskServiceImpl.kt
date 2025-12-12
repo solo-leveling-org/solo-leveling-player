@@ -5,6 +5,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
+import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.task.TaskRepository
 import com.sleepkqq.sololeveling.player.service.task.DefineTaskRarityService
 import com.sleepkqq.sololeveling.player.service.task.DefineTaskTopicService
@@ -47,7 +48,7 @@ class TaskServiceImpl(
 
 			1 -> {
 				val playerTask = playerTasks.first()
-				val newTaskId = taskRepository.findMatchingTasks(playerId, playerTask.task())
+				val newTaskId = taskRepository.findMatchingTask(playerId, playerTask.task())
 				listOf(updateTaskOrKeep(playerTask, newTaskId))
 			}
 
@@ -72,7 +73,7 @@ class TaskServiceImpl(
 	override fun initialize(playerTaskTopics: List<PlayerTaskTopic>): Task {
 
 		val playerTaskTopicsMap = playerTaskTopics
-			.filter(PlayerTaskTopic::isActive)
+			.filter(PlayerTaskTopic::active)
 			.associateBy(PlayerTaskTopic::taskTopic)
 
 		val definedTopics = defineTaskTopicService.define(playerTaskTopicsMap.keys)
@@ -92,4 +93,10 @@ class TaskServiceImpl(
 			}
 		}
 	}
+
+	@Transactional
+	override fun deprecateAll(): Int = taskRepository.deprecateAll()
+
+	@Transactional
+	override fun deprecateByTopic(topic: TaskTopic): Int = taskRepository.deprecateByTopic(topic)
 }

@@ -83,12 +83,25 @@ class LevelServiceImpl(
 			)
 		}
 
+		val updatedAssessment = resolveAssessment(updatedLevel)
+
 		return Immutables.createLevel(level) {
 			it.setLevel(updatedLevel)
 			it.setCurrentExperience(updatedCurrentExperience)
 			it.setTotalExperience(level.totalExperience() + experience)
 			it.setExperienceToNextLevel(updatedExperienceToNextLevel)
+			it.setAssessment(updatedAssessment)
 		}
+	}
+
+
+	private fun resolveAssessment(level: Int): Assessment = when {
+		level >= 50 -> Assessment.S
+		level >= 40 -> Assessment.A
+		level >= 30 -> Assessment.B
+		level >= 20 -> Assessment.C
+		level >= 10 -> Assessment.D
+		else -> Assessment.E
 	}
 }
 

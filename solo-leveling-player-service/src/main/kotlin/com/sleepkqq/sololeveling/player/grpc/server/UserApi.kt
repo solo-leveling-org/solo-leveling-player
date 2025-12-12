@@ -5,8 +5,10 @@ import com.sleepkqq.sololeveling.config.interceptor.UserContextHolder
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
+import com.sleepkqq.sololeveling.player.model.entity.Fetchers.USER_ROLE_ITEM_FETCHER
 import com.sleepkqq.sololeveling.player.service.user.UserService
 import com.sleepkqq.sololeveling.proto.user.AuthUserRequest
+import com.sleepkqq.sololeveling.proto.user.GetUserAdditionalInfoResponse
 import com.sleepkqq.sololeveling.proto.user.GetUserLeaderboardRequest
 import com.sleepkqq.sololeveling.proto.user.GetUserLeaderboardResponse
 import com.sleepkqq.sololeveling.proto.user.GetUserRequest
@@ -14,7 +16,7 @@ import com.sleepkqq.sololeveling.proto.user.GetUserResponse
 import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardRequest
 import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardResponse
 import com.sleepkqq.sololeveling.proto.user.UpdateUserLocaleRequest
-import com.sleepkqq.sololeveling.proto.user.UserLocaleResponse
+import com.sleepkqq.sololeveling.proto.user.UserLocale
 import com.sleepkqq.sololeveling.proto.user.UserServiceGrpc
 import io.grpc.stub.StreamObserver
 import org.springframework.grpc.server.service.GrpcService
@@ -51,20 +53,25 @@ class UserApi(
 		responseObserver.onCompleted()
 	}
 
-	override fun getUserLocale(
+	override fun getUserAdditionalInfo(
 		request: Empty,
-		responseObserver: StreamObserver<UserLocaleResponse>
+		responseObserver: StreamObserver<GetUserAdditionalInfoResponse>
 	) {
 		val user = userService.get(
 			UserContextHolder.getUserId()!!,
-			Fetchers.USER_FETCHER.locale().manualLocale()
+			Fetchers.USER_FETCHER
+				.locale()
+				.manualLocale()
+				.roles(USER_ROLE_ITEM_FETCHER.role())
 		)
-		val locale = user.manualLocale() ?: user.locale()
-		val isManual = user.manualLocale() != null
 
-		val response = UserLocaleResponse.newBuilder()
-			.setLocale(locale)
-			.setIsManual(isManual)
+		val response = GetUserAdditionalInfoResponse.newBuilder()
+			.setLocale(
+				UserLocale.newBuilder()
+					.setTag(user.manualLocale() ?: user.locale())
+					.setIsManual(user.manualLocale() != null)
+			)
+			.addAllRoles(protoMapper.map(user.roles()))
 			.build()
 
 		responseObserver.onNext(response)
@@ -73,18 +80,14 @@ class UserApi(
 
 	override fun updateUserLocale(
 		request: UpdateUserLocaleRequest,
-		responseObserver: StreamObserver<UserLocaleResponse>
+		responseObserver: StreamObserver<Empty>
 	) {
 		userService.updateLocale(
 			UserContextHolder.getUserId()!!,
-			Locale.forLanguageTag(request.locale)
+			Locale.forLanguageTag(request.tag)
 		)
-		val response = UserLocaleResponse.newBuilder()
-			.setLocale(request.locale)
-			.setIsManual(true)
-			.build()
 
-		responseObserver.onNext(response)
+		responseObserver.onNext(Empty.newBuilder().build())
 		responseObserver.onCompleted()
 	}
 

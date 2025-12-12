@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-tasks-is-deprecated
+      author: sleepkqq
+      changes:
+        - addColumn:
+            tableName: tasks
+            columns:
+              - column:
+                  name: is_deprecated
+                  type: boolean
+                  defaultValue: false
+                  constraints:
+                    nullable: false

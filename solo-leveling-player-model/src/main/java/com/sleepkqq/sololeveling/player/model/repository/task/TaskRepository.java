@@ -54,7 +54,7 @@ public class TaskRepository {
         .execute();
   }
 
-  public UUID findMatchingTasks(long playerId, Task task) {
+  public UUID findMatchingTask(long playerId, Task task) {
     var topicOrdinalsArray = StreamEx.of(task.topics())
         .map(TaskTopicItem::topic)
         .map(TaskTopic::ordinal)
@@ -65,6 +65,7 @@ public class TaskRepository {
         .where(
             table.rarity().eq(task.rarity()),
             table.version().ne(0),
+            table.deprecated().eq(false),
             Predicate.sql(
                 "NOT EXISTS (SELECT 1 FROM player_tasks pt WHERE pt.task_id = %e AND pt.player_id = %v)",
                 ctx -> {
@@ -118,5 +119,20 @@ public class TaskRepository {
             row -> (UUID) row.get("player_task_id"),
             row -> (UUID) row.get("task_id")
         );
+  }
+
+  public int deprecateAll() {
+    var table = TASK_TABLE;
+    return sql.createUpdate(table)
+        .set(table.deprecated(), true)
+        .execute();
+  }
+
+  public int deprecateByTopic(TaskTopic topic) {
+    var table = TASK_TABLE;
+    return sql.createUpdate(table)
+        .where(table.asTableEx().topics().topic().eq(topic))
+        .set(table.deprecated(), true)
+        .execute();
   }
 }
