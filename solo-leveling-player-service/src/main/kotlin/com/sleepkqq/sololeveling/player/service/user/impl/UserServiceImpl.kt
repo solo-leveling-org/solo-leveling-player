@@ -8,6 +8,7 @@ import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser
 import com.sleepkqq.sololeveling.player.model.entity.user.User
 import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher
+import com.sleepkqq.sololeveling.player.model.entity.user.UsersStats
 import com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole
 import com.sleepkqq.sololeveling.player.model.repository.user.UserRepository
 import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
@@ -119,4 +120,7 @@ class UserServiceImpl(
 		type: LeaderboardType,
 		range: DateFilter.DayRange
 	): LeaderboardUser? = userRepository.findLeaderboardUser(id, type, range)
+
+	@Transactional(readOnly = true)
+	override fun getUsersStats(): UsersStats = userRepository.getUsersStats()
 }
