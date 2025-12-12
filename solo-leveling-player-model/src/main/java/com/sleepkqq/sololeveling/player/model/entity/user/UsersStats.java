@@ -23,4 +23,8 @@ public class UsersStats {
   private final long monthTotal;
   private final long monthReturning;
   private final long monthNew;
+
+  public static UsersStats empty() {
+    return new UsersStats(0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L);
+  }
 }

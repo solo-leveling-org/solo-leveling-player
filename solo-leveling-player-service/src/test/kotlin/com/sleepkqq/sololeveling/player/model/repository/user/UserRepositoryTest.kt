@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 import kotlin.time.measureTimedValue
 
 class UserRepositoryTest : BaseTestClass() {
@@ -400,5 +401,133 @@ class UserRepositoryTest : BaseTestClass() {
 		// Then: Проверяем что сортировка корректна (по убыванию количества задач)
 		val firstPageScores = page1.rows.map { it.score as Long }
 		assertThat(firstPageScores).isSortedAccordingTo(Comparator.reverseOrder())
+	}
+
+	@Test
+	fun `getUsersStats returns correct statistics`() {
+		// Given: Создаем пользователей с разными временами создания и активности
+		val now = ZonedDateTime.now(ZoneOffset.UTC).toInstant()
+		val todayStart = now.truncatedTo(ChronoUnit.DAYS)
+		val yesterday = todayStart.minus(1, ChronoUnit.DAYS)
+		val weekAgo = todayStart.minus(7, ChronoUnit.DAYS)
+		val twoWeeksAgo = todayStart.minus(14, ChronoUnit.DAYS)
+		val monthAgo = todayStart.minus(30, ChronoUnit.DAYS)
+
+		// User 1: Создан месяц назад, заходил сегодня (returning user)
+		val user1 = Immutables.createUser {
+			it.setId(601)
+			it.setUsername("user1")
+			it.setFirstName("User 1")
+			it.setLastName("")
+			it.setPhotoUrl("")
+			it.setLocale("en")
+			it.setCreatedAt(monthAgo)
+			it.setUpdatedAt(now)
+			it.setLastLoginAt(now) // активен сегодня
+			it.setVersion(5) // заходил больше 1 раза
+		}
+
+		// User 2: Создан неделю назад, заходил сегодня (returning user)
+		val user2 = Immutables.createUser {
+			it.setId(602)
+			it.setUsername("user2")
+			it.setFirstName("User 2")
+			it.setLastName("")
+			it.setPhotoUrl("")
+			it.setLocale("en")
+			it.setCreatedAt(weekAgo)
+			it.setUpdatedAt(now)
+			it.setLastLoginAt(now) // активен сегодня
+			it.setVersion(3)
+		}
+
+		// User 3: Создан и заходил только сегодня (новый пользователь)
+		val user3 = Immutables.createUser {
+			it.setId(603)
+			it.setUsername("user3")
+			it.setFirstName("User 3")
+			it.setLastName("")
+			it.setPhotoUrl("")
+			it.setLocale("en")
+			it.setCreatedAt(todayStart.plus(2, ChronoUnit.HOURS))
+			it.setUpdatedAt(now)
+			it.setLastLoginAt(todayStart.plus(2, ChronoUnit.HOURS))
+			it.setVersion(1) // первый заход
+		}
+
+		// User 4: Создан 2 недели назад, заходил вчера (не активен сегодня)
+		val user4 = Immutables.createUser {
+			it.setId(604)
+			it.setUsername("user4")
+			it.setFirstName("User 4")
+			it.setLastName("")
+			it.setPhotoUrl("")
+			it.setLocale("en")
+			it.setCreatedAt(twoWeeksAgo)
+			it.setUpdatedAt(yesterday)
+			it.setLastLoginAt(yesterday)
+			it.setVersion(7)
+		}
+
+		// User 5: Создан месяц назад, не заходил с тех пор
+		val user5 = Immutables.createUser {
+			it.setId(605)
+			it.setUsername("user5")
+			it.setFirstName("User 5")
+			it.setLastName("")
+			it.setPhotoUrl("")
+			it.setLocale("en")
+			it.setCreatedAt(monthAgo.plus(1, ChronoUnit.HOURS))
+			it.setUpdatedAt(monthAgo.plus(1, ChronoUnit.HOURS))
+			it.setLastLoginAt(monthAgo.plus(1, ChronoUnit.HOURS))
+			it.setVersion(1)
+		}
+
+		userRepository.save(user1, SaveMode.INSERT_ONLY)
+		userRepository.save(user2, SaveMode.INSERT_ONLY)
+		userRepository.save(user3, SaveMode.INSERT_ONLY)
+		userRepository.save(user4, SaveMode.INSERT_ONLY)
+		userRepository.save(user5, SaveMode.INSERT_ONLY)
+
+		// When: Получаем статистику
+		val stats = userRepository.getUsersStats()
+
+		// Then: Проверяем общую статистику
+		assertThat(stats.total).isEqualTo(5) // всего 5 пользователей
+		assertThat(stats.returning).isEqualTo(3) // user1, user2, user4 (version > 1)
+
+		// Then: Проверяем статистику за сегодня
+		assertThat(stats.todayTotal).isEqualTo(3) // user1, user2, user3 (активны сегодня)
+		assertThat(stats.todayNew).isEqualTo(1) // user3 (создан сегодня)
+		assertThat(stats.todayReturning).isEqualTo(2) // user1, user2 (version > 1)
+
+		// Then: Проверяем статистику за неделю (последние 7 дней)
+		assertThat(stats.weekTotal).isEqualTo(4) // user1, user2, user3, user4
+		assertThat(stats.weekNew).isEqualTo(2) // user2, user3
+		assertThat(stats.weekReturning).isEqualTo(3) // user1, user2, user4 (version > 1)
+
+		// Then: Проверяем статистику за месяц (последние 30 дней)
+		assertThat(stats.monthTotal).isEqualTo(5) // все пользователи
+		assertThat(stats.monthNew).isEqualTo(5) // все созданы за последние 30 дней
+		assertThat(stats.monthReturning).isEqualTo(3) // user1, user2, user4 (version > 1)
+	}
+
+	@Test
+	fun `getUsersStats returns zeros when no users exist`() {
+		// When: Получаем статистику в пустой базе
+		val stats = userRepository.getUsersStats()
+
+		// Then: Все значения должны быть 0
+		assertThat(stats.total).isEqualTo(0)
+		assertThat(stats.returning).isEqualTo(0)
+		assertThat(stats.todayTotal).isEqualTo(0)
+		assertThat(stats.todayNew).isEqualTo(0)
+		assertThat(stats.todayReturning).isEqualTo(0)
+		assertThat(stats.weekTotal).isEqualTo(0)
+		assertThat(stats.weekNew).isEqualTo(0)
+		assertThat(stats.weekReturning).isEqualTo(0)
+		assertThat(stats.monthTotal).isEqualTo(0)
+		assertThat(stats.monthNew).isEqualTo(0)
+		assertThat(stats.monthReturning).isEqualTo(0)
 	}
 }

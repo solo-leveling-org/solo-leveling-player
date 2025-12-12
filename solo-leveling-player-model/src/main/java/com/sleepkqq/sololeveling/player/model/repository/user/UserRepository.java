@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.babyfish.jimmer.Page;
 import org.babyfish.jimmer.View;
@@ -198,7 +199,7 @@ public class UserRepository {
     var weekStats = getPeriodStats(u, weekStart);
     var monthStats = getPeriodStats(u, monthStart);
 
-    return sql.createQuery(u)
+    var result = sql.createQuery(u)
         .select(UsersStatsMapper
             .total(total)
             .returning(returning)
@@ -212,7 +213,11 @@ public class UserRepository {
             .monthReturning(monthStats.returning())
             .monthNew(monthStats.newUsers())
         )
-        .fetchOne();
+        .limit(1)
+        .fetchOneOrNull();
+
+    return Optional.ofNullable(result)
+        .orElseGet(UsersStats::empty);
   }
 
   private PeriodStats getPeriodStats(UserTable u, Instant startTime) {
@@ -225,7 +230,10 @@ public class UserRepository {
         .selectCount();
 
     var returning = sql.createSubQuery(u)
-        .where(u.version().gt(1))
+        .where(
+            u.lastLoginAt().ge(startTime),
+            u.version().gt(1)
+        )
         .selectCount();
 
     return new PeriodStats(total, newUsers, returning);
