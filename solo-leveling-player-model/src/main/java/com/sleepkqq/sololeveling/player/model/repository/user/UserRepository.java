@@ -192,7 +192,7 @@ public class UserRepository {
     var total = sql.createSubQuery(u).selectCount();
 
     var returning = sql.createSubQuery(u)
-        .where(u.lastLoginAt().gt(u.createdAt()))
+        .where(u.version().gt(0))
         .selectCount();
 
     var todayStats = getPeriodStats(u, todayStart);
@@ -232,7 +232,7 @@ public class UserRepository {
     var returning = sql.createSubQuery(u)
         .where(
             u.lastLoginAt().ge(startTime),
-            u.version().gt(1)
+            u.version().gt(0)
         )
         .selectCount();
 

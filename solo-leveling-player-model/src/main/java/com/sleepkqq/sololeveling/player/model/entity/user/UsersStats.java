@@ -25,6 +25,6 @@ public class UsersStats {
   private final long monthNew;
 
   public static UsersStats empty() {
-    return new UsersStats(0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L);
+    return new UsersStats(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   }
 }
