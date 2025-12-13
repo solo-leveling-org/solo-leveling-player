@@ -1,6 +1,5 @@
 package com.sleepkqq.sololeveling.player.model.entity.gear.enums;
 
-import com.sleepkqq.sololeveling.jimmer.enums.EnumPathGenerator;
 import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
 import lombok.Getter;
 import org.babyfish.jimmer.sql.EnumItem;
@@ -48,7 +47,5 @@ public enum GearItemType implements LocalizableEnum {
   AMULET,
 
   @EnumItem(ordinal = 13)
-  BRACELET;
-
-  private final String path = EnumPathGenerator.generatePath(this);
+  BRACELET
 }

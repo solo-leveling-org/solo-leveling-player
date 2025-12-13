@@ -2,7 +2,6 @@ package com.sleepkqq.sololeveling.player.model.entity.task.enums;
 
 import static java.util.Map.entry;
 
-import com.sleepkqq.sololeveling.jimmer.enums.EnumPathGenerator;
 import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
 import java.util.Map;
 import java.util.Set;
@@ -67,7 +66,6 @@ public enum TaskTopic implements LocalizableEnum {
   );
 
   private final boolean isDisabled;
-  private final String path = EnumPathGenerator.generatePath(this);
 
   public Set<TaskTopic> getCompatibleTopics() {
     return COMPATIBLE_TOPICS.getOrDefault(this, Set.of());

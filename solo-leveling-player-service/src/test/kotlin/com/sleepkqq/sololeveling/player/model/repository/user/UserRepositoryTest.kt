@@ -452,7 +452,7 @@ class UserRepositoryTest : BaseTestClass() {
 			it.setCreatedAt(todayStart.plus(2, ChronoUnit.HOURS))
 			it.setUpdatedAt(now)
 			it.setLastLoginAt(todayStart.plus(2, ChronoUnit.HOURS))
-			it.setVersion(1) // первый заход
+			it.setVersion(0) // первый заход
 		}
 
 		// User 4: Создан 2 недели назад, заходил вчера (не активен сегодня)
@@ -480,7 +480,7 @@ class UserRepositoryTest : BaseTestClass() {
 			it.setCreatedAt(monthAgo.plus(1, ChronoUnit.HOURS))
 			it.setUpdatedAt(monthAgo.plus(1, ChronoUnit.HOURS))
 			it.setLastLoginAt(monthAgo.plus(1, ChronoUnit.HOURS))
-			it.setVersion(1)
+			it.setVersion(0)
 		}
 
 		userRepository.save(user1, SaveMode.INSERT_ONLY)
@@ -494,12 +494,12 @@ class UserRepositoryTest : BaseTestClass() {
 
 		// Then: Проверяем общую статистику
 		assertThat(stats.total).isEqualTo(5) // всего 5 пользователей
-		assertThat(stats.returning).isEqualTo(3) // user1, user2, user4 (version > 1)
+		assertThat(stats.returning).isEqualTo(3) // user1, user2, user4 (version > 0)
 
 		// Then: Проверяем статистику за сегодня
 		assertThat(stats.todayTotal).isEqualTo(3) // user1, user2, user3 (активны сегодня)
 		assertThat(stats.todayNew).isEqualTo(1) // user3 (создан сегодня)
-		assertThat(stats.todayReturning).isEqualTo(2) // user1, user2 (version > 1)
+		assertThat(stats.todayReturning).isEqualTo(2) // user1, user2 (version > 0)
 
 		// Then: Проверяем статистику за неделю (последние 7 дней)
 		assertThat(stats.weekTotal).isEqualTo(4) // user1, user2, user3, user4

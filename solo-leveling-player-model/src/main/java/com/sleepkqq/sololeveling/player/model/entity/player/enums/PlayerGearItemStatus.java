@@ -1,11 +1,11 @@
 package com.sleepkqq.sololeveling.player.model.entity.player.enums;
 
-import com.sleepkqq.sololeveling.jimmer.enums.EnumPathGenerator;
+import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
 import lombok.Getter;
 import org.babyfish.jimmer.sql.EnumItem;
 
 @Getter
-public enum PlayerGearItemStatus {
+public enum PlayerGearItemStatus implements LocalizableEnum {
   @EnumItem(ordinal = 0)
   IN_INVENTORY,
 
@@ -16,7 +16,5 @@ public enum PlayerGearItemStatus {
   QUICK_SOLD,
 
   @EnumItem(ordinal = 3)
-  MARKETPLACE_SOLD;
-
-  private final String path = EnumPathGenerator.generatePath(this);
+  MARKETPLACE_SOLD
 }
