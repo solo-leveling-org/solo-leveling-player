@@ -15,10 +15,12 @@ import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
 import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser
 import com.sleepkqq.sololeveling.player.model.entity.user.UserRoleItem
+import com.sleepkqq.sololeveling.player.model.entity.user.UsersStats
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.proto.player.*
 import com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicInput
 import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardResponse
+import com.sleepkqq.sololeveling.proto.user.GetUsersStatsResponse
 import com.sleepkqq.sololeveling.proto.user.UserInput
 import com.sleepkqq.sololeveling.proto.user.UserRole
 import org.babyfish.jimmer.Page
@@ -133,4 +135,5 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 	@Mapping(target = "photoUrl", source = "input.user.photoUrl")
 	abstract fun map(input: LeaderboardUser): com.sleepkqq.sololeveling.proto.user.LeaderboardUser
 
+	abstract fun map(input: UsersStats): GetUsersStatsResponse
 }

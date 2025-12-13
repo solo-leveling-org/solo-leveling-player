@@ -1,6 +1,5 @@
 package com.sleepkqq.sololeveling.player.model.entity.player.enums;
 
-import com.sleepkqq.sololeveling.jimmer.enums.EnumPathGenerator;
 import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
 import lombok.Getter;
 import org.babyfish.jimmer.sql.EnumItem;
@@ -17,7 +16,5 @@ public enum PlayerTaskStatus implements LocalizableEnum {
   COMPLETED,
 
   @EnumItem(ordinal = 3)
-  SKIPPED;
-
-  private final String path = EnumPathGenerator.generatePath(this);
+  SKIPPED
 }

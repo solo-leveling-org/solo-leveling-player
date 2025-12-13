@@ -2,7 +2,6 @@ package com.sleepkqq.sololeveling.player.model.entity.task.enums;
 
 import static java.util.Map.entry;
 
-import com.sleepkqq.sololeveling.jimmer.enums.EnumPathGenerator;
 import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
 import java.util.Map;
 import java.util.Set;
@@ -54,10 +53,7 @@ public enum TaskTopic implements LocalizableEnum {
   private static final Map<TaskTopic, Set<TaskTopic>> COMPATIBLE_TOPICS = Map.ofEntries(
       entry(PHYSICAL_ACTIVITY, Set.of(ADVENTURE, MUSIC)),
       entry(CREATIVITY, Set.of(NUTRITION, BRAIN)),
-      entry(
-          SOCIAL_SKILLS,
-          Set.of(PHYSICAL_ACTIVITY, ADVENTURE, MUSIC, CYBERSPORT, READING, LANGUAGE_LEARNING)
-      ),
+      entry(SOCIAL_SKILLS, Set.of(ADVENTURE, MUSIC, CYBERSPORT, READING, LANGUAGE_LEARNING)),
       entry(NUTRITION, Set.of(CREATIVITY)),
       entry(PRODUCTIVITY, Set.of(DEVELOPMENT, READING, LANGUAGE_LEARNING)),
       entry(ADVENTURE, Set.of(PHYSICAL_ACTIVITY, SOCIAL_SKILLS)),
@@ -70,7 +66,6 @@ public enum TaskTopic implements LocalizableEnum {
   );
 
   private final boolean isDisabled;
-  private final String path = EnumPathGenerator.generatePath(this);
 
   public Set<TaskTopic> getCompatibleTopics() {
     return COMPATIBLE_TOPICS.getOrDefault(this, Set.of());

@@ -1,6 +1,5 @@
 package com.sleepkqq.sololeveling.player.model.entity.user.enums;
 
-import com.sleepkqq.sololeveling.jimmer.enums.EnumPathGenerator;
 import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
 import lombok.Getter;
 import org.babyfish.jimmer.sql.EnumItem;
@@ -17,7 +16,5 @@ public enum UserRole implements LocalizableEnum {
   DEVELOPER,
 
   @EnumItem(ordinal = 3)
-  MANAGER;
-
-  private final String path = EnumPathGenerator.generatePath(this);
+  MANAGER
 }

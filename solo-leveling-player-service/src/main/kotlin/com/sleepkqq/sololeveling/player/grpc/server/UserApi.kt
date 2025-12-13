@@ -15,6 +15,7 @@ import com.sleepkqq.sololeveling.proto.user.GetUserRequest
 import com.sleepkqq.sololeveling.proto.user.GetUserResponse
 import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardRequest
 import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardResponse
+import com.sleepkqq.sololeveling.proto.user.GetUsersStatsResponse
 import com.sleepkqq.sololeveling.proto.user.UpdateUserLocaleRequest
 import com.sleepkqq.sololeveling.proto.user.UserLocale
 import com.sleepkqq.sololeveling.proto.user.UserServiceGrpc
@@ -118,6 +119,17 @@ class UserApi(
 		val response = GetUserLeaderboardResponse.newBuilder()
 			.setUser(protoMapper.map(leaderboardUser))
 			.build()
+
+		responseObserver.onNext(response)
+		responseObserver.onCompleted()
+	}
+
+	override fun getUsersStats(
+		request: Empty,
+		responseObserver: StreamObserver<GetUsersStatsResponse>
+	) {
+		val usersStats = userService.getUsersStats()
+		val response = protoMapper.map(usersStats)
 
 		responseObserver.onNext(response)
 		responseObserver.onCompleted()

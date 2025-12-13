@@ -10,16 +10,23 @@ import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser;
 import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUserMapper;
 import com.sleepkqq.sololeveling.player.model.entity.user.User;
 import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher;
+import com.sleepkqq.sololeveling.player.model.entity.user.UserTable;
+import com.sleepkqq.sololeveling.player.model.entity.user.UsersStats;
+import com.sleepkqq.sololeveling.player.model.entity.user.UsersStatsMapper;
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.LeaderboardUserView;
 import com.sleepkqq.sololeveling.proto.player.RequestPaging;
 import com.sleepkqq.sololeveling.proto.user.LeaderboardType;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.babyfish.jimmer.Page;
 import org.babyfish.jimmer.View;
 import org.babyfish.jimmer.sql.JSqlClient;
 import org.babyfish.jimmer.sql.ast.Expression;
+import org.babyfish.jimmer.sql.ast.NumericExpression;
 import org.babyfish.jimmer.sql.ast.Predicate;
 import org.babyfish.jimmer.sql.ast.Selection;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
@@ -171,6 +178,71 @@ public class UserRepository {
   private record LeaderboardQueryData(
       Expression<? extends Number> expression,
       Predicate predicate
+  ) {
+
+  }
+
+  public UsersStats getUsersStats() {
+    var u = USER_TABLE;
+    var now = Instant.now();
+    var todayStart = now.truncatedTo(ChronoUnit.DAYS);
+    var weekStart = todayStart.minus(7, ChronoUnit.DAYS);
+    var monthStart = todayStart.minus(30, ChronoUnit.DAYS);
+
+    var total = sql.createSubQuery(u).selectCount();
+
+    var returning = sql.createSubQuery(u)
+        .where(u.version().gt(0))
+        .selectCount();
+
+    var todayStats = getPeriodStats(u, todayStart);
+    var weekStats = getPeriodStats(u, weekStart);
+    var monthStats = getPeriodStats(u, monthStart);
+
+    var result = sql.createQuery(u)
+        .select(UsersStatsMapper
+            .total(total)
+            .returning(returning)
+            .todayTotal(todayStats.total())
+            .todayReturning(todayStats.returning())
+            .todayNew(todayStats.newUsers())
+            .weekTotal(weekStats.total())
+            .weekReturning(weekStats.returning())
+            .weekNew(weekStats.newUsers())
+            .monthTotal(monthStats.total())
+            .monthReturning(monthStats.returning())
+            .monthNew(monthStats.newUsers())
+        )
+        .limit(1)
+        .fetchOneOrNull();
+
+    return Optional.ofNullable(result)
+        .orElseGet(UsersStats::empty);
+  }
+
+  private PeriodStats getPeriodStats(UserTable u, Instant startTime) {
+    var total = sql.createSubQuery(u)
+        .where(u.lastLoginAt().ge(startTime))
+        .selectCount();
+
+    var newUsers = sql.createSubQuery(u)
+        .where(u.createdAt().ge(startTime))
+        .selectCount();
+
+    var returning = sql.createSubQuery(u)
+        .where(
+            u.lastLoginAt().ge(startTime),
+            u.version().gt(0)
+        )
+        .selectCount();
+
+    return new PeriodStats(total, newUsers, returning);
+  }
+
+  private record PeriodStats(
+      NumericExpression<Long> total,
+      NumericExpression<Long> newUsers,
+      NumericExpression<Long> returning
   ) {
 
   }

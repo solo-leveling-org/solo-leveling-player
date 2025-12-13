@@ -7,6 +7,7 @@ import com.sleepkqq.sololeveling.player.model.entity.user.User
 import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher
 import com.sleepkqq.sololeveling.player.exception.ModelNotFoundException
 import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser
+import com.sleepkqq.sololeveling.player.model.entity.user.UsersStats
 import com.sleepkqq.sololeveling.proto.player.RequestPaging
 import com.sleepkqq.sololeveling.proto.user.LeaderboardType
 import org.babyfish.jimmer.Page
@@ -47,4 +48,6 @@ interface UserService {
 		range: DateFilter.DayRange
 	): LeaderboardUser = findLeaderboardUser(id, type, range)
 		?: throw LeaderboardUserNotFoundException()
+
+	fun getUsersStats(): UsersStats
 }
