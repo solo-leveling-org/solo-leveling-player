@@ -43,6 +43,40 @@ app:
     preparing-tasks-retry:
       enabled: true
       cron: "0 * * * * *"
+  tasks:
+    rarity-properties:
+      - rarity: COMMON
+        stamina-cost: 10
+        experience: 10
+      - rarity: UNCOMMON
+        stamina-cost: 20
+        experience: 50
+      - rarity: RARE
+        stamina-cost: 30
+        experience: 100
+      - rarity: EPIC
+        stamina-cost: 40
+        experience: 150
+      - rarity: LEGENDARY
+        stamina-cost: 50
+        experience: 250
+    currency-experience-multiplier: 0.5
+  player:
+    limits:
+      free:
+        tasks:
+          max: 5
+        stamina:
+          max: 100
+          regen-rate: 1
+          regen-interval-seconds: 720
+      premium:
+        tasks:
+          max: 10
+        stamina:
+          max: 100
+          regen-rate: 1
+          regen-interval-seconds: 360
 management:
   endpoints:
     web:

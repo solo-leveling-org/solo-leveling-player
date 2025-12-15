@@ -4,7 +4,6 @@ import com.sleepkqq.sololeveling.player.model.entity.*
 import com.sleepkqq.sololeveling.player.model.entity.player.*
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.*
 import com.sleepkqq.sololeveling.player.model.entity.task.*
-import com.sleepkqq.sololeveling.player.model.entity.task.dto.*
 import com.sleepkqq.sololeveling.player.model.entity.user.*
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.*
 import io.confluent.kafka.schemaregistry.client.rest.entities.Schema
@@ -110,7 +109,6 @@ import org.springframework.context.annotation.Configuration
 		PlayerTaskTopicProps::class,
 		PlayerTaskTopicTable::class,
 		PlayerTaskTopicTableEx::class,
-		TaskInput::class,
 		TaskDraft::class,
 		TaskFetcher::class,
 		TaskProps::class,

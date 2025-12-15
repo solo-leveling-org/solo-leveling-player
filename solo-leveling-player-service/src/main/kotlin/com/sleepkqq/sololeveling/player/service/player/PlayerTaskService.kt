@@ -28,6 +28,10 @@ interface PlayerTaskService {
 		fetcher: PlayerTaskFetcher = Fetchers.PLAYER_TASK_FETCHER.allScalarFields()
 	): PlayerTask = find(id, fetcher) ?: throw ModelNotFoundException(PlayerTask::class, id)
 
+	fun <V : View<PlayerTask>> findView(id: UUID, viewType: KClass<V>): V?
+	fun <V : View<PlayerTask>> getView(id: UUID, viewType: KClass<V>): V = findView(id, viewType)
+		?: throw ModelNotFoundException(PlayerTask::class, id)
+
 	fun find(playerId: Long, taskIds: Collection<UUID>): List<PlayerTask>
 	fun insertAll(playerTasks: Collection<PlayerTask>)
 	fun getActiveTasks(playerId: Long): List<PlayerTaskView>
@@ -40,7 +44,6 @@ interface PlayerTaskService {
 	fun initialize(playerId: Long, order: Int, task: Task): PlayerTask
 	fun skipTask(playerId: Long, id: UUID)
 	fun completeTask(playerId: Long, id: UUID): Pair<PlayerView, PlayerView>
-
 	fun inProgressTasks(tasks: Collection<PlayerTask>)
 	fun generateTasks(playerId: Long, player: Player? = null, replaceOrders: Set<Int> = setOf())
 	fun <V : View<PlayerTask>> searchView(

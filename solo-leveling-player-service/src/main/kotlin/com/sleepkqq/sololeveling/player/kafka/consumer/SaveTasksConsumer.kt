@@ -4,12 +4,12 @@ import com.sleepkqq.sololeveling.avro.config.consumer.AbstractKafkaConsumer
 import com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics
 import com.sleepkqq.sololeveling.avro.idempotency.IdempotencyService
 import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent
+import com.sleepkqq.sololeveling.player.config.properties.TasksProperties
 import com.sleepkqq.sololeveling.player.mapper.AvroMapper
 import com.sleepkqq.sololeveling.player.model.entity.task.dto.SaveTaskInput
 import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
-import com.sleepkqq.sololeveling.player.service.task.DefineTaskRarityService
 import com.sleepkqq.sololeveling.player.service.task.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
@@ -24,7 +24,7 @@ class SaveTasksConsumer(
 	private val playerTaskService: PlayerTaskService,
 	private val avroMapper: AvroMapper,
 	private val notificationService: NotificationService,
-	private val defineTaskRarityService: DefineTaskRarityService,
+	private val tasksProperties: TasksProperties,
 	idempotencyService: IdempotencyService
 ) : AbstractKafkaConsumer<SaveTasksEvent>(
 	idempotencyService = idempotencyService,
@@ -50,9 +50,11 @@ class SaveTasksConsumer(
 				it.description!!.id = UUID.randomUUID()
 
 				if (it.currencyReward == null || it.experience == null) {
-					val (defaultCurrency, defaultExp) = defineTaskRarityService.getDefaultRewards(it.rarity!!)
-					it.currencyReward = defaultCurrency
-					it.experience = defaultExp
+					val experience = tasksProperties.getExperience(it.rarity)
+					val currency = tasksProperties.calculateCurrencyReward(it.rarity)
+
+					it.experience = experience
+					it.currencyReward = currency
 					log.warn("Applied default rewards for taskId={}", it.id)
 				}
 			}

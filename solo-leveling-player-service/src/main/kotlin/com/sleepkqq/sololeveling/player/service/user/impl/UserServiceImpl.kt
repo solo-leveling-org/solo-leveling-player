@@ -3,8 +3,6 @@ package com.sleepkqq.sololeveling.player.service.user.impl
 import com.sleepkqq.sololeveling.jimmer.predicate.filter.DateFilter
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.LevelType
-import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser
 import com.sleepkqq.sololeveling.player.model.entity.user.User
 import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher
@@ -13,9 +11,7 @@ import com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole
 import com.sleepkqq.sololeveling.player.model.repository.user.UserRepository
 import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
-import com.sleepkqq.sololeveling.player.service.player.LevelService
-import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
-import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
+import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.user.UserService
 import com.sleepkqq.sololeveling.proto.player.RequestPaging
 import com.sleepkqq.sololeveling.proto.user.LeaderboardType
@@ -25,22 +21,15 @@ import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
-import java.util.Locale
-import java.util.UUID
+import java.util.*
 import kotlin.reflect.KClass
 
 @Service
 class UserServiceImpl(
 	private val userRepository: UserRepository,
 	private val notificationService: NotificationService,
-	private val levelService: LevelService,
-	private val playerBalanceService: PlayerBalanceService,
-	private val playerTaskTopicService: PlayerTaskTopicService
+	private val playerService: PlayerService
 ) : UserService {
-
-	private companion object {
-		const val INITIAL_PLAYER_MAX_TASKS = 5
-	}
 
 	@Transactional(readOnly = true)
 	override fun find(id: Long, fetcher: UserFetcher): User? =
@@ -94,17 +83,7 @@ class UserServiceImpl(
 				}
 			)
 		)
-		it.setPlayer(Immutables.createPlayer { p ->
-			p.setId(user.id())
-			p.setMaxTasks(INITIAL_PLAYER_MAX_TASKS)
-			p.setLevel(levelService.initialize(LevelType.PLAYER))
-			p.setBalance(playerBalanceService.initializePlayerBalance())
-			p.setTaskTopics(
-				TaskTopic.entries.map { topic ->
-					playerTaskTopicService.initialize(user.id(), topic)
-				}
-			)
-		})
+		it.setPlayer(playerService.initialize(user.id()))
 	}
 
 	@Transactional(readOnly = true)

@@ -86,6 +86,15 @@ public class PlayerTaskRepository extends PageFetcher<PlayerTask, PlayerTaskTabl
         .fetchFirstOrNull();
   }
 
+  @Nullable
+  public <V extends View<PlayerTask>> V findView(UUID id, Class<V> viewType) {
+    var table = PLAYER_TASK_TABLE;
+    return sql.createQuery(table)
+        .where(table.id().eq(id))
+        .select(table.fetch(viewType))
+        .fetchFirstOrNull();
+  }
+
   public <V extends View<PlayerTask>> List<V> findByPlayerIdAndStatusIn(
       long playerId,
       Collection<PlayerTaskStatus> statuses,

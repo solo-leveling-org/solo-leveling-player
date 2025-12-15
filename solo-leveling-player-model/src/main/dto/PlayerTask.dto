@@ -4,12 +4,16 @@ export com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 PlayerTaskView {
   #allScalars
 
+  -version
+
   task {
     #allScalars
 
     -createdAt
 
     -updatedAt
+
+    -version
 
     -deprecated
 
@@ -23,6 +27,42 @@ PlayerTaskView {
 
     topics {
       #allScalars
+    }
+  }
+}
+
+PlayerCompletionTaskView {
+  #allScalars
+
+  task {
+    #allScalars
+
+    topics {
+      #allScalars
+    }
+  }
+
+  player {
+    #allScalars
+
+    level {
+      #allScalars
+    }
+
+    balance {
+      #allScalars
+    }
+
+    stamina {
+      #allScalars
+    }
+
+    taskTopics {
+      #allScalars
+
+      level {
+        #allScalars
+      }
     }
   }
 }

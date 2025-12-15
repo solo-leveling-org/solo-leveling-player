@@ -1,6 +1,6 @@
 package com.sleepkqq.sololeveling.player.model.entity.player;
 
-import com.sleepkqq.sololeveling.player.model.entity.Model;
+import com.sleepkqq.sololeveling.player.model.entity.Auditable;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType;
@@ -16,7 +16,7 @@ import org.babyfish.jimmer.sql.meta.UUIDIdGenerator;
 
 @Entity
 @Table(name = "player_balance_transactions")
-public interface PlayerBalanceTransaction extends Model {
+public interface PlayerBalanceTransaction extends Auditable {
 
   @Id
   @GeneratedValue(generatorType = UUIDIdGenerator.class)

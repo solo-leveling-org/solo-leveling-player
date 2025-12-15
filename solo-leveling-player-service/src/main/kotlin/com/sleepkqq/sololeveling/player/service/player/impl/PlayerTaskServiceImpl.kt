@@ -1,5 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.player.impl
 
+import com.sleepkqq.sololeveling.player.config.properties.PlayerLimitsProperties
 import com.sleepkqq.sololeveling.player.exception.AccessDeniedException
 import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers
@@ -9,6 +10,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskFetcher
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskProps
 import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerCompletionTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
@@ -20,6 +22,7 @@ import com.sleepkqq.sololeveling.player.service.notification.NotificationService
 import com.sleepkqq.sololeveling.player.service.player.LevelService
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerService
+import com.sleepkqq.sololeveling.player.service.player.PlayerStaminaService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.task.TaskService
 import com.sleepkqq.sololeveling.proto.player.RequestPaging
@@ -30,6 +33,7 @@ import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.babyfish.jimmer.sql.fetcher.Fetcher
 import org.slf4j.LoggerFactory
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -37,6 +41,7 @@ import java.util.UUID
 import kotlin.reflect.KClass
 
 @Service
+@EnableConfigurationProperties(PlayerLimitsProperties::class)
 class PlayerTaskServiceImpl(
 	private val playerTaskRepository: PlayerTaskRepository,
 	private val playerBalanceService: PlayerBalanceService,
@@ -44,7 +49,9 @@ class PlayerTaskServiceImpl(
 	private val levelService: LevelService,
 	private val taskService: TaskService,
 	private val notificationService: NotificationService,
-	private val generateTasksProducer: GenerateTasksProducer
+	private val generateTasksProducer: GenerateTasksProducer,
+	private val playerLimitsProperties: PlayerLimitsProperties,
+	private val playerStaminaService: PlayerStaminaService
 ) : PlayerTaskService {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -56,6 +63,10 @@ class PlayerTaskServiceImpl(
 	@Transactional(readOnly = true)
 	override fun find(id: UUID, fetcher: PlayerTaskFetcher): PlayerTask? =
 		playerTaskRepository.find(id, fetcher)
+
+	@Transactional(readOnly = true)
+	override fun <V : View<PlayerTask>> findView(id: UUID, viewType: KClass<V>): V? =
+		playerTaskRepository.findView(id, viewType.java)
 
 	@Transactional(readOnly = true)
 	override fun find(playerId: Long, taskIds: Collection<UUID>): List<PlayerTask> =
@@ -99,40 +110,30 @@ class PlayerTaskServiceImpl(
 				.player()
 		)
 
-		if (playerTask.player().id() != playerId) {
+		if (playerTask.player()!!.id() != playerId) {
 			throw AccessDeniedException()
 		}
 
-		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED, false)
+		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED)
 
 		generateTasks(playerId, replaceOrders = setOf(playerTask.order()))
 	}
 
 	@Transactional
-	override fun completeTask(
-		playerId: Long,
-		id: UUID
-	): Pair<PlayerView, PlayerView> {
-		val playerTask = get(
-			id,
-			Fetchers.PLAYER_TASK_FETCHER.allScalarFields()
-				.task(
-					Fetchers.TASK_FETCHER.allScalarFields()
-						.topics(Fetchers.TASK_TOPIC_ITEM_FETCHER.allScalarFields())
-				)
-				.player()
-		)
+	override fun completeTask(playerId: Long, id: UUID): Pair<PlayerView, PlayerView> {
+		val playerTask = getView(id, PlayerCompletionTaskView::class)
+			.toEntity()
 
-		if (playerTask.player().id() != playerId) {
+		val player = playerTask.player()!!
+		val task = playerTask.task()!!
+
+		if (player.id() != playerId) {
 			throw AccessDeniedException()
 		}
 
-		val task = playerTask.task()!!
+		val consumedStamina = playerStaminaService.consumeStamina(player.stamina()!!, task.rarity())
 
-		setStatus(listOf(playerTask), PlayerTaskStatus.COMPLETED, false)
-
-		val playerView = playerService.getView(playerId, PlayerView::class)
-		val player = playerView.toEntity()
+		setStatus(listOf(playerTask), PlayerTaskStatus.COMPLETED)
 
 		val updatedBalance = playerBalanceService.deposit(
 			player.balance()!!,
@@ -146,20 +147,21 @@ class PlayerTaskServiceImpl(
 		val updatedPlayer = playerService.update(
 			Immutables.createPlayer(gainedExperiencePlayer) {
 				it.setAgility(player.agility() + task.agility()!!)
-				it.setStrength(player.strength() + task.strength()!!)
-				it.setIntelligence(player.intelligence() + task.intelligence()!!)
-				it.setBalance(updatedBalance)
+					.setStrength(player.strength() + task.strength()!!)
+					.setIntelligence(player.intelligence() + task.intelligence()!!)
+					.setBalance(updatedBalance)
+					.setStamina(consumedStamina)
 			}
 		)
 
 		generateTasks(playerId, updatedPlayer, setOf(playerTask.order()))
 
-		return playerView to PlayerView(updatedPlayer)
+		return PlayerView(player) to PlayerView(updatedPlayer)
 	}
 
 	@Transactional
 	override fun inProgressTasks(tasks: Collection<PlayerTask>) {
-		setStatus(tasks, PlayerTaskStatus.IN_PROGRESS)
+		setStatus(tasks, PlayerTaskStatus.IN_PROGRESS, true)
 	}
 
 	@Transactional(readOnly = true)
@@ -178,15 +180,12 @@ class PlayerTaskServiceImpl(
 	) {
 		val resolvedPlayer = player ?: playerService.get(
 			playerId,
-			Fetchers.PLAYER_FETCHER.maxTasks()
-				.taskTopics(
-					Fetchers.PLAYER_TASK_TOPIC_FETCHER
-						.taskTopic()
-						.active()
-						.level(
-							Fetchers.LEVEL_FETCHER.level()
-						)
-				)
+			Fetchers.PLAYER_FETCHER.taskTopics(
+				Fetchers.PLAYER_TASK_TOPIC_FETCHER
+					.taskTopic()
+					.active()
+					.level(Fetchers.LEVEL_FETCHER.level())
+			)
 		)
 
 		val activeTasks = getActiveTasks(playerId, Fetchers.PLAYER_TASK_FETCHER.order())
@@ -194,7 +193,7 @@ class PlayerTaskServiceImpl(
 		activeTasks.firstOrNull { it.order() in replaceOrders }
 			?.let { throw IllegalArgumentException("Incorrect replacement order ${it.order()}") }
 
-		val maxTasks = resolvedPlayer.maxTasks()
+		val maxTasks = playerLimitsProperties.limits.free.tasks.max
 		val additionalTasksNeeded = maxTasks - activeTasks.size
 
 		if (additionalTasksNeeded <= 0) {
@@ -245,7 +244,7 @@ class PlayerTaskServiceImpl(
 	private fun setStatus(
 		playerTasks: Collection<PlayerTask>,
 		status: PlayerTaskStatus,
-		saveTask: Boolean = true
+		saveTask: Boolean = false
 	) {
 		if (playerTasks.isEmpty()) {
 			return
@@ -265,10 +264,16 @@ class PlayerTaskServiceImpl(
 			}
 
 			Immutables.createPlayerTask(it) { p ->
-
 				if (!saveTask && ImmutableObjects.isLoaded(it, PlayerTaskProps.TASK)) {
 					val task = it.task()!!
-					p.setTask(null).setTaskId(task.id())
+					p.setTask(null)
+						.setTaskId(task.id())
+				}
+
+				if (ImmutableObjects.isLoaded(it, PlayerTaskProps.PLAYER)) {
+					val player = it.player()!!
+					p.setPlayer(null)
+						.setPlayerId(player.id())
 				}
 
 				p.setStatus(status)

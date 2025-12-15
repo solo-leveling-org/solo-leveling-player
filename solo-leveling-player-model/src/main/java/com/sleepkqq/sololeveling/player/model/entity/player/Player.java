@@ -18,8 +18,6 @@ public interface Player extends Model {
   @Id
   long id();
 
-  int maxTasks();
-
   int agility();
 
   int strength();
@@ -37,6 +35,10 @@ public interface Player extends Model {
   @Nullable
   @OneToOne(mappedBy = "player")
   PlayerBalance balance();
+
+  @Nullable
+  @OneToOne(mappedBy = "player")
+  PlayerStamina stamina();
 
   @OneToMany(mappedBy = "player")
   List<PlayerTask> tasks();

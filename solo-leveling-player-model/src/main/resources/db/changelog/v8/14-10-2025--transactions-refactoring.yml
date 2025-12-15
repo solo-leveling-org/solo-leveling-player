@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: remove-updated-at-version-from-transactions
+      author: sleepkqq
+      changes:
+        - dropColumn:
+            tableName: player_balance_transactions
+            columnName: updated_at
+        - dropColumn:
+            tableName: player_balance_transactions
+            columnName: version
+      rollback:
+        - addColumn:
+            tableName: player_balance_transactions
+            columns:
+              - column:
+                  name: version
+                  type: integer
+                  defaultValue: 0
+        - addColumn:
+            tableName: player_balance_transactions
+            columns:
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false

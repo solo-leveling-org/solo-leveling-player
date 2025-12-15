@@ -82,16 +82,4 @@ class DefineTaskRarityService {
 
 		return doubleArrayOf(commonWeight, uncommonWeight, rareWeight, epicWeight, legendaryWeight)
 	}
-
-	fun getDefaultRewards(rarity: Rarity): Pair<Int, Int> {
-		val exp = when (rarity) {
-			Rarity.COMMON -> 10
-			Rarity.UNCOMMON -> 50
-			Rarity.RARE -> 100
-			Rarity.EPIC -> 150
-			Rarity.LEGENDARY -> 250
-		}
-		val currency = exp / 2
-		return currency to exp
-	}
 }

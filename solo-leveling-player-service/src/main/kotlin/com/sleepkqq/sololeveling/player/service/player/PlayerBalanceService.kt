@@ -10,11 +10,11 @@ import kotlin.reflect.KClass
 
 interface PlayerBalanceService {
 
-	fun <V : View<PlayerBalance>> findView(id: Long, viewType: KClass<V>): V?
-	fun <V : View<PlayerBalance>> getView(id: Long, viewType: KClass<V>): V = findView(id, viewType)
-		?: throw ModelNotFoundException(PlayerBalance::class, id)
+	fun <V : View<PlayerBalance>> findView(playerId: Long, viewType: KClass<V>): V?
+	fun <V : View<PlayerBalance>> getView(playerId: Long, viewType: KClass<V>): V = findView(playerId, viewType)
+		?: throw ModelNotFoundException(PlayerBalance::class, playerId)
 
-	fun initializePlayerBalance(currencyCode: CurrencyCode = CurrencyCode.SLCN): PlayerBalance
+	fun initialize(currencyCode: CurrencyCode = CurrencyCode.SLCN): PlayerBalance
 	fun deposit(
 		playerBalance: PlayerBalance,
 		amount: BigDecimal,

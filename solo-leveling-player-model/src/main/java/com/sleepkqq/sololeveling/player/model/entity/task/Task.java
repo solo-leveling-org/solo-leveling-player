@@ -42,7 +42,6 @@ public interface Task extends Model {
   @Nullable
   Integer currencyReward();
 
-  @Nullable
   Rarity rarity();
 
   @Nullable

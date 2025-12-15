@@ -27,6 +27,7 @@ public interface PlayerTask extends Model {
   @Column(name = "_order")
   int order();
 
+  @Nullable // для оптимизировнного запроса при завершении задачи
   @ManyToOne
   @JoinColumn(name = "player_id")
   Player player();

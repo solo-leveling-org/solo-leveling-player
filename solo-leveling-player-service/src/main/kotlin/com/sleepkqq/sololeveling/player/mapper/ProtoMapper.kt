@@ -3,12 +3,14 @@ package com.sleepkqq.sololeveling.player.mapper
 import com.google.protobuf.Timestamp
 import com.google.type.Money
 import com.sleepkqq.sololeveling.jimmer.mapper.JimmerProtoMapper
+import com.sleepkqq.sololeveling.player.config.properties.PlayerLimitsProperties.StaminaConfig
 import com.sleepkqq.sololeveling.player.extenstions.toMoney
 import com.sleepkqq.sololeveling.player.extenstions.toTimestamp
 import com.sleepkqq.sololeveling.player.model.entity.localization.LocalizationItem
 import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerStaminaView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
@@ -28,6 +30,7 @@ import org.babyfish.jimmer.View
 import org.mapstruct.*
 import org.springframework.context.i18n.LocaleContextHolder
 import java.math.BigDecimal
+import java.time.Duration
 import java.time.Instant
 
 @Mapper(
@@ -136,4 +139,66 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 	abstract fun map(input: LeaderboardUser): com.sleepkqq.sololeveling.proto.user.LeaderboardUser
 
 	abstract fun map(input: UsersStats): GetUsersStatsResponse
+
+	@Mapping(target = "isRegenerating", source = "stamina.regenerating")
+	@Mapping(
+		target = "nextRegenAt",
+		expression = "java(map(stamina.getUpdatedAt(), stamina.isRegenerating(), staminaConfig.getRegenIntervalSeconds()))"
+	)
+	@Mapping(
+		target = "secondsUntilFull",
+		expression = "java(map(stamina.getCurrent(), stamina.getUpdatedAt(), stamina.isRegenerating(), staminaConfig.getMax(), staminaConfig.getRegenRate(), staminaConfig.getRegenIntervalSeconds()))"
+	)
+	abstract fun map(
+		stamina: PlayerStaminaView,
+		staminaConfig: StaminaConfig
+	): com.sleepkqq.sololeveling.proto.player.PlayerStaminaView
+
+	protected fun map(
+		updatedAt: Instant,
+		isRegenerating: Boolean,
+		regenIntervalSeconds: Int
+	): Timestamp? {
+
+		if (!isRegenerating) {
+			return null
+		}
+
+		val now = Instant.now()
+		val secondsSinceLastUpdate = Duration.between(updatedAt, now).seconds
+		val secondsUntilNext = regenIntervalSeconds - (secondsSinceLastUpdate % regenIntervalSeconds)
+		val nextRegenAt = now.plusSeconds(secondsUntilNext)
+
+		return Timestamp.newBuilder()
+			.setSeconds(nextRegenAt.epochSecond)
+			.setNanos(nextRegenAt.nano)
+			.build()
+	}
+
+	protected fun map(
+		current: Int,
+		updatedAt: Instant,
+		isRegenerating: Boolean,
+		max: Int,
+		regenRate: Int,
+		regenIntervalSeconds: Int
+	): Int {
+
+		if (!isRegenerating) {
+			return 0
+		}
+
+		val staminaNeeded = max - current
+		if (staminaNeeded <= 0) {
+			return 0
+		}
+
+		val now = Instant.now()
+		val secondsSinceLastUpdate = Duration.between(updatedAt, now).seconds
+
+		val intervalsNeeded = (staminaNeeded + regenRate - 1) / regenRate
+		val totalSecondsNeeded = intervalsNeeded * regenIntervalSeconds
+
+		return kotlin.math.max(0L, totalSecondsNeeded - secondsSinceLastUpdate).toInt()
+	}
 }

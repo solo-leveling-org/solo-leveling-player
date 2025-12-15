@@ -4,19 +4,49 @@ export com.sleepkqq.sololeveling.player.model.entity.player.Player
 PlayerView {
   #allScalars
 
+  -createdAt
+
+  -updatedAt
+
+  -version
+
   level {
     #allScalars
+
+    -createdAt
+
+    -updatedAt
+
+    -version
   }
 
   balance {
     #allScalars
+
+    -createdAt
+
+    -updatedAt
+
+    -version
   }
 
   taskTopics {
     #allScalars
 
+    -createdAt
+
+    -updatedAt
+
+    -version
+
     level {
       #allScalars
+
+      -createdAt
+
+      -updatedAt
+
+      -version
     }
   }
 }

@@ -1,10 +1,8 @@
-export com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalance
+export com.sleepkqq.sololeveling.player.model.entity.player.PlayerStamina
   -> package com.sleepkqq.sololeveling.player.model.entity.player.dto
 
-PlayerBalanceView {
+PlayerStaminaView {
   #allScalars
-
-  -updatedAt
 
   -createdAt
 

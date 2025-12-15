@@ -21,18 +21,14 @@ class PlayerBalanceServiceImpl(
 	private val playerBalanceRepository: PlayerBalanceRepository
 ) : PlayerBalanceService {
 
-	private companion object {
-		val INITIAL_BALANCE: BigDecimal = BigDecimal.ZERO
-	}
-
 	@Transactional(readOnly = true)
-	override fun <V : View<PlayerBalance>> findView(id: Long, viewType: KClass<V>): V? =
-		playerBalanceRepository.findView(id, viewType.java)
+	override fun <V : View<PlayerBalance>> findView(playerId: Long, viewType: KClass<V>): V? =
+		playerBalanceRepository.findView(playerId, viewType.java)
 
-	override fun initializePlayerBalance(currencyCode: CurrencyCode): PlayerBalance =
+	override fun initialize(currencyCode: CurrencyCode): PlayerBalance =
 		Immutables.createPlayerBalance {
 			it.setId(UUID.randomUUID())
-			it.setBalance(INITIAL_BALANCE)
+			it.setBalance(BigDecimal.ZERO)
 			it.setCurrencyCode(currencyCode)
 		}
 
