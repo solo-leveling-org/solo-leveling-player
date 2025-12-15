@@ -2,30 +2,25 @@ package com.sleepkqq.sololeveling.player.service.player.impl
 
 import com.sleepkqq.sololeveling.config.interceptor.UserContextHolder
 import com.sleepkqq.sololeveling.player.config.properties.PlayerLimitsProperties
-import com.sleepkqq.sololeveling.player.config.properties.TasksProperties
 import com.sleepkqq.sololeveling.player.exception.InsufficientStaminaException
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerStamina
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerStaminaFetcher
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerStaminaView
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerStaminaRepository
 import com.sleepkqq.sololeveling.player.service.player.PlayerStaminaService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.slf4j.LoggerFactory
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 import kotlin.math.min
 
-@EnableConfigurationProperties(TasksProperties::class)
 @Service
 class PlayerStaminaServiceImpl(
 	private val playerStaminaRepository: PlayerStaminaRepository,
-	private val tasksProperties: TasksProperties,
 	private val playerLimitsProperties: PlayerLimitsProperties
 ) : PlayerStaminaService {
 
@@ -44,10 +39,10 @@ class PlayerStaminaServiceImpl(
 			.setPlayerId(playerId)
 			.setCurrent(playerLimitsProperties.limits.free.stamina.max)
 			.setRegenerating(false)
+			.setLastRegeneratedAt(Instant.now())
 	}
 
-	override fun consumeStamina(stamina: PlayerStamina, rarity: Rarity): PlayerStamina {
-		val amount = tasksProperties.getStaminaCost(rarity)
+	override fun consumeStamina(stamina: PlayerStamina, amount: Int): PlayerStamina {
 		require(amount > 0) { "Stamina amount must be positive" }
 
 		val currentStamina = calculateCurrentStamina(stamina)
@@ -82,6 +77,7 @@ class PlayerStaminaServiceImpl(
 		Immutables.createPlayerStamina(stamina) {
 			it.setCurrent(playerLimitsProperties.limits.free.stamina.max)
 				.setRegenerating(false)
+				.setLastRegeneratedAt(Instant.now())
 		}
 
 	override fun calculateCurrentStamina(stamina: PlayerStamina): PlayerStamina {
@@ -92,6 +88,7 @@ class PlayerStaminaServiceImpl(
 			return if (stamina.regenerating()) {
 				Immutables.createPlayerStamina(stamina) {
 					it.setRegenerating(false)
+						.setLastRegeneratedAt(Instant.now())
 				}
 			} else {
 				stamina
@@ -99,7 +96,7 @@ class PlayerStaminaServiceImpl(
 		}
 
 		val now = Instant.now()
-		val secondsElapsed = Duration.between(stamina.updatedAt(), now).seconds
+		val secondsElapsed = Duration.between(stamina.lastRegeneratedAt(), now).seconds
 		val intervalsCompleted = secondsElapsed / staminaConfig.regenIntervalSeconds
 
 		if (intervalsCompleted == 0L) {
@@ -113,24 +110,30 @@ class PlayerStaminaServiceImpl(
 			return stamina
 		}
 
-		val updated = Immutables.createPlayerStamina(stamina) {
-			it.setCurrent(newStamina)
-				.setRegenerating(newStamina < maxStamina)
+		val completedSeconds = intervalsCompleted * staminaConfig.regenIntervalSeconds
+
+		val newLastRegeneratedAt = if (newStamina >= maxStamina) {
+			now
+		} else {
+			stamina.lastRegeneratedAt().plusSeconds(completedSeconds)
 		}
 
-		log.debug(
+		log.info(
 			"Regenerated stamina for player {}: {} -> {} (+{} in {} seconds)",
 			UserContextHolder.getUserId(), stamina.current(), newStamina, staminaToRecover, secondsElapsed
 		)
 
-		return updated
+		return Immutables.createPlayerStamina(stamina) {
+			it.setCurrent(newStamina)
+				.setRegenerating(newStamina < maxStamina)
+				.setLastRegeneratedAt(newLastRegeneratedAt)
+		}
 	}
 
 	@Transactional
 	override fun getCurrentStamina(playerId: Long): PlayerStaminaView {
 		val stamina = get(playerId)
 		val calculated = calculateCurrentStamina(stamina)
-		val updated = update(calculated)
-		return PlayerStaminaView(updated)
+		return PlayerStaminaView(calculated)
 	}
 }

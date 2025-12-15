@@ -40,6 +40,12 @@ databaseChangeLog:
                     nullable: false
                   defaultValueBoolean: false
               - column:
+                  name: last_regenerated_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
                   name: player_id
                   type: bigint
                   constraints:
@@ -70,8 +76,8 @@ databaseChangeLog:
             onDelete: CASCADE
         - sql:
             sql: >
-              ALTER TABLE player_stamina 
-              ADD CONSTRAINT check_current_stamina_non_negative 
+              ALTER TABLE player_stamina
+              ADD CONSTRAINT check_current_stamina_non_negative
               CHECK (current >= 0)
         - createIndex:
             tableName: player_stamina
@@ -79,13 +85,6 @@ databaseChangeLog:
             columns:
               - column:
                   name: player_id
-        - createIndex:
-            tableName: player_stamina
-            indexName: idx_player_stamina_regenerating
-            columns:
-              - column:
-                  name: updated_at
-            where: "is_regenerating = true"
       rollback:
         - dropTable:
             tableName: player_stamina
@@ -96,11 +95,12 @@ databaseChangeLog:
       changes:
         - sql:
             sql: >
-              INSERT INTO player_stamina (id, current, is_regenerating, player_id, created_at, updated_at, version)
-              SELECT 
+              INSERT INTO player_stamina (id, current, is_regenerating, last_regenerated_at, player_id, created_at, updated_at, version)
+              SELECT
                 gen_random_uuid(),
                 100,
                 false,
+                CURRENT_TIMESTAMP,
                 p.id,
                 CURRENT_TIMESTAMP,
                 CURRENT_TIMESTAMP,
@@ -112,7 +112,7 @@ databaseChangeLog:
       rollback:
         - sql:
             sql: >
-              DELETE FROM player_stamina 
+              DELETE FROM player_stamina
               WHERE current = 100 AND is_regenerating = false
 
   - changeSet:

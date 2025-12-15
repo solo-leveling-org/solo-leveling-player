@@ -5,30 +5,29 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "app.tasks")
 data class TasksProperties(
-	val rarityProperties: List<RarityProperty>,
-	val currencyExperienceMultiplier: Double
+	val skipStaminaCost: Int,
+	val currencyExperienceMultiplier: Double,
+	val rarities: List<RarityConfig>
 ) {
 
-	data class RarityProperty(
-		val rarity: Rarity,
-		val staminaCost: Int,
+	data class RarityConfig(
+		val name: Rarity,
+		val stamina: Int,
 		val experience: Int
-	) {
+	)
 
-		fun calculateCurrencyReward(multiplier: Double): Int = (experience * multiplier).toInt()
+	private val rarityMap: Map<Rarity, RarityConfig> by lazy {
+		rarities.associateBy { it.name }
 	}
 
-	private val rarityMap: Map<Rarity, RarityProperty> by lazy {
-		rarityProperties.associateBy { it.rarity }
-	}
+	fun getSkipCost(): Int = skipStaminaCost
 
-	fun getProperties(rarity: Rarity): RarityProperty = rarityMap[rarity]
-		?: throw IllegalArgumentException("No properties configured for rarity: $rarity")
+	fun getCompleteCost(rarity: Rarity): Int = rarityMap[rarity]?.stamina
+		?: throw IllegalArgumentException("No config for rarity: $rarity")
 
-	fun calculateCurrencyReward(rarity: Rarity): Int = getProperties(rarity)
-		.calculateCurrencyReward(currencyExperienceMultiplier)
+	fun getExperience(rarity: Rarity): Int = rarityMap[rarity]?.experience
+		?: throw IllegalArgumentException("No config for rarity: $rarity")
 
-	fun getStaminaCost(rarity: Rarity): Int = getProperties(rarity).staminaCost
-
-	fun getExperience(rarity: Rarity): Int = getProperties(rarity).experience
+	fun calculateCurrencyReward(rarity: Rarity): Int =
+		(getExperience(rarity) * currencyExperienceMultiplier).toInt()
 }

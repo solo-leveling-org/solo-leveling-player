@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.player.impl
 
 import com.sleepkqq.sololeveling.player.config.properties.PlayerLimitsProperties
+import com.sleepkqq.sololeveling.player.config.properties.TasksProperties
 import com.sleepkqq.sololeveling.player.exception.AccessDeniedException
 import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers
@@ -41,7 +42,7 @@ import java.util.UUID
 import kotlin.reflect.KClass
 
 @Service
-@EnableConfigurationProperties(PlayerLimitsProperties::class)
+@EnableConfigurationProperties(PlayerLimitsProperties::class, TasksProperties::class)
 class PlayerTaskServiceImpl(
 	private val playerTaskRepository: PlayerTaskRepository,
 	private val playerBalanceService: PlayerBalanceService,
@@ -51,7 +52,8 @@ class PlayerTaskServiceImpl(
 	private val notificationService: NotificationService,
 	private val generateTasksProducer: GenerateTasksProducer,
 	private val playerLimitsProperties: PlayerLimitsProperties,
-	private val playerStaminaService: PlayerStaminaService
+	private val playerStaminaService: PlayerStaminaService,
+	private val tasksProperties: TasksProperties
 ) : PlayerTaskService {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -107,12 +109,23 @@ class PlayerTaskServiceImpl(
 		val playerTask = get(
 			id,
 			Fetchers.PLAYER_TASK_FETCHER.allScalarFields()
-				.player()
+				.player(
+					Fetchers.PLAYER_FETCHER
+						.stamina(Fetchers.PLAYER_STAMINA_FETCHER.allScalarFields())
+				)
 		)
 
-		if (playerTask.player()!!.id() != playerId) {
+		val player = playerTask.player()!!
+
+		if (player.id() != playerId) {
 			throw AccessDeniedException()
 		}
+
+		val consumedStamina = playerStaminaService.consumeStamina(
+			player.stamina()!!,
+			tasksProperties.getSkipCost()
+		)
+		playerStaminaService.update(consumedStamina)
 
 		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED)
 
@@ -131,7 +144,10 @@ class PlayerTaskServiceImpl(
 			throw AccessDeniedException()
 		}
 
-		val consumedStamina = playerStaminaService.consumeStamina(player.stamina()!!, task.rarity())
+		val consumedStamina = playerStaminaService.consumeStamina(
+			player.stamina()!!,
+			tasksProperties.getCompleteCost(task.rarity())
+		)
 
 		setStatus(listOf(playerTask), PlayerTaskStatus.COMPLETED)
 

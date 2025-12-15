@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.model.entity.player;
 
 import com.sleepkqq.sololeveling.player.model.entity.Model;
+import java.time.Instant;
 import java.util.UUID;
 import org.babyfish.jimmer.sql.Column;
 import org.babyfish.jimmer.sql.Entity;
@@ -23,6 +24,8 @@ public interface PlayerStamina extends Model {
 
   @Column(name = "is_regenerating")
   boolean regenerating();
+
+  Instant lastRegeneratedAt();
 
   @OneToOne
   @JoinColumn(name = "player_id")

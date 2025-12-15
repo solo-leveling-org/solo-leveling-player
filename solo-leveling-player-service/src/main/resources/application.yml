@@ -44,23 +44,24 @@ app:
       enabled: true
       cron: "0 * * * * *"
   tasks:
-    rarity-properties:
-      - rarity: COMMON
-        stamina-cost: 10
-        experience: 10
-      - rarity: UNCOMMON
-        stamina-cost: 20
-        experience: 50
-      - rarity: RARE
-        stamina-cost: 30
-        experience: 100
-      - rarity: EPIC
-        stamina-cost: 40
-        experience: 150
-      - rarity: LEGENDARY
-        stamina-cost: 50
-        experience: 250
+    skip-stamina-cost: 5
     currency-experience-multiplier: 0.5
+    rarities:
+      - name: COMMON
+        stamina: 10
+        experience: 10
+      - name: UNCOMMON
+        stamina: 20
+        experience: 50
+      - name: RARE
+        stamina: 30
+        experience: 100
+      - name: EPIC
+        stamina: 40
+        experience: 150
+      - name: LEGENDARY
+        stamina: 50
+        experience: 250
   player:
     limits:
       free:

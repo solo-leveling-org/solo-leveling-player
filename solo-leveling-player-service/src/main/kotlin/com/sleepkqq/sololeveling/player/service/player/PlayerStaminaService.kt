@@ -6,7 +6,6 @@ import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerStamina
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerStaminaFetcher
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerStaminaView
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity
 
 interface PlayerStaminaService {
 
@@ -25,7 +24,7 @@ interface PlayerStaminaService {
 	fun initialize(playerId: Long): PlayerStamina
 	fun calculateCurrentStamina(stamina: PlayerStamina): PlayerStamina
 	fun getCurrentStamina(playerId: Long): PlayerStaminaView
-	fun consumeStamina(stamina: PlayerStamina, rarity: Rarity): PlayerStamina
+	fun consumeStamina(stamina: PlayerStamina, amount: Int): PlayerStamina
 	fun restoreStamina(stamina: PlayerStamina, amount: Int): PlayerStamina
 	fun fullRestore(stamina: PlayerStamina): PlayerStamina
 }

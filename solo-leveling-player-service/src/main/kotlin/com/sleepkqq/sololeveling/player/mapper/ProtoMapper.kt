@@ -32,6 +32,7 @@ import org.springframework.context.i18n.LocaleContextHolder
 import java.math.BigDecimal
 import java.time.Duration
 import java.time.Instant
+import kotlin.math.max
 
 @Mapper(
 	componentModel = "spring",
@@ -140,22 +141,21 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 
 	abstract fun map(input: UsersStats): GetUsersStatsResponse
 
-	@Mapping(target = "isRegenerating", source = "stamina.regenerating")
 	@Mapping(
 		target = "nextRegenAt",
-		expression = "java(map(stamina.getUpdatedAt(), stamina.isRegenerating(), staminaConfig.getRegenIntervalSeconds()))"
+		expression = "java(map(input.getLastRegeneratedAt(), input.isRegenerating(), cfg.getRegenIntervalSeconds()))"
 	)
 	@Mapping(
-		target = "secondsUntilFull",
-		expression = "java(map(stamina.getCurrent(), stamina.getUpdatedAt(), stamina.isRegenerating(), staminaConfig.getMax(), staminaConfig.getRegenRate(), staminaConfig.getRegenIntervalSeconds()))"
+		target = "fullRegenAt",
+		expression = "java(map(input.getCurrent(), input.getLastRegeneratedAt(), input.isRegenerating(), cfg.getMax(), cfg.getRegenRate(), cfg.getRegenIntervalSeconds()))"
 	)
 	abstract fun map(
-		stamina: PlayerStaminaView,
-		staminaConfig: StaminaConfig
+		input: PlayerStaminaView,
+		cfg: StaminaConfig
 	): com.sleepkqq.sololeveling.proto.player.PlayerStaminaView
 
 	protected fun map(
-		updatedAt: Instant,
+		lastRegeneratedAt: Instant,
 		isRegenerating: Boolean,
 		regenIntervalSeconds: Int
 	): Timestamp? {
@@ -165,10 +165,9 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		}
 
 		val now = Instant.now()
-		val secondsSinceLastUpdate = Duration.between(updatedAt, now).seconds
+		val secondsSinceLastUpdate = Duration.between(lastRegeneratedAt, now).seconds
 		val secondsUntilNext = regenIntervalSeconds - (secondsSinceLastUpdate % regenIntervalSeconds)
 		val nextRegenAt = now.plusSeconds(secondsUntilNext)
-
 		return Timestamp.newBuilder()
 			.setSeconds(nextRegenAt.epochSecond)
 			.setNanos(nextRegenAt.nano)
@@ -177,28 +176,33 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 
 	protected fun map(
 		current: Int,
-		updatedAt: Instant,
+		lastRegeneratedAt: Instant,
 		isRegenerating: Boolean,
 		max: Int,
 		regenRate: Int,
 		regenIntervalSeconds: Int
-	): Int {
+	): Timestamp? {
 
 		if (!isRegenerating) {
-			return 0
+			return null
 		}
 
 		val staminaNeeded = max - current
 		if (staminaNeeded <= 0) {
-			return 0
+			return null
 		}
 
 		val now = Instant.now()
-		val secondsSinceLastUpdate = Duration.between(updatedAt, now).seconds
-
+		val secondsSinceLastUpdate = Duration.between(lastRegeneratedAt, now).seconds
 		val intervalsNeeded = (staminaNeeded + regenRate - 1) / regenRate
 		val totalSecondsNeeded = intervalsNeeded * regenIntervalSeconds
+		val secondsRemaining = max(0L, totalSecondsNeeded - secondsSinceLastUpdate)
 
-		return kotlin.math.max(0L, totalSecondsNeeded - secondsSinceLastUpdate).toInt()
+		val fullRegenAt = now.plusSeconds(secondsRemaining)
+
+		return Timestamp.newBuilder()
+			.setSeconds(fullRegenAt.epochSecond)
+			.setNanos(fullRegenAt.nano)
+			.build()
 	}
 }
