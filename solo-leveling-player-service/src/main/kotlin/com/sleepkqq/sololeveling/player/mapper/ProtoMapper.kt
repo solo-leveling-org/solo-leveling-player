@@ -141,6 +141,7 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 
 	abstract fun map(input: UsersStats): GetUsersStatsResponse
 
+	@Mapping(target = "isRegenerating", source = "input.regenerating")
 	@Mapping(
 		target = "nextRegenAt",
 		expression = "java(map(input.getLastRegeneratedAt(), input.isRegenerating(), cfg.getRegenIntervalSeconds()))"
