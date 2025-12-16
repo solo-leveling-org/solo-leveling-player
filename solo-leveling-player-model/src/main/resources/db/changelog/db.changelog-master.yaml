@@ -40,3 +40,7 @@ databaseChangeLog:
   # v8
   - include:
       file: db/changelog/v8/10-12-2025--deprecated-tasks.yml
+  - include:
+      file: db/changelog/v8/14-10-2025--transactions-refactoring.yml
+  - include:
+      file: db/changelog/v8/14-10-2025--player-stamina.yml

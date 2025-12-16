@@ -12,23 +12,32 @@ class ApiExceptionHandler : GrpcExceptionHandler {
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	override fun handleException(e: Throwable): StatusException {
-		log.error("Unexpected error occurred", e)
-
 		val status = when (e) {
 			is ModelNotFoundException,
-			is LeaderboardUserNotFoundException -> Status.NOT_FOUND
-				.withDescription(e.message)
+			is LeaderboardUserNotFoundException -> {
+				log.warn("Not found: {}", e.message)
+				Status.NOT_FOUND.withDescription(e.message)
+			}
 
-			is IllegalArgumentException -> Status.INVALID_ARGUMENT
-				.withDescription(e.message)
+			is IllegalArgumentException -> {
+				log.warn("Invalid argument: {}", e.message, e)
+				Status.INVALID_ARGUMENT.withDescription(e.message)
+			}
 
-			is IllegalStateException -> Status.FAILED_PRECONDITION
-				.withDescription(e.message)
+			is IllegalStateException -> {
+				log.error("Illegal state", e)
+				Status.FAILED_PRECONDITION.withDescription(e.message)
+			}
 
-			is AccessDeniedException -> Status.PERMISSION_DENIED
+			is AccessDeniedException -> {
+				log.warn("Access denied: {}", e.message)
+				Status.PERMISSION_DENIED
+			}
 
-			else -> Status.INTERNAL
-				.withDescription("Internal server error")
+			else -> {
+				log.error("Unexpected error occurred", e)
+				Status.INTERNAL.withDescription("Internal server error")
+			}
 		}
 
 		return status.withCause(e).asException()

@@ -1,28 +1,6 @@
 export com.sleepkqq.sololeveling.player.model.entity.task.Task
   -> package com.sleepkqq.sololeveling.player.model.entity.task.dto
 
-input TaskInput {
-  #allScalars
-
-  -createdAt
-
-  -updatedAt
-
-  -deprecated
-
-  title {
-    #allScalars
-  }
-
-  description {
-    #allScalars
-  }
-
-  topics {
-    #allScalars
-  }
-}
-
 input SaveTaskInput {
   #allScalars
 
@@ -49,6 +27,6 @@ GenerateTaskView {
   rarity
 
   topics {
-    topic
+    #allScalars
   }
 }

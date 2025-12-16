@@ -1,0 +1,130 @@
+databaseChangeLog:
+  - changeSet:
+      id: remove-max-tasks-from-players
+      author: sleepkqq
+      changes:
+        - dropColumn:
+            tableName: players
+            columnName: max_tasks
+      rollback:
+        - addColumn:
+            tableName: players
+            columns:
+              - column:
+                  name: max_tasks
+                  type: integer
+
+  - changeSet:
+      id: create-player-stamina-table
+      author: sleepkqq
+      changes:
+        - createTable:
+            tableName: player_stamina
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: current
+                  type: integer
+                  constraints:
+                    nullable: false
+                  defaultValue: 0
+              - column:
+                  name: is_regenerating
+                  type: boolean
+                  constraints:
+                    nullable: false
+                  defaultValueBoolean: false
+              - column:
+                  name: last_regenerated_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: player_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: integer
+                  defaultValue: 0
+        - addForeignKeyConstraint:
+            baseTableName: player_stamina
+            baseColumnNames: player_id
+            constraintName: fk_player_stamina_player
+            referencedTableName: players
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - sql:
+            sql: >
+              ALTER TABLE player_stamina
+              ADD CONSTRAINT check_current_stamina_non_negative
+              CHECK (current >= 0)
+        - createIndex:
+            tableName: player_stamina
+            indexName: idx_player_stamina_player_id
+            columns:
+              - column:
+                  name: player_id
+      rollback:
+        - dropTable:
+            tableName: player_stamina
+
+  - changeSet:
+      id: initialize-stamina-for-existing-players
+      author: sleepkqq
+      changes:
+        - sql:
+            sql: >
+              INSERT INTO player_stamina (id, current, is_regenerating, last_regenerated_at, player_id, created_at, updated_at, version)
+              SELECT
+                gen_random_uuid(),
+                100,
+                false,
+                CURRENT_TIMESTAMP,
+                p.id,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP,
+                0
+              FROM players p
+              WHERE NOT EXISTS (
+                SELECT 1 FROM player_stamina ps WHERE ps.player_id = p.id
+              )
+      rollback:
+        - sql:
+            sql: >
+              DELETE FROM player_stamina
+              WHERE current = 100 AND is_regenerating = false
+
+  - changeSet:
+      id: set-rarity-not-nullable-in-tasks
+      author: sleepkqq
+      changes:
+        - addNotNullConstraint:
+            tableName: tasks
+            columnName: rarity
+            columnDataType: integer
+      rollback:
+        - dropNotNullConstraint:
+            tableName: tasks
+            columnName: rarity
+            columnDataType: integer

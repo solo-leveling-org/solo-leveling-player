@@ -3,6 +3,4 @@ export com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransac
 
 PlayerBalanceTransactionView {
   #allScalars
-
-  -updatedAt
 }

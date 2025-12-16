@@ -3,6 +3,7 @@ package com.sleepkqq.sololeveling.player.grpc.server
 import com.google.protobuf.Empty
 import com.sleepkqq.sololeveling.config.interceptor.UserContextHolder
 import com.sleepkqq.sololeveling.jimmer.enums.EnumLocalizer
+import com.sleepkqq.sololeveling.player.config.properties.PlayerLimitsProperties
 import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_BALANCE_TRANSACTIONS
 import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_TASKS
 import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
@@ -15,6 +16,7 @@ import com.sleepkqq.sololeveling.player.model.repository.player.PlayerBalanceTra
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceTransactionService
+import com.sleepkqq.sololeveling.player.service.player.PlayerStaminaService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
 import com.sleepkqq.sololeveling.player.service.task.TaskService
@@ -31,21 +33,29 @@ class PlayerApi(
 	private val playerBalanceTransactionService: PlayerBalanceTransactionService,
 	private val playerBalanceService: PlayerBalanceService,
 	private val taskService: TaskService,
-	private val enumLocalizer: EnumLocalizer
+	private val enumLocalizer: EnumLocalizer,
+	private val playerStaminaService: PlayerStaminaService,
+	private val playerLimitsProperties: PlayerLimitsProperties
 ) : PlayerServiceGrpc.PlayerServiceImplBase() {
 
 	override fun getActiveTasks(
 		request: Empty,
 		responseObserver: StreamObserver<GetActiveTasksResponse>
 	) {
-		val activeTasks = playerTaskService.getActiveTasks(UserContextHolder.getUserId()!!)
+		val playerId = UserContextHolder.getUserId()!!
+
+		val activeTasks = playerTaskService.getActiveTasks(playerId)
 			.map { protoMapper.map(it) }
 
 		val isFirstTime = activeTasks.isEmpty()
 
+		val stamina = playerStaminaService.getCurrentStamina(playerId)
+		val staminaConfig = playerLimitsProperties.limits.free.stamina
+
 		val response = GetActiveTasksResponse.newBuilder()
 			.addAllTasks(activeTasks)
 			.setFirstTime(isFirstTime)
+			.setStamina(protoMapper.map(stamina, staminaConfig))
 			.build()
 
 		responseObserver.onNext(response)

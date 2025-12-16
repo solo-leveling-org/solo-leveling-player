@@ -12,7 +12,17 @@ input PlayerTaskTopicInput {
 PlayerTaskTopicView {
   #allScalars
 
+  -updatedAt
+
+  -createdAt
+
   level {
     #allScalars
+
+    -createdAt
+
+    -updatedAt
+
+    -version
   }
 }

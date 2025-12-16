@@ -189,8 +189,6 @@ public class UserRepository {
     var weekStart = todayStart.minus(7, ChronoUnit.DAYS);
     var monthStart = todayStart.minus(30, ChronoUnit.DAYS);
 
-    var total = sql.createSubQuery(u).selectCount();
-
     var returning = sql.createSubQuery(u)
         .where(u.version().gt(0))
         .selectCount();
@@ -201,7 +199,7 @@ public class UserRepository {
 
     var result = sql.createQuery(u)
         .select(UsersStatsMapper
-            .total(total)
+            .total(u.count())
             .returning(returning)
             .todayTotal(todayStats.total())
             .todayReturning(todayStats.returning())

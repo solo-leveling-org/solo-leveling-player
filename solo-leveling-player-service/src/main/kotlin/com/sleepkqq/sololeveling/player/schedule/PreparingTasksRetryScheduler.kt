@@ -39,7 +39,7 @@ class PreparingTasksRetryScheduler(
 
 		preparingTasks
 			.groupBy(
-				{ it.player().id() },
+				{ it.player()!!.id() },
 				{ it.task()!! }
 			)
 			.forEach { (playerId, tasks) ->
