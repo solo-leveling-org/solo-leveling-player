@@ -46,17 +46,21 @@ class PlayerStaminaServiceImpl(
 		require(amount > 0) { "Stamina amount must be positive" }
 
 		val currentStamina = calculateCurrentStamina(stamina)
-
 		if (currentStamina.current() < amount) {
 			throw InsufficientStaminaException(amount, currentStamina.current())
 		}
 
 		val staminaConfig = playerLimitsProperties.limits.free.stamina
+		val wasAtMax = currentStamina.current() >= staminaConfig.max
 		val newStamina = currentStamina.current() - amount
 
 		return Immutables.createPlayerStamina(currentStamina) {
 			it.setCurrent(newStamina)
 				.setRegenerating(newStamina < staminaConfig.max)
+
+			if (wasAtMax) {
+				it.setLastRegeneratedAt(Instant.now())
+			}
 		}
 	}
 

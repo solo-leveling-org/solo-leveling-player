@@ -158,7 +158,11 @@ class PlayerTaskServiceImpl(
 		)
 
 		val topics = task.topics().map(TaskTopicItem::topic)
-		val gainedExperiencePlayer = levelService.gainExperience(player, topics, task.experience()!!)
+		val gainedExperiencePlayer = levelService.gainExperience(
+			player,
+			topics,
+			task.experience()!!
+		)
 
 		val updatedPlayer = playerService.update(
 			Immutables.createPlayer(gainedExperiencePlayer) {

@@ -138,6 +138,7 @@ public class PlayerTaskRepository extends PageFetcher<PlayerTask, PlayerTaskTabl
             .player()
             .task(Fetchers.TASK_FETCHER
                 .version()
+                .rarity()
                 .topics(Fetchers.TASK_TOPIC_ITEM_FETCHER.topic())
             )
         ))

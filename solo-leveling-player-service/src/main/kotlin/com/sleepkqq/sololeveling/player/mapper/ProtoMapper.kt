@@ -159,10 +159,10 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		lastRegeneratedAt: Instant,
 		isRegenerating: Boolean,
 		regenIntervalSeconds: Int
-	): Timestamp? {
+	): Timestamp {
 
 		if (!isRegenerating) {
-			return null
+			return Timestamp.getDefaultInstance()
 		}
 
 		val now = Instant.now()
@@ -182,15 +182,15 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		max: Int,
 		regenRate: Int,
 		regenIntervalSeconds: Int
-	): Timestamp? {
+	): Timestamp {
 
 		if (!isRegenerating) {
-			return null
+			return Timestamp.getDefaultInstance()
 		}
 
 		val staminaNeeded = max - current
 		if (staminaNeeded <= 0) {
-			return null
+			return Timestamp.getDefaultInstance()
 		}
 
 		val now = Instant.now()
