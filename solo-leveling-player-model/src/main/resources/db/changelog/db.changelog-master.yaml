@@ -44,3 +44,5 @@ databaseChangeLog:
       file: db/changelog/v8/14-10-2025--transactions-refactoring.yml
   - include:
       file: db/changelog/v8/14-10-2025--player-stamina.yml
+  - include:
+      file: db/changelog/v8/17-10-2025--cascade-delete.yml

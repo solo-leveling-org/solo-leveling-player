@@ -16,6 +16,7 @@ import com.sleepkqq.sololeveling.player.model.repository.player.PlayerBalanceTra
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceTransactionService
+import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.player.PlayerStaminaService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
@@ -35,7 +36,8 @@ class PlayerApi(
 	private val taskService: TaskService,
 	private val enumLocalizer: EnumLocalizer,
 	private val playerStaminaService: PlayerStaminaService,
-	private val playerLimitsProperties: PlayerLimitsProperties
+	private val playerLimitsProperties: PlayerLimitsProperties,
+	private val playerService: PlayerService
 ) : PlayerServiceGrpc.PlayerServiceImplBase() {
 
 	override fun getActiveTasks(
@@ -145,11 +147,11 @@ class PlayerApi(
 			UserContextHolder.getUserId()!!,
 			PlayerBalanceView::class
 		)
-		val grpcResponse = GetPlayerBalanceResponse.newBuilder()
+		val response = GetPlayerBalanceResponse.newBuilder()
 			.setBalance(protoMapper.map(playerBalance))
 			.build()
 
-		responseObserver.onNext(grpcResponse)
+		responseObserver.onNext(response)
 		responseObserver.onCompleted()
 	}
 
@@ -226,6 +228,16 @@ class PlayerApi(
 			.build()
 
 		responseObserver.onNext(response)
+		responseObserver.onCompleted()
+	}
+
+	override fun resetPlayer(
+		request: ResetPlayerRequest,
+		responseObserver: StreamObserver<Empty>
+	) {
+		playerService.reset(request.playerId)
+
+		responseObserver.onNext(Empty.newBuilder().build())
 		responseObserver.onCompleted()
 	}
 }

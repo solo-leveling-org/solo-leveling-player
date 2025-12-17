@@ -19,11 +19,10 @@ class PlayerTaskTopicServiceImpl(
 	private val levelService: LevelService
 ) : PlayerTaskTopicService {
 
-	override fun initialize(playerId: Long, taskTopic: TaskTopic): PlayerTaskTopic =
+	override fun initialize(taskTopic: TaskTopic): PlayerTaskTopic =
 		Immutables.createPlayerTaskTopic {
 			it.setId(UUID.randomUUID())
 			it.setTaskTopic(taskTopic)
-			it.setPlayerId(playerId)
 			it.setLevel(levelService.initialize(LevelType.TASK_TOPIC))
 			it.setActive(false)
 		}

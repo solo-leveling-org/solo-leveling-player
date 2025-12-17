@@ -34,9 +34,8 @@ class PlayerStaminaServiceImpl(
 	override fun update(stamina: PlayerStamina): PlayerStamina =
 		playerStaminaRepository.save(stamina, SaveMode.UPDATE_ONLY)
 
-	override fun initialize(playerId: Long): PlayerStamina = Immutables.createPlayerStamina {
+	override fun initialize(): PlayerStamina = Immutables.createPlayerStamina {
 		it.setId(UUID.randomUUID())
-			.setPlayerId(playerId)
 			.setCurrent(playerLimitsProperties.limits.free.stamina.max)
 			.setRegenerating(false)
 			.setLastRegeneratedAt(Instant.now())

@@ -6,7 +6,7 @@ import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 
 interface PlayerTaskTopicService {
 
-	fun initialize(playerId: Long, taskTopic: TaskTopic): PlayerTaskTopic
+	fun initialize(taskTopic: TaskTopic): PlayerTaskTopic
 	fun insert(topic: PlayerTaskTopic): PlayerTaskTopic
 	fun updateAll(topics: Collection<PlayerTaskTopic>)
 	fun update(playerTaskTopic: PlayerTaskTopic): PlayerTaskTopic

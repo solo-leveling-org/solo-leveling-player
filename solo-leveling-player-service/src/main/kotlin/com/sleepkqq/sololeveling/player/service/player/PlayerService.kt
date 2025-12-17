@@ -20,4 +20,5 @@ interface PlayerService {
 	fun insert(player: Player): Player
 	fun update(player: Player): Player
 	fun initialize(userId: Long): Player
+	fun reset(id: Long)
 }
