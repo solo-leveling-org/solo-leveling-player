@@ -49,7 +49,7 @@ class SaveTasksConsumer(
 				it.title!!.id = UUID.randomUUID()
 				it.description!!.id = UUID.randomUUID()
 
-				if (it.currencyReward == null || it.experience == null) {
+				if (it.currencyReward == null || it.currencyReward == 0 || it.experience == null || it.experience == 0) {
 					val experience = tasksProperties.getExperience(it.rarity)
 					val currency = tasksProperties.calculateCurrencyReward(it.rarity)
 
