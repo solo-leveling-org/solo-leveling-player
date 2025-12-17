@@ -7,6 +7,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerFetcher;
 import lombok.RequiredArgsConstructor;
 import org.babyfish.jimmer.View;
 import org.babyfish.jimmer.sql.JSqlClient;
+import org.babyfish.jimmer.sql.ast.mutation.AssociatedSaveMode;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Repository;
@@ -36,8 +37,18 @@ public class PlayerRepository {
   }
 
   public Player save(Player player, SaveMode saveMode) {
-    return sql.saveCommand(player)
-        .setMode(saveMode)
+    return save(player, saveMode, null);
+  }
+
+  public Player save(Player player, SaveMode saveMode, AssociatedSaveMode associatedSaveMode) {
+    var command = sql.saveCommand(player)
+        .setMode(saveMode);
+
+    if (associatedSaveMode != null) {
+      command = command.setAssociatedModeAll(associatedSaveMode);
+    }
+
+    return command
         .execute()
         .getModifiedEntity();
   }

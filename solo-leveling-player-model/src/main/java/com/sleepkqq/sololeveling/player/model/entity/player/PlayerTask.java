@@ -5,11 +5,13 @@ import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStat
 import com.sleepkqq.sololeveling.player.model.entity.task.Task;
 import java.util.UUID;
 import org.babyfish.jimmer.sql.Column;
+import org.babyfish.jimmer.sql.DissociateAction;
 import org.babyfish.jimmer.sql.Entity;
 import org.babyfish.jimmer.sql.GeneratedValue;
 import org.babyfish.jimmer.sql.Id;
 import org.babyfish.jimmer.sql.JoinColumn;
 import org.babyfish.jimmer.sql.ManyToOne;
+import org.babyfish.jimmer.sql.OnDissociate;
 import org.babyfish.jimmer.sql.Table;
 import org.babyfish.jimmer.sql.meta.UUIDIdGenerator;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +31,7 @@ public interface PlayerTask extends Model {
 
   @Nullable // для оптимизировнного запроса при завершении задачи
   @ManyToOne
+  @OnDissociate(DissociateAction.DELETE)
   @JoinColumn(name = "player_id")
   Player player();
 

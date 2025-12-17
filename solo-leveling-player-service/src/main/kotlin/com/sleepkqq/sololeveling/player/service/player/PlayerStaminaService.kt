@@ -21,7 +21,7 @@ interface PlayerStaminaService {
 		?: throw ModelNotFoundException(Player::class, playerId)
 
 	fun update(stamina: PlayerStamina): PlayerStamina
-	fun initialize(playerId: Long): PlayerStamina
+	fun initialize(): PlayerStamina
 	fun calculateCurrentStamina(stamina: PlayerStamina): PlayerStamina
 	fun getCurrentStamina(playerId: Long): PlayerStaminaView
 	fun consumeStamina(stamina: PlayerStamina, amount: Int): PlayerStamina

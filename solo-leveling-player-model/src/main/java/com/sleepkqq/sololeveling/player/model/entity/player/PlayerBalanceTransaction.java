@@ -6,11 +6,13 @@ import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceT
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionType;
 import java.math.BigDecimal;
 import java.util.UUID;
+import org.babyfish.jimmer.sql.DissociateAction;
 import org.babyfish.jimmer.sql.Entity;
 import org.babyfish.jimmer.sql.GeneratedValue;
 import org.babyfish.jimmer.sql.Id;
 import org.babyfish.jimmer.sql.JoinColumn;
 import org.babyfish.jimmer.sql.ManyToOne;
+import org.babyfish.jimmer.sql.OnDissociate;
 import org.babyfish.jimmer.sql.Table;
 import org.babyfish.jimmer.sql.meta.UUIDIdGenerator;
 
@@ -31,6 +33,7 @@ public interface PlayerBalanceTransaction extends Auditable {
   PlayerBalanceTransactionCause cause();
 
   @ManyToOne
+  @OnDissociate(DissociateAction.DELETE)
   @JoinColumn(name = "balance_id")
   PlayerBalance balance();
 

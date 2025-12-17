@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-cascade-delete-constraints
+      author: sleepkqq
+      changes:
+        # Удаляем старые FK без CASCADE
+        - dropForeignKeyConstraint:
+            baseTableName: player_task_topics
+            constraintName: fk_player_task_topic_player
+
+        - dropForeignKeyConstraint:
+            baseTableName: player_tasks
+            constraintName: fk_player_task_player
+
+        - dropForeignKeyConstraint:
+            baseTableName: player_balance_transactions
+            constraintName: fk_player_balance_transaction_balance
+
+        - dropForeignKeyConstraint:
+            baseTableName: player_balances
+            constraintName: fk_player_balance_player
+
+        # Добавляем FK с CASCADE для player_task_topics
+        - addForeignKeyConstraint:
+            baseTableName: player_task_topics
+            baseColumnNames: player_id
+            constraintName: fk_player_task_topic_player
+            referencedTableName: players
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+        # Добавляем FK с CASCADE для player_tasks
+        - addForeignKeyConstraint:
+            baseTableName: player_tasks
+            baseColumnNames: player_id
+            constraintName: fk_player_task_player
+            referencedTableName: players
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+        # Добавляем FK с CASCADE для player_balance_transactions
+        - addForeignKeyConstraint:
+            baseTableName: player_balance_transactions
+            baseColumnNames: balance_id
+            constraintName: fk_player_balance_transaction_balance
+            referencedTableName: player_balances
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+        # Добавляем FK с CASCADE для player_balances
+        - addForeignKeyConstraint:
+            baseTableName: player_balances
+            baseColumnNames: player_id
+            constraintName: fk_player_balance_player
+            referencedTableName: players
+            referencedColumnNames: id
+            onDelete: CASCADE
