@@ -17,6 +17,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
+import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
 import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
@@ -176,8 +177,13 @@ class PlayerTaskServiceImpl(
 
 		generateTasks(playerId, updatedPlayer, setOf(playerTask.order()))
 
-		return PlayerView(player) to PlayerView(updatedPlayer)
+		return filterPlayerTopics(player, topics) to filterPlayerTopics(updatedPlayer, topics)
 	}
+
+	private fun filterPlayerTopics(player: Player, topics: Collection<TaskTopic>): PlayerView =
+		PlayerView(Immutables.createPlayer(player) {
+			it.setTaskTopics(player.taskTopics().filter { t -> t.taskTopic() in topics })
+		})
 
 	@Transactional
 	override fun inProgressTasks(tasks: Collection<PlayerTask>) {
