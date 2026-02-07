@@ -21,11 +21,19 @@ class PlayerDayStreakServiceImpl : PlayerDayStreakService {
 		val daysDifference = ChronoUnit.DAYS.between(lastActiveDate, today)
 
 		return when (daysDifference) {
-			0L -> dayStreak
+			0L -> if (dayStreak.current() == 0) {
+				Immutables.createPlayerDayStreak {
+					it.setCurrent(1)
+						.setMax(1)
+				}
+			} else {
+				dayStreak
+			}
+
 			1L -> Immutables.createPlayerDayStreak(dayStreak) {
 				val updatedStreak = dayStreak.current() + 1
 				it.setCurrent(updatedStreak)
-				it.setMax(max(updatedStreak, dayStreak.max()))
+					.setMax(max(updatedStreak, dayStreak.max()))
 			}
 
 			else -> Immutables.createPlayerDayStreak(dayStreak) {
