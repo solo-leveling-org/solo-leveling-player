@@ -1,16 +1,12 @@
 package com.sleepkqq.sololeveling.player.service.player.impl
 
-import com.sleepkqq.sololeveling.config.interceptor.UserContextHolder
 import com.sleepkqq.sololeveling.player.config.properties.PlayerLimitsProperties
 import com.sleepkqq.sololeveling.player.exception.InsufficientStaminaException
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerStamina
-import com.sleepkqq.sololeveling.player.model.entity.player.PlayerStaminaFetcher
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerStaminaView
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerStaminaRepository
 import com.sleepkqq.sololeveling.player.service.player.PlayerStaminaService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
@@ -24,12 +20,6 @@ class PlayerStaminaServiceImpl(
 	private val playerLimitsProperties: PlayerLimitsProperties
 ) : PlayerStaminaService {
 
-	private val log = LoggerFactory.getLogger(javaClass)
-
-	@Transactional(readOnly = true)
-	override fun find(playerId: Long, fetcher: PlayerStaminaFetcher): PlayerStamina? =
-		playerStaminaRepository.find(playerId, fetcher)
-
 	@Transactional
 	override fun update(stamina: PlayerStamina): PlayerStamina =
 		playerStaminaRepository.save(stamina, SaveMode.UPDATE_ONLY)
@@ -41,10 +31,10 @@ class PlayerStaminaServiceImpl(
 			.setLastRegeneratedAt(Instant.now())
 	}
 
-	override fun consumeStamina(stamina: PlayerStamina, amount: Int): PlayerStamina {
+	override fun consume(stamina: PlayerStamina, amount: Int): PlayerStamina {
 		require(amount > 0) { "Stamina amount must be positive" }
 
-		val currentStamina = calculateCurrentStamina(stamina)
+		val currentStamina = calculateCurrent(stamina)
 		if (currentStamina.current() < amount) {
 			throw InsufficientStaminaException(amount, currentStamina.current())
 		}
@@ -63,10 +53,10 @@ class PlayerStaminaServiceImpl(
 		}
 	}
 
-	override fun restoreStamina(stamina: PlayerStamina, amount: Int): PlayerStamina {
+	override fun restore(stamina: PlayerStamina, amount: Int): PlayerStamina {
 		require(amount > 0) { "Restore amount must be positive" }
 
-		val currentStamina = calculateCurrentStamina(stamina)
+		val currentStamina = calculateCurrent(stamina)
 		val staminaConfig = playerLimitsProperties.limits.free.stamina
 		val newStamina = min(currentStamina.current() + amount, staminaConfig.max)
 
@@ -83,7 +73,7 @@ class PlayerStaminaServiceImpl(
 				.setLastRegeneratedAt(Instant.now())
 		}
 
-	override fun calculateCurrentStamina(stamina: PlayerStamina): PlayerStamina {
+	override fun calculateCurrent(stamina: PlayerStamina): PlayerStamina {
 		val staminaConfig = playerLimitsProperties.limits.free.stamina
 		val maxStamina = staminaConfig.max
 
@@ -121,22 +111,10 @@ class PlayerStaminaServiceImpl(
 			stamina.lastRegeneratedAt().plusSeconds(completedSeconds)
 		}
 
-		log.info(
-			"Regenerated stamina for player {}: {} -> {} (+{} in {} seconds)",
-			UserContextHolder.getUserId(), stamina.current(), newStamina, staminaToRecover, secondsElapsed
-		)
-
 		return Immutables.createPlayerStamina(stamina) {
 			it.setCurrent(newStamina)
 				.setRegenerating(newStamina < maxStamina)
 				.setLastRegeneratedAt(newLastRegeneratedAt)
 		}
-	}
-
-	@Transactional
-	override fun getCurrentStamina(playerId: Long): PlayerStaminaView {
-		val stamina = get(playerId)
-		val calculated = calculateCurrentStamina(stamina)
-		return PlayerStaminaView(calculated)
 	}
 }

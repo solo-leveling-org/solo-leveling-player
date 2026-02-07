@@ -10,6 +10,8 @@ import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.AMOUNT_FIELD
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerDayStreakView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerStaminaView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerBalanceTransactionRepository
@@ -46,18 +48,26 @@ class PlayerApi(
 	) {
 		val playerId = UserContextHolder.getUserId()!!
 
-		val activeTasks = playerTaskService.getActiveTasks(playerId)
+		val player = playerService.getWithActiveTasks(playerId)
+
+		val activeTasks = player.tasks
+			.map { PlayerTaskView(it.toEntity()) }
 			.map { protoMapper.map(it) }
 
 		val isFirstTime = activeTasks.isEmpty()
 
-		val stamina = playerStaminaService.getCurrentStamina(playerId)
+		val stamina = PlayerStaminaView(
+			playerStaminaService.calculateCurrent(player.stamina.toEntity())
+		)
 		val staminaConfig = playerLimitsProperties.limits.free.stamina
+
+		val dayStreak = PlayerDayStreakView(player.dayStreak.toEntity())
 
 		val response = GetActiveTasksResponse.newBuilder()
 			.addAllTasks(activeTasks)
 			.setFirstTime(isFirstTime)
 			.setStamina(protoMapper.map(stamina, staminaConfig))
+			.setDayStreak(protoMapper.map(dayStreak))
 			.build()
 
 		responseObserver.onNext(response)

@@ -11,6 +11,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskFetcher
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskProps
 import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.GenerateTasksPlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerCompletionTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
@@ -23,6 +24,7 @@ import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
 import com.sleepkqq.sololeveling.player.service.player.LevelService
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
+import com.sleepkqq.sololeveling.player.service.player.PlayerDayStreakService
 import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.player.PlayerStaminaService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
@@ -54,7 +56,8 @@ class PlayerTaskServiceImpl(
 	private val generateTasksProducer: GenerateTasksProducer,
 	private val playerLimitsProperties: PlayerLimitsProperties,
 	private val playerStaminaService: PlayerStaminaService,
-	private val tasksProperties: TasksProperties
+	private val tasksProperties: TasksProperties,
+	private val playerDayStreakService: PlayerDayStreakService
 ) : PlayerTaskService {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -122,7 +125,7 @@ class PlayerTaskServiceImpl(
 			throw AccessDeniedException()
 		}
 
-		val consumedStamina = playerStaminaService.consumeStamina(
+		val consumedStamina = playerStaminaService.consume(
 			player.stamina()!!,
 			tasksProperties.getSkipCost()
 		)
@@ -145,7 +148,7 @@ class PlayerTaskServiceImpl(
 			throw AccessDeniedException()
 		}
 
-		val consumedStamina = playerStaminaService.consumeStamina(
+		val updatedStamina = playerStaminaService.consume(
 			player.stamina()!!,
 			tasksProperties.getCompleteCost(task.rarity())
 		)
@@ -165,13 +168,16 @@ class PlayerTaskServiceImpl(
 			task.experience()!!
 		)
 
+		val updatedDayStreak = playerDayStreakService.extend(player.dayStreak()!!)
+
 		val updatedPlayer = playerService.update(
 			Immutables.createPlayer(gainedExperiencePlayer) {
 				it.setAgility(player.agility() + task.agility()!!)
 					.setStrength(player.strength() + task.strength()!!)
 					.setIntelligence(player.intelligence() + task.intelligence()!!)
 					.setBalance(updatedBalance)
-					.setStamina(consumedStamina)
+					.setStamina(updatedStamina)
+					.setDayStreak(updatedDayStreak)
 			}
 		)
 
@@ -204,15 +210,8 @@ class PlayerTaskServiceImpl(
 		player: Player?,
 		replaceOrders: Set<Int>
 	) {
-		val resolvedPlayer = player ?: playerService.get(
-			playerId,
-			Fetchers.PLAYER_FETCHER.taskTopics(
-				Fetchers.PLAYER_TASK_TOPIC_FETCHER
-					.taskTopic()
-					.active()
-					.level(Fetchers.LEVEL_FETCHER.level())
-			)
-		)
+		val resolvedPlayer = player
+			?: playerService.getView(playerId, GenerateTasksPlayerView::class).toEntity()
 
 		val activeTasks = getActiveTasks(playerId, Fetchers.PLAYER_TASK_FETCHER.order())
 

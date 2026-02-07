@@ -1,7 +1,7 @@
-export com.sleepkqq.sololeveling.player.model.entity.player.PlayerStamina
+export com.sleepkqq.sololeveling.player.model.entity.player.PlayerDayStreak
   -> package com.sleepkqq.sololeveling.player.model.entity.player.dto
 
-PlayerStaminaView {
+PlayerDayStreakView {
   #allScalars
 
   -createdAt

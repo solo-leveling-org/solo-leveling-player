@@ -7,6 +7,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerFetcher;
 import lombok.RequiredArgsConstructor;
 import org.babyfish.jimmer.View;
 import org.babyfish.jimmer.sql.JSqlClient;
+import org.babyfish.jimmer.sql.ast.Predicate;
 import org.babyfish.jimmer.sql.ast.mutation.AssociatedSaveMode;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
 import org.jetbrains.annotations.Nullable;
@@ -28,10 +29,11 @@ public class PlayerRepository {
   }
 
   @Nullable
-  public <V extends View<Player>> V findView(long id, Class<V> viewType) {
+  public <V extends View<Player>> V findView(long id, Class<V> viewType, Predicate... predicates) {
     var table = PLAYER_TABLE;
     return sql.createQuery(table)
         .where(table.id().eq(id))
+        .where(predicates)
         .select(table.fetch(viewType))
         .fetchFirstOrNull();
   }

@@ -50,3 +50,77 @@ PlayerView {
     }
   }
 }
+
+ResetPlayerView {
+  #allScalars
+
+  level {
+    #allScalars
+  }
+
+  balance {
+    #allScalars
+  }
+
+  taskTopics {
+    #allScalars
+
+    level {
+      #allScalars
+    }
+  }
+
+  stamina {
+    #allScalars
+  }
+
+  dayStreak {
+    #allScalars
+  }
+}
+
+unsafe ActiveTasksPlayerView {
+  tasks {
+    #allScalars
+
+    -version
+
+    task! {
+      #allScalars
+
+      -createdAt
+
+      -updatedAt
+
+      -version
+    }
+  }
+
+  stamina! {
+    #allScalars
+
+    -createdAt
+
+    -version
+  }
+
+  dayStreak! {
+    #allScalars
+
+    -createdAt
+
+    -version
+  }
+}
+
+GenerateTasksPlayerView {
+  taskTopics {
+    taskTopic
+
+    active
+
+    level {
+      level
+    }
+  }
+}

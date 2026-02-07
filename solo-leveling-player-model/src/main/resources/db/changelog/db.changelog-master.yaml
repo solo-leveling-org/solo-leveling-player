@@ -41,8 +41,12 @@ databaseChangeLog:
   - include:
       file: db/changelog/v8/10-12-2025--deprecated-tasks.yml
   - include:
-      file: db/changelog/v8/14-10-2025--transactions-refactoring.yml
+      file: db/changelog/v8/14-12-2025--transactions-refactoring.yml
   - include:
-      file: db/changelog/v8/14-10-2025--player-stamina.yml
+      file: db/changelog/v8/14-12-2025--player-stamina.yml
   - include:
-      file: db/changelog/v8/17-10-2025--cascade-delete.yml
+      file: db/changelog/v8/17-12-2025--cascade-delete.yml
+
+  # v9
+  - include:
+      file: db/changelog/v9/07-02-2026--player-day-streak.yml

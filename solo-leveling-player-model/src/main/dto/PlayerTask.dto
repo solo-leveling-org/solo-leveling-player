@@ -64,5 +64,9 @@ PlayerCompletionTaskView {
         #allScalars
       }
     }
+
+    dayStreak {
+      #allScalars
+    }
   }
 }

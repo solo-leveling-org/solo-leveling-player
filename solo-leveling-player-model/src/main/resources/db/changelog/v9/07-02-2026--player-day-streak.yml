@@ -1,0 +1,98 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-player-day-streak-table
+      author: sleepkqq
+      changes:
+        - createTable:
+            tableName: player_day_streak
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: current
+                  type: integer
+                  constraints:
+                    nullable: false
+                    defaultValue: 0
+              - column:
+                  name: max
+                  type: integer
+                  constraints:
+                    nullable: false
+                    defaultValue: 0
+              - column:
+                  name: player_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: integer
+                  defaultValue: 0
+        - addForeignKeyConstraint:
+            baseTableName: player_day_streak
+            baseColumnNames: player_id
+            constraintName: fk_player_day_streak_player
+            referencedTableName: players
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - sql:
+            sql: >
+              ALTER TABLE player_day_streak
+              ADD CONSTRAINT check_current_streak_non_negative
+              CHECK (current >= 0),
+              ADD CONSTRAINT check_max_streak_non_negative
+              CHECK (max >= 0),
+              ADD CONSTRAINT check_max_streak_gte_current
+              CHECK (max >= current)
+        - createIndex:
+            tableName: player_day_streak
+            indexName: idx_player_day_streak_player_id
+            columns:
+              - column:
+                  name: player_id
+      rollback:
+        - dropTable:
+            tableName: player_day_streak
+
+  - changeSet:
+      id: initialize-day-streak-for-existing-players
+      author: sleepkqq
+      changes:
+        - sql:
+            sql: >
+              INSERT INTO player_day_streak (id, current, max, player_id, created_at, updated_at, version)
+              SELECT
+                gen_random_uuid(),
+                0,
+                0,
+                p.id,
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP,
+                0
+              FROM players p
+              WHERE NOT EXISTS (
+                SELECT 1 FROM player_day_streak pds WHERE pds.player_id = p.id
+              )
+      rollback:
+        - sql:
+            sql: >
+              DELETE FROM player_day_streak
+              WHERE current = 0 AND max = 0

@@ -10,6 +10,7 @@ import com.sleepkqq.sololeveling.player.model.entity.localization.LocalizationIt
 import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerDayStreakView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerStaminaView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
@@ -154,6 +155,8 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		input: PlayerStaminaView,
 		cfg: StaminaConfig
 	): com.sleepkqq.sololeveling.proto.player.PlayerStaminaView
+
+	abstract fun map(input: PlayerDayStreakView): com.sleepkqq.sololeveling.proto.player.PlayerDayStreakView
 
 	protected fun map(
 		lastRegeneratedAt: Instant,
