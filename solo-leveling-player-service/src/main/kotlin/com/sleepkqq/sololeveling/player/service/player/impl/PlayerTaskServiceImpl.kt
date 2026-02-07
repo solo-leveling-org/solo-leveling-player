@@ -10,7 +10,6 @@ import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskFetcher
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskProps
-import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.GenerateTasksPlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerCompletionTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
@@ -139,51 +138,50 @@ class PlayerTaskServiceImpl(
 	@Transactional
 	override fun completeTask(playerId: Long, id: UUID): Pair<PlayerView, PlayerView> {
 		val playerTask = getView(id, PlayerCompletionTaskView::class)
-			.toEntity()
 
-		val player = playerTask.player()!!
-		val task = playerTask.task()!!
+		val player = playerTask.player
+		val task = playerTask.task
 
-		if (player.id() != playerId) {
+		if (player.id != playerId) {
 			throw AccessDeniedException()
 		}
 
 		val updatedStamina = playerStaminaService.consume(
-			player.stamina()!!,
-			tasksProperties.getCompleteCost(task.rarity())
+			player.stamina.toEntity(),
+			tasksProperties.getCompleteCost(task.rarity)
 		)
 
-		setStatus(listOf(playerTask), PlayerTaskStatus.COMPLETED)
+		setStatus(listOf(playerTask.toEntity()), PlayerTaskStatus.COMPLETED)
 
 		val updatedBalance = playerBalanceService.deposit(
-			player.balance()!!,
-			BigDecimal(task.currencyReward()!!),
+			player.balance.toEntity(),
+			BigDecimal(task.currencyReward),
 			PlayerBalanceTransactionCause.TASK_COMPLETION
 		)
 
-		val topics = task.topics().map(TaskTopicItem::topic)
+		val topics = task.topics.map { it.topic }
 		val gainedExperiencePlayer = levelService.gainExperience(
-			player,
+			player.toEntity(),
 			topics,
-			task.experience()!!
+			task.experience
 		)
 
-		val updatedDayStreak = playerDayStreakService.extend(player.dayStreak()!!)
+		val updatedDayStreak = playerDayStreakService.extend(player.dayStreak.toEntity())
 
 		val updatedPlayer = playerService.update(
 			Immutables.createPlayer(gainedExperiencePlayer) {
-				it.setAgility(player.agility() + task.agility()!!)
-					.setStrength(player.strength() + task.strength()!!)
-					.setIntelligence(player.intelligence() + task.intelligence()!!)
+				it.setAgility(player.agility + task.agility)
+					.setStrength(player.strength + task.strength)
+					.setIntelligence(player.intelligence + task.intelligence)
 					.setBalance(updatedBalance)
 					.setStamina(updatedStamina)
 					.setDayStreak(updatedDayStreak)
 			}
 		)
 
-		generateTasks(playerId, updatedPlayer, setOf(playerTask.order()))
+		generateTasks(playerId, updatedPlayer, setOf(playerTask.order))
 
-		return filterPlayerTopics(player, topics) to filterPlayerTopics(updatedPlayer, topics)
+		return filterPlayerTopics(player.toEntity(), topics) to filterPlayerTopics(updatedPlayer, topics)
 	}
 
 	private fun filterPlayerTopics(player: Player, topics: Collection<TaskTopic>): PlayerView =

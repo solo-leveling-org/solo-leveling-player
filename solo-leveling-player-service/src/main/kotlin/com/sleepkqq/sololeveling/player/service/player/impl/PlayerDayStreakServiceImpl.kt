@@ -22,7 +22,7 @@ class PlayerDayStreakServiceImpl : PlayerDayStreakService {
 
 		return when (daysDifference) {
 			0L -> if (dayStreak.current() == 0) {
-				Immutables.createPlayerDayStreak {
+				Immutables.createPlayerDayStreak(dayStreak) {
 					it.setCurrent(1)
 						.setMax(1)
 				}
