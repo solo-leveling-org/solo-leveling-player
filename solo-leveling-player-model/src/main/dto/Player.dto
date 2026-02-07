@@ -93,6 +93,18 @@ unsafe ActiveTasksPlayerView {
       -updatedAt
 
       -version
+
+      title! {
+        #allScalars
+      }
+
+      description! {
+        #allScalars
+      }
+
+      topics {
+        #allScalars
+      }
     }
   }
 
