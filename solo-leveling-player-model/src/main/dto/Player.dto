@@ -80,34 +80,6 @@ ResetPlayerView {
 }
 
 unsafe ActiveTasksPlayerView {
-  tasks {
-    #allScalars
-
-    -version
-
-    task! {
-      #allScalars
-
-      -createdAt
-
-      -updatedAt
-
-      -version
-
-      title! {
-        #allScalars
-      }
-
-      description! {
-        #allScalars
-      }
-
-      topics {
-        #allScalars
-      }
-    }
-  }
-
   stamina! {
     #allScalars
 

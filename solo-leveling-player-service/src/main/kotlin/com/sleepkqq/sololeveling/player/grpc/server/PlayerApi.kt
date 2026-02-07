@@ -8,6 +8,7 @@ import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PL
 import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_TASKS
 import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.AMOUNT_FIELD
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.ActiveTasksPlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerDayStreakView
@@ -48,11 +49,10 @@ class PlayerApi(
 	) {
 		val playerId = UserContextHolder.getUserId()!!
 
-		val player = playerService.getWithActiveTasks(playerId)
+		val player = playerService.getView(playerId, ActiveTasksPlayerView::class)
 
-		val activeTasks = player.tasks
-			.map { PlayerTaskView(it.toEntity()) }
-			.map { protoMapper.map(it) }
+		val activeTasks = playerTaskService.getActiveTasks(playerId)
+			.map(protoMapper::map)
 
 		val isFirstTime = activeTasks.isEmpty()
 

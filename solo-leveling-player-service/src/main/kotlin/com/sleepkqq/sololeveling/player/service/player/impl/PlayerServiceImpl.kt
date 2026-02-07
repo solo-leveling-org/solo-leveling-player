@@ -1,23 +1,14 @@
 package com.sleepkqq.sololeveling.player.service.player.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
-import com.sleepkqq.sololeveling.player.model.entity.TableExes.PLAYER_TABLE_EX
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerFetcher
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.ActiveTasksPlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.ResetPlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.LevelType
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerRepository
-import com.sleepkqq.sololeveling.player.service.player.LevelService
-import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
-import com.sleepkqq.sololeveling.player.service.player.PlayerDayStreakService
-import com.sleepkqq.sololeveling.player.service.player.PlayerService
-import com.sleepkqq.sololeveling.player.service.player.PlayerStaminaService
-import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
+import com.sleepkqq.sololeveling.player.service.player.*
 import org.babyfish.jimmer.View
-import org.babyfish.jimmer.sql.JoinType
 import org.babyfish.jimmer.sql.ast.mutation.AssociatedSaveMode
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Service
@@ -41,13 +32,6 @@ class PlayerServiceImpl(
 	@Transactional(readOnly = true)
 	override fun <V : View<Player>> findView(id: Long, viewType: KClass<V>): V? =
 		playerRepository.findView(id, viewType.java)
-
-	@Transactional(readOnly = true)
-	override fun findWithActiveTasks(id: Long): ActiveTasksPlayerView? {
-		val isActiveTasks = PLAYER_TABLE_EX.tasks(JoinType.LEFT)
-			.status().eq(PlayerTaskStatus.IN_PROGRESS)
-		return playerRepository.findView(id, ActiveTasksPlayerView::class.java, isActiveTasks)
-	}
 
 	@Transactional
 	override fun insert(player: Player): Player =

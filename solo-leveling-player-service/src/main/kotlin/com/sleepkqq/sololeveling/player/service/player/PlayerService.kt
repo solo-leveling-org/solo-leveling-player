@@ -1,10 +1,9 @@
 package com.sleepkqq.sololeveling.player.service.player
 
+import com.sleepkqq.sololeveling.player.exception.ModelNotFoundException
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerFetcher
-import com.sleepkqq.sololeveling.player.exception.ModelNotFoundException
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.ActiveTasksPlayerView
 import org.babyfish.jimmer.View
 import kotlin.reflect.KClass
 
@@ -15,9 +14,6 @@ interface PlayerService {
 		find(id, fetcher) ?: throw ModelNotFoundException(Player::class, id)
 	fun <V : View<Player>> findView(id: Long, viewType: KClass<V>): V?
 	fun <V : View<Player>> getView(id: Long, viewType: KClass<V>): V = findView(id, viewType)
-		?: throw ModelNotFoundException(Player::class, id)
-	fun findWithActiveTasks(id: Long): ActiveTasksPlayerView?
-	fun getWithActiveTasks(id: Long): ActiveTasksPlayerView = findWithActiveTasks(id)
 		?: throw ModelNotFoundException(Player::class, id)
 
 	fun insert(player: Player): Player
