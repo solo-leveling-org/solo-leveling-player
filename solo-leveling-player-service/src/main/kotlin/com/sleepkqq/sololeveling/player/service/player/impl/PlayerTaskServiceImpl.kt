@@ -10,10 +10,11 @@ import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskFetcher
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskProps
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.CompletePlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.GenerateTasksPlayerView
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerCompletionTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.SkipPlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
@@ -109,35 +110,28 @@ class PlayerTaskServiceImpl(
 
 	@Transactional
 	override fun skipTask(playerId: Long, id: UUID) {
-		val playerTask = get(
-			id,
-			Fetchers.PLAYER_TASK_FETCHER.allScalarFields()
-				.player(
-					Fetchers.PLAYER_FETCHER
-						.stamina(Fetchers.PLAYER_STAMINA_FETCHER.allScalarFields())
-				)
-		)
+		val playerTask = getView(id, SkipPlayerTaskView::class)
 
-		val player = playerTask.player()!!
+		val player = playerTask.player
 
-		if (player.id() != playerId) {
+		if (player.id != playerId) {
 			throw AccessDeniedException()
 		}
 
 		val consumedStamina = playerStaminaService.consume(
-			player.stamina()!!,
+			player.stamina.toEntity(),
 			tasksProperties.getSkipCost()
 		)
 		playerStaminaService.update(consumedStamina)
 
-		setStatus(listOf(playerTask), PlayerTaskStatus.SKIPPED)
+		setStatus(listOf(playerTask.toEntity()), PlayerTaskStatus.SKIPPED)
 
-		generateTasks(playerId, replaceOrders = setOf(playerTask.order()))
+		generateTasks(playerId, replaceOrders = setOf(playerTask.order))
 	}
 
 	@Transactional
 	override fun completeTask(playerId: Long, id: UUID): Pair<PlayerView, PlayerView> {
-		val playerTask = getView(id, PlayerCompletionTaskView::class)
+		val playerTask = getView(id, CompletePlayerTaskView::class)
 
 		val player = playerTask.player
 		val task = playerTask.task

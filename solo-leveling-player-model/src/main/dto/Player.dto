@@ -51,30 +51,30 @@ PlayerView {
   }
 }
 
-ResetPlayerView {
+unsafe ResetPlayerView {
   #allScalars
 
-  level {
+  level! {
     #allScalars
   }
 
-  balance {
+  balance! {
     #allScalars
   }
 
   taskTopics {
     #allScalars
 
-    level {
+    level! {
       #allScalars
     }
   }
 
-  stamina {
+  stamina! {
     #allScalars
   }
 
-  dayStreak {
+  dayStreak! {
     #allScalars
   }
 }

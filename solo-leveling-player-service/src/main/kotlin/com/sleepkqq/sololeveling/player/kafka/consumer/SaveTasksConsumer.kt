@@ -46,8 +46,8 @@ class SaveTasksConsumer(
 	override fun processEvent(event: SaveTasksEvent) {
 		val tasks = event.tasks.map(avroMapper::map)
 			.onEach {
-				it.title!!.id = UUID.randomUUID()
-				it.description!!.id = UUID.randomUUID()
+				it.title.id = UUID.randomUUID()
+				it.description.id = UUID.randomUUID()
 
 				if (it.currencyReward == null || it.currencyReward == 0 || it.experience == null || it.experience == 0) {
 					val experience = tasksProperties.getExperience(it.rarity)

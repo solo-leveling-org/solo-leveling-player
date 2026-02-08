@@ -56,40 +56,40 @@ class PlayerServiceImpl(
 
 	@Transactional
 	override fun reset(id: Long) {
-		val player = getView(id, ResetPlayerView::class).toEntity()
+		val player = getView(id, ResetPlayerView::class)
 
-		val resetPlayer = Immutables.createPlayer(player) {
+		val resetPlayer = Immutables.createPlayer(player.toEntity()) {
 			it.setAgility(0)
 				.setStrength(0)
 				.setIntelligence(0)
 				.setLevel(Immutables.createLevel(levelService.initialize(LevelType.PLAYER)) { l ->
-					val level = player.level()!!
-					l.setId(level.id())
-						.setVersion(level.version())
+					val level = player.level
+					l.setId(level.id)
+						.setVersion(level.version)
 				})
 				.setBalance(Immutables.createPlayerBalance(playerBalanceService.initialize()) { b ->
-					val balance = player.balance()!!
-					b.setId(balance.id())
-						.setVersion(balance.version())
+					val balance = player.balance
+					b.setId(balance.id)
+						.setVersion(balance.version)
 						.setTransactions(listOf())
 				})
 				.setTaskTopics(
-					player.taskTopics().map { topic ->
-						Immutables.createPlayerTaskTopic(topic) { t ->
-							val level = t.level()!!
+					player.taskTopics.map { topic ->
+						Immutables.createPlayerTaskTopic(topic.toEntity()) { t ->
+							val level = topic.level
 
 							t.setActive(false)
 								.setLevel(Immutables.createLevel(levelService.initialize(LevelType.TASK_TOPIC)) { l ->
-									l.setId(level.id())
-										.setVersion(level.version())
+									l.setId(level.id)
+										.setVersion(level.version)
 								})
 						}
 					}
 				)
 				.setStamina(Immutables.createPlayerStamina(playerStaminaService.initialize()) { s ->
-					val stamina = player.stamina()!!
-					s.setId(stamina.id())
-						.setVersion(stamina.version())
+					val stamina = player.stamina
+					s.setId(stamina.id)
+						.setVersion(stamina.version)
 				})
 				.setTasks(listOf())
 		}
