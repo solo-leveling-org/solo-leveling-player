@@ -4,8 +4,8 @@ import com.google.protobuf.Empty
 import com.sleepkqq.sololeveling.config.interceptor.UserContextHolder
 import com.sleepkqq.sololeveling.jimmer.enums.EnumLocalizer
 import com.sleepkqq.sololeveling.player.config.properties.PlayerLimitsProperties
-import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_BALANCE_TRANSACTIONS
-import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_TASKS
+import com.sleepkqq.sololeveling.player.lozalization.LocalizationCode.TABLES_PLAYER_BALANCE_TRANSACTIONS
+import com.sleepkqq.sololeveling.player.lozalization.LocalizationCode.TABLES_PLAYER_TASKS
 import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.AMOUNT_FIELD
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.ActiveTasksPlayerView
@@ -179,7 +179,7 @@ class PlayerApi(
 			transactionsPage,
 			request.paging.page,
 			enumLocalizer.localize(
-				TABLES_PLAYER_BALANCE_TRANSACTIONS,
+				TABLES_PLAYER_BALANCE_TRANSACTIONS.code,
 				PlayerBalanceTransactionRepository.FIELD_ENUM_TYPES
 			),
 			setOf(AMOUNT_FIELD)
@@ -203,7 +203,7 @@ class PlayerApi(
 			tasksPage,
 			request.paging.page,
 			enumLocalizer.localize(
-				TABLES_PLAYER_TASKS,
+				TABLES_PLAYER_TASKS.code,
 				PlayerTaskRepository.FIELD_ENUM_TYPES,
 				PlayerTaskRepository.ENUM_TYPE_PREDICATES
 			)

@@ -6,7 +6,8 @@ import com.sleepkqq.sololeveling.avro.notification.NotificationSource
 import com.sleepkqq.sololeveling.avro.notification.NotificationType
 import com.sleepkqq.sololeveling.avro.notification.SendNotificationEvent
 import com.sleepkqq.sololeveling.player.kafka.producer.SendNotificationProducer
-import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TASKS_GENERATION_SUCCESS
+import com.sleepkqq.sololeveling.player.lozalization.LocalizationCode
+import com.sleepkqq.sololeveling.player.lozalization.LocalizationCode.TASKS_GENERATION_SUCCESS
 import com.sleepkqq.sololeveling.player.service.i18n.I18nService
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -18,8 +19,10 @@ class NotificationService(
 ) {
 
 	fun send(command: NotificationCommand) {
-		val ctx = command.toContext(i18nService)
-		val notification = Notification(ctx.message, ctx.type, ctx.source, ctx.visible)
+		val ctx = command.toContext()
+
+		val message = ctx.localizationCode?.let { i18nService.getMessage(it) }
+		val notification = Notification(message, ctx.type, ctx.source, ctx.visible)
 		val event = SendNotificationEvent(ctx.txId, ctx.userId, ctx.priority, notification)
 
 		sendNotificationProducer.send(event)
@@ -29,7 +32,7 @@ class NotificationService(
 		val txId: String,
 		val userId: Long,
 		val source: NotificationSource,
-		val message: String? = null,
+		val localizationCode: LocalizationCode? = null,
 		val visible: Boolean = false,
 		val type: NotificationType = NotificationType.INFO,
 		val priority: NotificationPriority = NotificationPriority.LOW
@@ -39,23 +42,23 @@ class NotificationService(
 		val userId: Long
 		val txId: String get() = UUID.randomUUID().toString()
 
-		fun toContext(i18n: I18nService): NotificationCtx
+		fun toContext(): NotificationCtx
 
 		data class SaveTasks(
 			override val userId: Long,
 			override val txId: String = UUID.randomUUID().toString()
 		) : NotificationCommand {
-			override fun toContext(i18n: I18nService) = NotificationCtx(
+			override fun toContext() = NotificationCtx(
 				txId = txId,
 				userId = userId,
 				source = NotificationSource.TASKS,
-				message = i18n.getMessage(TASKS_GENERATION_SUCCESS),
+				localizationCode = TASKS_GENERATION_SUCCESS,
 				visible = true
 			)
 		}
 
 		data class SilentTasksUpdate(override val userId: Long) : NotificationCommand {
-			override fun toContext(i18n: I18nService) = NotificationCtx(
+			override fun toContext() = NotificationCtx(
 				txId = txId,
 				userId = userId,
 				source = NotificationSource.TASKS
@@ -63,7 +66,7 @@ class NotificationService(
 		}
 
 		data class UpdateLocale(override val userId: Long) : NotificationCommand {
-			override fun toContext(i18n: I18nService) = NotificationCtx(
+			override fun toContext() = NotificationCtx(
 				txId = txId,
 				userId = userId,
 				source = NotificationSource.LOCALE
