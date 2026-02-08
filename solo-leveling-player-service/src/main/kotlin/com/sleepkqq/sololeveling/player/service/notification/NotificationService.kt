@@ -18,59 +18,40 @@ class NotificationService(
 ) {
 
 	fun send(command: NotificationCommand) {
-		val notificationData = when (command) {
+		val ctx = when (command) {
 			is NotificationCommand.SaveTasks -> createTasksSavedNotification(command.userId, command.txId)
 			is NotificationCommand.SilentTasksUpdate -> createTaskUpdatedNotification(command.userId)
 			is NotificationCommand.UpdateLocale -> createLocaleUpdatedNotification(command.userId)
 		}
 
-		sendNotificationProducer.send(notificationData)
+		val notification = Notification(ctx.message, ctx.type, ctx.source, ctx.visible)
+		val event = SendNotificationEvent(ctx.txId, ctx.userId, ctx.priority, notification)
+
+		sendNotificationProducer.send(event)
 	}
 
-	private fun createTasksSavedNotification(userId: Long, txId: String): NotificationData {
-		val message = i18nService.getMessage(TASKS_GENERATION_SUCCESS)
-
-		val context = NotificationCtx(
+	private fun createTasksSavedNotification(userId: Long, txId: String): NotificationCtx =
+		NotificationCtx(
 			txId = txId,
 			userId = userId,
 			source = NotificationSource.TASKS,
-			message = message,
+			message = i18nService.getMessage(TASKS_GENERATION_SUCCESS),
 			visible = true,
-			notificationCause = "tasks saved"
 		)
 
-		return createBaseNotification(context)
-	}
-
-	private fun createTaskUpdatedNotification(userId: Long): NotificationData {
-		val context = NotificationCtx(
+	private fun createTaskUpdatedNotification(userId: Long): NotificationCtx =
+		NotificationCtx(
 			txId = UUID.randomUUID().toString(),
 			userId = userId,
 			source = NotificationSource.TASKS,
-			notificationCause = "task updated"
 		)
 
-		return createBaseNotification(context)
-	}
-
-	private fun createLocaleUpdatedNotification(userId: Long): NotificationData {
-		val context = NotificationCtx(
+	private fun createLocaleUpdatedNotification(userId: Long): NotificationCtx =
+		NotificationCtx(
 			txId = UUID.randomUUID().toString(),
 			userId = userId,
 			source = NotificationSource.LOCALE,
-			notificationCause = "locale updated"
 		)
-
-		return createBaseNotification(context)
-	}
-
-	private fun createBaseNotification(context: NotificationCtx): NotificationData {
-		val notification = Notification(context.message, context.type, context.source, context.visible)
-
-		val event = SendNotificationEvent(context.txId, context.userId, context.priority, notification)
-
-		return NotificationData(event, context.notificationCause)
-	}
 
 	private data class NotificationCtx(
 		val txId: String,
@@ -78,13 +59,7 @@ class NotificationService(
 		val source: NotificationSource,
 		val message: String? = null,
 		val visible: Boolean = false,
-		val notificationCause: String,
 		val type: NotificationType = NotificationType.INFO,
 		val priority: NotificationPriority = NotificationPriority.LOW
-	)
-
-	data class NotificationData(
-		val event: SendNotificationEvent,
-		val message: String
 	)
 }
