@@ -18,42 +18,14 @@ class NotificationService(
 ) {
 
 	fun send(command: NotificationCommand) {
-		val ctx = when (command) {
-			is NotificationCommand.SaveTasks -> createTasksSavedNotification(command.userId, command.txId)
-			is NotificationCommand.SilentTasksUpdate -> createTaskUpdatedNotification(command.userId)
-			is NotificationCommand.UpdateLocale -> createLocaleUpdatedNotification(command.userId)
-		}
-
+		val ctx = command.toContext(i18nService)
 		val notification = Notification(ctx.message, ctx.type, ctx.source, ctx.visible)
 		val event = SendNotificationEvent(ctx.txId, ctx.userId, ctx.priority, notification)
 
 		sendNotificationProducer.send(event)
 	}
 
-	private fun createTasksSavedNotification(userId: Long, txId: String): NotificationCtx =
-		NotificationCtx(
-			txId = txId,
-			userId = userId,
-			source = NotificationSource.TASKS,
-			message = i18nService.getMessage(TASKS_GENERATION_SUCCESS),
-			visible = true,
-		)
-
-	private fun createTaskUpdatedNotification(userId: Long): NotificationCtx =
-		NotificationCtx(
-			txId = UUID.randomUUID().toString(),
-			userId = userId,
-			source = NotificationSource.TASKS,
-		)
-
-	private fun createLocaleUpdatedNotification(userId: Long): NotificationCtx =
-		NotificationCtx(
-			txId = UUID.randomUUID().toString(),
-			userId = userId,
-			source = NotificationSource.LOCALE,
-		)
-
-	private data class NotificationCtx(
+	data class NotificationCtx(
 		val txId: String,
 		val userId: Long,
 		val source: NotificationSource,
@@ -62,4 +34,40 @@ class NotificationService(
 		val type: NotificationType = NotificationType.INFO,
 		val priority: NotificationPriority = NotificationPriority.LOW
 	)
+
+	sealed interface NotificationCommand {
+		val userId: Long
+		val txId: String get() = UUID.randomUUID().toString()
+
+		fun toContext(i18n: I18nService): NotificationCtx
+
+		data class SaveTasks(
+			override val userId: Long,
+			override val txId: String = UUID.randomUUID().toString()
+		) : NotificationCommand {
+			override fun toContext(i18n: I18nService) = NotificationCtx(
+				txId = txId,
+				userId = userId,
+				source = NotificationSource.TASKS,
+				message = i18n.getMessage(TASKS_GENERATION_SUCCESS),
+				visible = true
+			)
+		}
+
+		data class SilentTasksUpdate(override val userId: Long) : NotificationCommand {
+			override fun toContext(i18n: I18nService) = NotificationCtx(
+				txId = txId,
+				userId = userId,
+				source = NotificationSource.TASKS
+			)
+		}
+
+		data class UpdateLocale(override val userId: Long) : NotificationCommand {
+			override fun toContext(i18n: I18nService) = NotificationCtx(
+				txId = txId,
+				userId = userId,
+				source = NotificationSource.LOCALE
+			)
+		}
+	}
 }

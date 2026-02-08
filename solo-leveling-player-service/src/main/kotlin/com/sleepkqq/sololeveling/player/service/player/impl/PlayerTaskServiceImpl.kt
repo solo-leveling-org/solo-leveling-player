@@ -20,8 +20,9 @@ import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStat
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
-import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
+import com.sleepkqq.sololeveling.player.service.notification.NotificationService.NotificationCommand.SaveTasks
+import com.sleepkqq.sololeveling.player.service.notification.NotificationService.NotificationCommand.SilentTasksUpdate
 import com.sleepkqq.sololeveling.player.service.player.LevelService
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerDayStreakService
@@ -175,7 +176,10 @@ class PlayerTaskServiceImpl(
 
 		generateTasks(playerId, updatedPlayer, setOf(playerTask.order))
 
-		return filterPlayerTopics(player.toEntity(), topics) to filterPlayerTopics(updatedPlayer, topics)
+		return filterPlayerTopics(player.toEntity(), topics) to filterPlayerTopics(
+			updatedPlayer,
+			topics
+		)
 	}
 
 	private fun filterPlayerTopics(player: Player, topics: Collection<TaskTopic>): PlayerView =
@@ -247,9 +251,9 @@ class PlayerTaskServiceImpl(
 		insertAll(playerTasksToInsert)
 
 		if (playerTasksToInsert.all { it.status() == PlayerTaskStatus.IN_PROGRESS }) {
-			notificationService.send(NotificationCommand.SaveTasks(playerId))
+			notificationService.send(SaveTasks(playerId))
 		} else {
-			notificationService.send(NotificationCommand.SilentTasksUpdate(playerId))
+			notificationService.send(SilentTasksUpdate(playerId))
 		}
 
 		val tasksToGenerate = playerTasksToInsert.filter { it.status() == PlayerTaskStatus.PREPARING }

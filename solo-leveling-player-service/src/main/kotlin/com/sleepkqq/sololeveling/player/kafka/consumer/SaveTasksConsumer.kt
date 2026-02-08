@@ -7,8 +7,8 @@ import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent
 import com.sleepkqq.sololeveling.player.config.properties.TasksProperties
 import com.sleepkqq.sololeveling.player.mapper.AvroMapper
 import com.sleepkqq.sololeveling.player.model.entity.task.dto.SaveTaskInput
-import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
+import com.sleepkqq.sololeveling.player.service.notification.NotificationService.NotificationCommand.SaveTasks
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.task.TaskService
 import org.slf4j.LoggerFactory
@@ -74,6 +74,6 @@ class SaveTasksConsumer(
 			playerTaskService.inProgressTasks(playerTasks)
 		}
 
-		notificationService.send(NotificationCommand.SaveTasks(event.playerId, event.txId))
+		notificationService.send(SaveTasks(event.playerId, event.txId))
 	}
 }

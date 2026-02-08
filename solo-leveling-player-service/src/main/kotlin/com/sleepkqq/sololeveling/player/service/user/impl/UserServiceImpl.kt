@@ -9,8 +9,8 @@ import com.sleepkqq.sololeveling.player.model.entity.user.UserFetcher
 import com.sleepkqq.sololeveling.player.model.entity.user.UsersStats
 import com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole
 import com.sleepkqq.sololeveling.player.model.repository.user.UserRepository
-import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
+import com.sleepkqq.sololeveling.player.service.notification.NotificationService.NotificationCommand.UpdateLocale
 import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.user.UserService
 import com.sleepkqq.sololeveling.proto.player.RequestPaging
@@ -71,7 +71,7 @@ class UserServiceImpl(
 	override fun updateLocale(id: Long, locale: Locale) {
 		userRepository.updateLocale(id, locale)
 
-		notificationService.send(NotificationCommand.UpdateLocale(id))
+		notificationService.send(UpdateLocale(id))
 	}
 
 	override fun register(user: User): User = Immutables.createUser(user) {
