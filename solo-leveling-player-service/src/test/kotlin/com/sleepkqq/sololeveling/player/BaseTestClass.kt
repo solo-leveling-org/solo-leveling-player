@@ -22,9 +22,9 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.transaction.annotation.Transactional
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.Network
-import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.kafka.ConfluentKafkaContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 import java.math.BigDecimal
 import java.util.UUID
 
@@ -44,7 +44,7 @@ abstract class BaseTestClass {
 	companion object {
 		private val network = Network.newNetwork()
 
-		private val postgresContainer = PostgreSQLContainer("postgres:16.2")
+		private val postgresContainer = PostgreSQLContainer("postgres:18.1")
 			.apply {
 				withDatabaseName("sololeveling_test")
 				withUsername("test")

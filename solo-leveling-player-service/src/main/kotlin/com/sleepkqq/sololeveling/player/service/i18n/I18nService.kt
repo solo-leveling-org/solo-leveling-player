@@ -10,7 +10,7 @@ class I18nService(
 	private val messageSource: MessageSource
 ) {
 
-	fun getMessage(code: LocalizationCode, vararg args: Any?): String = messageSource.getMessage(
+	fun getMessage(code: LocalizationCode, vararg args: Any): String = messageSource.getMessage(
 		code.code,
 		if (args.isEmpty()) null else args,
 		LocaleContextHolder.getLocale()
