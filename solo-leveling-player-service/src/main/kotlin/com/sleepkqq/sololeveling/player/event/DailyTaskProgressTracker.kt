@@ -10,7 +10,6 @@ import com.sleepkqq.sololeveling.player.model.entity.player.sealed.SpendCurrency
 import com.sleepkqq.sololeveling.player.service.player.PlayerDailyTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.event.TransactionPhase
 import org.springframework.transaction.event.TransactionalEventListener
 import java.math.BigDecimal
@@ -22,7 +21,6 @@ class DailyTaskProgressTracker(
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	@Transactional
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	fun listen(event: DailyTaskProgressEvent) {
 		val dailyTask = playerDailyTaskService.find(event.playerId, event.type)
