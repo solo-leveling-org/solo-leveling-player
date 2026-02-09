@@ -1,0 +1,6 @@
+export com.sleepkqq.sololeveling.player.model.entity.player.PlayerDailyTask
+  -> package com.sleepkqq.sololeveling.player.model.entity.player.dto
+
+ReplacePlayerDailyTaskView {
+  #allScalars
+}

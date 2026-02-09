@@ -50,3 +50,5 @@ databaseChangeLog:
   # v9
   - include:
       file: db/changelog/v9/07-02-2026--player-day-streak.yml
+  - include:
+      file: db/changelog/v9/09-02-2026--player-daily-tasks.yml

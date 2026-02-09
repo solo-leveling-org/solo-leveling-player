@@ -4,17 +4,12 @@ import com.sleepkqq.sololeveling.player.config.properties.PlayerLimitsProperties
 import com.sleepkqq.sololeveling.player.config.properties.TasksProperties
 import com.sleepkqq.sololeveling.player.exception.AccessDeniedException
 import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
-import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskFetcher
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTaskProps
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.CompletePlayerTaskView
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.GenerateTasksPlayerView
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.SkipPlayerTaskView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.*
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
@@ -23,12 +18,7 @@ import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskReposi
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService.NotificationCommand.SaveTasks
 import com.sleepkqq.sololeveling.player.service.notification.NotificationService.NotificationCommand.SilentTasksUpdate
-import com.sleepkqq.sololeveling.player.service.player.LevelService
-import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
-import com.sleepkqq.sololeveling.player.service.player.PlayerDayStreakService
-import com.sleepkqq.sololeveling.player.service.player.PlayerService
-import com.sleepkqq.sololeveling.player.service.player.PlayerStaminaService
-import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
+import com.sleepkqq.sololeveling.player.service.player.*
 import com.sleepkqq.sololeveling.player.service.task.TaskService
 import com.sleepkqq.sololeveling.proto.player.RequestPaging
 import com.sleepkqq.sololeveling.proto.player.RequestQueryOptions
@@ -36,13 +26,12 @@ import org.babyfish.jimmer.ImmutableObjects
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
-import org.babyfish.jimmer.sql.fetcher.Fetcher
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 import kotlin.reflect.KClass
 
 @Service
@@ -85,20 +74,12 @@ class PlayerTaskServiceImpl(
 	}
 
 	@Transactional(readOnly = true)
-	override fun getActiveTasks(playerId: Long): List<PlayerTaskView> =
-		playerTaskRepository.findByPlayerIdAndStatusIn(
-			playerId,
-			ACTIVE_TASKS_STATUSES,
-			PlayerTaskView::class.java
-		)
+	override fun <V : View<PlayerTask>> getActiveTasks(playerId: Long, viewType: KClass<V>): List<V> =
+		playerTaskRepository.findByPlayerIdAndStatusIn(playerId, ACTIVE_TASKS_STATUSES, viewType.java)
 
 	@Transactional(readOnly = true)
 	override fun getPreparingTasksForRetry(): List<PlayerTask> =
 		playerTaskRepository.findPreparingTasksForRetry()
-
-	@Transactional(readOnly = true)
-	override fun getActiveTasks(playerId: Long, fetcher: Fetcher<PlayerTask>): List<PlayerTask> =
-		playerTaskRepository.findByPlayerIdAndStatusIn(playerId, ACTIVE_TASKS_STATUSES, fetcher)
 
 	override fun initialize(playerId: Long, order: Int, task: Task): PlayerTask =
 		Immutables.createPlayerTask {
@@ -209,10 +190,10 @@ class PlayerTaskServiceImpl(
 		val resolvedPlayer = player
 			?: playerService.getView(playerId, GenerateTasksPlayerView::class).toEntity()
 
-		val activeTasks = getActiveTasks(playerId, Fetchers.PLAYER_TASK_FETCHER.order())
+		val activeTasks = getActiveTasks(playerId, GeneratePlayerTaskView::class)
 
-		activeTasks.firstOrNull { it.order() in replaceOrders }
-			?.let { throw IllegalArgumentException("Incorrect replacement order ${it.order()}") }
+		activeTasks.firstOrNull { it.order in replaceOrders }
+			?.let { throw IllegalArgumentException("Incorrect replacement order ${it.order}") }
 
 		val maxTasks = playerLimitsProperties.limits.free.tasks.max
 		val additionalTasksNeeded = maxTasks - activeTasks.size
@@ -220,12 +201,12 @@ class PlayerTaskServiceImpl(
 		if (additionalTasksNeeded <= 0) {
 			log.warn(
 				"Invalid state: activeTasksCount={} exceeds maxTasks={} for playerId={}, skipping generation",
-				activeTasks, maxTasks, playerId
+				activeTasks.size, maxTasks, playerId
 			)
 			return
 		}
 
-		val usedOrders = activeTasks.map { it.order() }.toSet()
+		val usedOrders = activeTasks.map { it.order }.toSet()
 
 		val additionalOrders = (0 until maxTasks)
 			.filterNot { it in usedOrders }

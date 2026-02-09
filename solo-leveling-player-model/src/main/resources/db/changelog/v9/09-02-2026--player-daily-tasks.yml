@@ -1,0 +1,85 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-player-daily-tasks-table
+      author: sleepkqq
+      changes:
+        - createTable:
+            tableName: player_daily_tasks
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: progress
+                  type: decimal(19,2)
+                  constraints:
+                    nullable: false
+                  defaultValue: 0
+              - column:
+                  name: spec
+                  type: jsonb
+                  constraints:
+                    nullable: false
+                  remarks: "Daily task specification with type and parameters"
+              - column:
+                  name: is_completed
+                  type: boolean
+                  constraints:
+                    nullable: false
+                  defaultValue: false
+              - column:
+                  name: player_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: integer
+                  defaultValue: 0
+
+        - addForeignKeyConstraint:
+            baseTableName: player_daily_tasks
+            baseColumnNames: player_id
+            constraintName: fk_player_daily_task_player
+            referencedTableName: players
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+        - sql:
+            sql: >
+              ALTER TABLE player_daily_tasks
+              ADD CONSTRAINT check_progress_non_negative
+              CHECK (progress >= 0)
+
+        - createIndex:
+            tableName: player_daily_tasks
+            indexName: idx_player_daily_tasks_player_id
+            columns:
+              - column:
+                  name: player_id
+
+        - createIndex:
+            tableName: player_daily_tasks
+            indexName: idx_player_daily_tasks_completed
+            columns:
+              - column:
+                  name: is_completed
+
+      rollback:
+        - dropTable:
+            tableName: player_daily_tasks

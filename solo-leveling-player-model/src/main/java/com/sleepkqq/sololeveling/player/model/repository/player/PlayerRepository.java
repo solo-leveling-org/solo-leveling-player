@@ -20,19 +20,19 @@ public class PlayerRepository {
 
   @Nullable
   public Player findNullable(long id, PlayerFetcher fetcher) {
-    var table = PLAYER_TABLE;
-    return sql.createQuery(table)
-        .where(table.id().eq(id))
-        .select(table.fetch(fetcher))
+    var p = PLAYER_TABLE;
+    return sql.createQuery(p)
+        .where(p.id().eq(id))
+        .select(p.fetch(fetcher))
         .fetchFirstOrNull();
   }
 
   @Nullable
   public <V extends View<Player>> V findView(long id, Class<V> viewType) {
-    var table = PLAYER_TABLE;
-    return sql.createQuery(table)
-        .where(table.id().eq(id))
-        .select(table.fetch(viewType))
+    var p = PLAYER_TABLE;
+    return sql.createQuery(p)
+        .where(p.id().eq(id))
+        .select(p.fetch(viewType))
         .fetchFirstOrNull();
   }
 

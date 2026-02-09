@@ -51,7 +51,7 @@ class PlayerApi(
 
 		val player = playerService.getView(playerId, ActiveTasksPlayerView::class)
 
-		val activeTasks = playerTaskService.getActiveTasks(playerId)
+		val activeTasks = playerTaskService.getActiveTasks(playerId, PlayerTaskView::class)
 			.map(protoMapper::map)
 
 		val isFirstTime = activeTasks.isEmpty()

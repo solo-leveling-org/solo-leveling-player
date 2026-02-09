@@ -1,18 +1,17 @@
 package com.sleepkqq.sololeveling.player.schedule
 
-import com.sleepkqq.sololeveling.player.config.properties.PreparingTasksRetrySchedulerProperties
 import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import org.slf4j.LoggerFactory
-import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@EnableConfigurationProperties(PreparingTasksRetrySchedulerProperties::class)
 class PreparingTasksRetryScheduler(
-	private val preparingTasksRetrySchedulerProperties: PreparingTasksRetrySchedulerProperties,
+	@Value($$"${app.scheduler.preparing-tasks-retry.enabled}")
+	private val enabled: Boolean,
 	private val playerTaskService: PlayerTaskService,
 	private val generateTasksProducer: GenerateTasksProducer
 ) {
@@ -22,7 +21,7 @@ class PreparingTasksRetryScheduler(
 	@Transactional(readOnly = true)
 	@Scheduled(cron = $$"${app.scheduler.preparing-tasks-retry.cron}", zone = "UTC")
 	fun call() {
-		if (!preparingTasksRetrySchedulerProperties.enabled) {
+		if (!enabled) {
 			log.warn("Preparing tasks retry scheduler is disabled")
 			return
 		}

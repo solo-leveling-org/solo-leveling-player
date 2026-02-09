@@ -47,6 +47,13 @@ app:
     preparing-tasks-retry:
       enabled: true
       cron: "0 * * * * *"
+    daily-tasks-updater:
+      enabled: true
+      cron: "0 0 0 * * *"
+  job:
+    init-daily-tasks:
+      enabled: true
+      order: 10
   tasks:
     skip-stamina-cost: 5
     currency-experience-multiplier: 0.5

@@ -48,6 +48,9 @@ public interface Player extends Model {
   List<PlayerTask> tasks();
 
   @OneToMany(mappedBy = "player")
+  List<PlayerDailyTask> dailyTasks();
+
+  @OneToMany(mappedBy = "player")
   List<PlayerTaskTopic> taskTopics();
 
   @OneToMany(mappedBy = "player")

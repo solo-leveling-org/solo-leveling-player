@@ -92,3 +92,9 @@ unsafe SkipPlayerTaskView {
     }
   }
 }
+
+GeneratePlayerTaskView {
+  id
+
+  order
+}
