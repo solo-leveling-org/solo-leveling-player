@@ -11,6 +11,6 @@ interface PlayerDailyTaskService {
 	fun updateAll(tasks: Collection<PlayerDailyTask>)
 	fun replace(task: PlayerDailyTask): PlayerDailyTask
 	fun initialize(playerId: Long, type: DailyTaskType): PlayerDailyTask
-	fun findPlayersToInit(): List<Long>
+	fun findPlayersToInit(type: DailyTaskType): List<Long>
 	fun <V : View<PlayerDailyTask>> findView(viewType: KClass<V>): List<V>
 }

@@ -4,6 +4,7 @@ import static com.sleepkqq.sololeveling.player.model.entity.Tables.PLAYER_DAILY_
 import static com.sleepkqq.sololeveling.player.model.entity.Tables.PLAYER_TABLE;
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerDailyTask;
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.DailyTaskType;
 import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class PlayerDailyTaskRepository {
         .execute();
   }
 
-  public List<Long> findPlayersToInit() {
+  public List<Long> findPlayersToInit(DailyTaskType type) {
     var p = PLAYER_TABLE;
     var pdt = PLAYER_DAILY_TASK_TABLE;
 
@@ -32,9 +33,11 @@ public class PlayerDailyTaskRepository {
         .where(
             sql.createSubQuery(pdt)
                 .where(pdt.playerId().eq(p.id()))
+                .where(pdt.type().eq(type))
                 .notExists()
         )
         .select(p.id())
+        .distinct()
         .execute();
   }
 

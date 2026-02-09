@@ -65,6 +65,11 @@ databaseChangeLog:
             referencedColumnNames: id
             onDelete: CASCADE
 
+        - addUniqueConstraint:
+            tableName: player_daily_tasks
+            columnNames: player_id, type
+            constraintName: uk_player_daily_task_player_type
+
         - sql:
             sql: >
               ALTER TABLE player_daily_tasks

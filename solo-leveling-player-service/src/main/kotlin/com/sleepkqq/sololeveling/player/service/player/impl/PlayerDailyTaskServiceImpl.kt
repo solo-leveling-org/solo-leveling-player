@@ -43,6 +43,7 @@ class PlayerDailyTaskServiceImpl(
 			it.setId(UUID.randomUUID())
 				.setPlayerId(playerId)
 				.setSpec(pickSpec(type))
+				.setType(type)
 				.setProgress(BigDecimal.ZERO)
 				.setCompleted(false)
 		}
@@ -53,7 +54,8 @@ class PlayerDailyTaskServiceImpl(
 	}
 
 	@Transactional(readOnly = true)
-	override fun findPlayersToInit(): List<Long> = playerDailyTaskRepository.findPlayersToInit()
+	override fun findPlayersToInit(type: DailyTaskType): List<Long> =
+		playerDailyTaskRepository.findPlayersToInit(type)
 
 	@Transactional(readOnly = true)
 	override fun <V : View<PlayerDailyTask>> findView(viewType: KClass<V>): List<V> =

@@ -4,6 +4,7 @@ import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerFetcher
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.ResetPlayerView
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.DailyTaskType
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.LevelType
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerRepository
@@ -22,7 +23,8 @@ class PlayerServiceImpl(
 	private val playerBalanceService: PlayerBalanceService,
 	private val playerTaskTopicService: PlayerTaskTopicService,
 	private val playerStaminaService: PlayerStaminaService,
-	private val playerDayStreakService: PlayerDayStreakService
+	private val playerDayStreakService: PlayerDayStreakService,
+	private val playerDailyTaskService: PlayerDailyTaskService
 ) : PlayerService {
 
 	@Transactional(readOnly = true)
@@ -52,6 +54,11 @@ class PlayerServiceImpl(
 			)
 			.setStamina(playerStaminaService.initialize())
 			.setDayStreak(playerDayStreakService.initialize())
+			.setDailyTasks(
+				DailyTaskType.entries.map { type ->
+					playerDailyTaskService.initialize(userId, type)
+				}
+			)
 	}
 
 	@Transactional
