@@ -2,6 +2,7 @@ package com.sleepkqq.sololeveling.player.service.player.impl
 
 import com.sleepkqq.sololeveling.player.config.properties.PlayerLimitsProperties
 import com.sleepkqq.sololeveling.player.config.properties.TasksProperties
+import com.sleepkqq.sololeveling.player.event.TaskCompletedEvent
 import com.sleepkqq.sololeveling.player.exception.AccessDeniedException
 import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
@@ -28,6 +29,7 @@ import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -47,7 +49,8 @@ class PlayerTaskServiceImpl(
 	private val playerLimitsProperties: PlayerLimitsProperties,
 	private val playerStaminaService: PlayerStaminaService,
 	private val tasksProperties: TasksProperties,
-	private val playerDayStreakService: PlayerDayStreakService
+	private val playerDayStreakService: PlayerDayStreakService,
+	private val eventPublisher: ApplicationEventPublisher
 ) : PlayerTaskService {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -157,10 +160,10 @@ class PlayerTaskServiceImpl(
 
 		generateTasks(playerId, updatedPlayer, setOf(playerTask.order))
 
-		return filterPlayerTopics(player.toEntity(), topics) to filterPlayerTopics(
-			updatedPlayer,
-			topics
-		)
+		eventPublisher.publishEvent(TaskCompletedEvent(playerId, task.rarity))
+
+		return filterPlayerTopics(player.toEntity(), topics) to
+				filterPlayerTopics(updatedPlayer, topics)
 	}
 
 	private fun filterPlayerTopics(player: Player, topics: Collection<TaskTopic>): PlayerView =

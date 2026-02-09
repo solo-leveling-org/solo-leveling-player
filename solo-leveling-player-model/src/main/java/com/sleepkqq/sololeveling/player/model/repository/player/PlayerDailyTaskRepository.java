@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.babyfish.jimmer.View;
 import org.babyfish.jimmer.sql.JSqlClient;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -46,5 +47,24 @@ public class PlayerDailyTaskRepository {
     return sql.createQuery(pdt)
         .select(pdt.fetch(viewType))
         .execute();
+  }
+
+  @Nullable
+  public PlayerDailyTask findNullable(long playerId, DailyTaskType type) {
+    var pdt = PLAYER_DAILY_TASK_TABLE;
+    return sql.createQuery(pdt)
+        .where(
+            pdt.playerId().eq(playerId),
+            pdt.type().eq(type)
+        )
+        .select(pdt)
+        .fetchFirstOrNull();
+  }
+
+  public PlayerDailyTask save(PlayerDailyTask task, SaveMode saveMode) {
+    return sql.saveCommand(task)
+        .setMode(saveMode)
+        .execute()
+        .getModifiedEntity();
   }
 }

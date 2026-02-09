@@ -1,5 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.player.impl
 
+import com.sleepkqq.sololeveling.player.event.CurrencySpentEvent
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalance
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
@@ -9,6 +10,7 @@ import com.sleepkqq.sololeveling.player.model.repository.player.PlayerBalanceRep
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
 import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceTransactionService
 import org.babyfish.jimmer.View
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -18,7 +20,8 @@ import kotlin.reflect.KClass
 @Service
 class PlayerBalanceServiceImpl(
 	private val playerBalanceTransactionService: PlayerBalanceTransactionService,
-	private val playerBalanceRepository: PlayerBalanceRepository
+	private val playerBalanceRepository: PlayerBalanceRepository,
+	private val eventPublisher: ApplicationEventPublisher
 ) : PlayerBalanceService {
 
 	@Transactional(readOnly = true)
@@ -88,6 +91,8 @@ class PlayerBalanceServiceImpl(
 				it.setBalance(playerBalance)
 			}
 		)
+
+		eventPublisher.publishEvent(CurrencySpentEvent(playerBalance.player().id(), amount))
 
 		return Immutables.createPlayerBalance(playerBalance) {
 			it.setBalance(newBalance)

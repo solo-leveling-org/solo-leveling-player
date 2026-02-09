@@ -60,4 +60,12 @@ class PlayerDailyTaskServiceImpl(
 	@Transactional(readOnly = true)
 	override fun <V : View<PlayerDailyTask>> findView(viewType: KClass<V>): List<V> =
 		playerDailyTaskRepository.findView(viewType.java)
+
+	@Transactional(readOnly = true)
+	override fun find(playerId: Long, type: DailyTaskType): PlayerDailyTask? =
+		playerDailyTaskRepository.findNullable(playerId, type)
+
+	@Transactional
+	override fun update(task: PlayerDailyTask): PlayerDailyTask =
+		playerDailyTaskRepository.save(task, SaveMode.UPDATE_ONLY)
 }
