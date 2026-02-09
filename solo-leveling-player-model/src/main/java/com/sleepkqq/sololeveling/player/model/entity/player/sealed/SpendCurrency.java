@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import java.math.BigDecimal;
 
 @JsonTypeName("SpendCurrency")
-public record SpendCurrency() implements CurrencySpec {
+public record SpendCurrency() implements DailyTaskSpec {
 
   @Override
   public BigDecimal goal() {

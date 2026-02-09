@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.model.entity.player;
 
 import com.sleepkqq.sololeveling.player.model.entity.Model;
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.DailyTaskType;
 import com.sleepkqq.sololeveling.player.model.entity.player.sealed.DailyTaskSpec;
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -26,6 +27,8 @@ public interface PlayerDailyTask extends Model {
 
   @Serialized
   DailyTaskSpec spec();
+
+  DailyTaskType type();
 
   @Column(name = "is_completed")
   boolean completed();

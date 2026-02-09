@@ -1,7 +1,7 @@
 package com.sleepkqq.sololeveling.player.job
 
 import com.sleepkqq.sololeveling.player.config.properties.JobProperties
-import com.sleepkqq.sololeveling.player.model.entity.player.sealed.DailyTaskSpec.DailyTaskType
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.DailyTaskType
 import com.sleepkqq.sololeveling.player.service.player.PlayerDailyTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -48,7 +48,9 @@ class InitDailyTasksJob(
 
 		playerDailyTaskService.insertAll(initializedTasks)
 
-		log.info("Finished daily tasks init job, initialized {} tasks for {} players",
-			initializedTasks.size, playerIds.size)
+		log.info(
+			"Finished daily tasks init job, initialized {} tasks for {} players",
+			initializedTasks.size, playerIds.size
+		)
 	}
 }

@@ -25,6 +25,11 @@ databaseChangeLog:
                     nullable: false
                   remarks: "Daily task specification with type and parameters"
               - column:
+                  name: type
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
                   name: is_completed
                   type: boolean
                   constraints:

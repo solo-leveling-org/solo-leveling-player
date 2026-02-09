@@ -1,7 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.player
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerDailyTask
-import com.sleepkqq.sololeveling.player.model.entity.player.sealed.DailyTaskSpec.DailyTaskType
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.DailyTaskType
 import org.babyfish.jimmer.View
 import kotlin.reflect.KClass
 

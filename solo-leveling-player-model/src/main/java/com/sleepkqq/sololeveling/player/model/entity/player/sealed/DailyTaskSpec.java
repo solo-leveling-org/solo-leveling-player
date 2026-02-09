@@ -16,11 +16,4 @@ public interface DailyTaskSpec {
    * Целевое значение для выполнения задачи
    */
   BigDecimal goal();
-
-  DailyTaskType type();
-
-  enum DailyTaskType {
-    TASKS,
-    CURRENCY
-  }
 }

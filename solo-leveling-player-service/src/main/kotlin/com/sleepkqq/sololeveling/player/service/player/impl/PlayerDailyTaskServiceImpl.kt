@@ -2,9 +2,9 @@ package com.sleepkqq.sololeveling.player.service.player.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerDailyTask
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.DailyTaskType
 import com.sleepkqq.sololeveling.player.model.entity.player.sealed.CompleteTasks
 import com.sleepkqq.sololeveling.player.model.entity.player.sealed.DailyTaskSpec
-import com.sleepkqq.sololeveling.player.model.entity.player.sealed.DailyTaskSpec.DailyTaskType
 import com.sleepkqq.sololeveling.player.model.entity.player.sealed.SpendCurrency
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerDailyTaskRepository
 import com.sleepkqq.sololeveling.player.service.player.PlayerDailyTaskService
@@ -33,7 +33,7 @@ class PlayerDailyTaskServiceImpl(
 
 	override fun replace(task: PlayerDailyTask): PlayerDailyTask =
 		Immutables.createPlayerDailyTask(task) {
-			it.setSpec(pickSpec(task.spec().type()))
+			it.setSpec(pickSpec(task.type()))
 				.setProgress(BigDecimal.ZERO)
 				.setCompleted(false)
 		}

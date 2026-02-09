@@ -5,7 +5,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity;
 import java.math.BigDecimal;
 
 @JsonTypeName("CompleteSpecifiedRarityTask")
-public record CompleteSpecifiedRarityTask(Rarity rarity) implements TasksSpec {
+public record CompleteSpecifiedRarityTask(Rarity rarity) implements DailyTaskSpec {
 
   @Override
   public BigDecimal goal() {
