@@ -5,12 +5,14 @@ import com.sleepkqq.sololeveling.player.model.entity.player.sealed.DailyTaskSpec
 import com.sleepkqq.sololeveling.player.service.player.PlayerDailyTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.event.EventListener
 import org.springframework.core.Ordered
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+@EnableConfigurationProperties(JobProperties::class)
 class InitDailyTasksJob(
 	private val properties: JobProperties,
 	private val playerDailyTaskService: PlayerDailyTaskService
