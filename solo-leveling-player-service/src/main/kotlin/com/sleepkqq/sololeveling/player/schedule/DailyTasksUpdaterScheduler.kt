@@ -28,9 +28,16 @@ class DailyTasksUpdaterScheduler(
 		log.info("Starting daily tasks updater scheduler")
 
 		val tasks = playerDailyTaskService.findView(ReplacePlayerDailyTaskView::class)
+		log.info("Fetched {} daily tasks for update", tasks.size)
+
+		if (tasks.isEmpty()) {
+			log.info("No daily tasks found, exiting scheduler")
+			return
+		}
 
 		val updatedTasks = tasks.map { playerDailyTaskService.replace(it.toEntity()) }
-
 		playerDailyTaskService.updateAll(updatedTasks)
+
+		log.info("Finished daily tasks updater scheduler, updated {} tasks", updatedTasks.size)
 	}
 }

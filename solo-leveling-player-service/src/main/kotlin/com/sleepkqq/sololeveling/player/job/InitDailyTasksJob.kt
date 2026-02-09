@@ -30,16 +30,25 @@ class InitDailyTasksJob(
 			return
 		}
 
-		val playerIds = playerDailyTaskService.findPlayersToInit()
+		log.info("Starting daily tasks init job")
 
-		val initializedTasks = playerIds.flatMap {
+		val playerIds = playerDailyTaskService.findPlayersToInit()
+		log.info("Found {} players without daily tasks", playerIds.size)
+
+		if (playerIds.isEmpty()) {
+			log.info("No players found for initialization, exiting job")
+			return
+		}
+
+		val initializedTasks = playerIds.flatMap { playerId ->
 			DailyTaskType.entries.map { type ->
-				playerDailyTaskService.initialize(it, type)
+				playerDailyTaskService.initialize(playerId, type)
 			}
 		}
 
 		playerDailyTaskService.insertAll(initializedTasks)
 
-		log.info("Initialized ${initializedTasks.size} daily tasks for ${playerIds.size} players")
+		log.info("Finished daily tasks init job, initialized {} tasks for {} players",
+			initializedTasks.size, playerIds.size)
 	}
 }
