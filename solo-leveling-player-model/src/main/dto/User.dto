@@ -54,3 +54,15 @@ LeaderboardUserView {
 
   photoUrl
 }
+
+AuthUserView {
+  id
+
+  version
+
+  manualLocale
+
+  roles {
+    #allScalars
+  }
+}
