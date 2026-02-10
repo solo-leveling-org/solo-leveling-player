@@ -6,6 +6,7 @@ import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerStamina
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerStaminaRepository
 import com.sleepkqq.sololeveling.player.service.player.PlayerStaminaService
+import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,12 +14,17 @@ import java.time.Duration
 import java.time.Instant
 import java.util.*
 import kotlin.math.min
+import kotlin.reflect.KClass
 
 @Service
 class PlayerStaminaServiceImpl(
 	private val playerStaminaRepository: PlayerStaminaRepository,
 	private val playerLimitsProperties: PlayerLimitsProperties
 ) : PlayerStaminaService {
+
+	@Transactional(readOnly = true)
+	override fun <V : View<PlayerStamina>> findView(playerId: Long, viewType: KClass<V>): V? =
+		playerStaminaRepository.findView(playerId, viewType.java)
 
 	@Transactional
 	override fun update(stamina: PlayerStamina): PlayerStamina =

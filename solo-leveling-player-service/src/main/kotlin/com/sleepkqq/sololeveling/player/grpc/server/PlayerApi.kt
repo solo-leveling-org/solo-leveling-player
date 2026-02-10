@@ -8,26 +8,19 @@ import com.sleepkqq.sololeveling.player.lozalization.LocalizationCode.TABLES_PLA
 import com.sleepkqq.sololeveling.player.lozalization.LocalizationCode.TABLES_PLAYER_TASKS
 import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.AMOUNT_FIELD
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.ActiveTasksPlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerDayStreakView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerStaminaView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerBalanceTransactionRepository
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
-import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
-import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceTransactionService
-import com.sleepkqq.sololeveling.player.service.player.PlayerService
-import com.sleepkqq.sololeveling.player.service.player.PlayerStaminaService
-import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
-import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
+import com.sleepkqq.sololeveling.player.service.player.*
 import com.sleepkqq.sololeveling.player.service.task.TaskService
 import com.sleepkqq.sololeveling.proto.player.*
 import io.grpc.stub.StreamObserver
 import org.springframework.grpc.server.service.GrpcService
-import java.util.UUID
+import java.util.*
 
 @GrpcService
 class PlayerApi(
@@ -49,25 +42,18 @@ class PlayerApi(
 	) {
 		val playerId = UserContextHolder.getUserId()!!
 
-		val player = playerService.getView(playerId, ActiveTasksPlayerView::class)
-
 		val activeTasks = playerTaskService.getActiveTasks(playerId, PlayerTaskView::class)
 			.map(protoMapper::map)
 
 		val isFirstTime = activeTasks.isEmpty()
 
-		val stamina = PlayerStaminaView(
-			playerStaminaService.calculateCurrent(player.stamina.toEntity())
-		)
+		val stamina = playerStaminaService.getView(playerId, PlayerStaminaView::class)
 		val staminaConfig = playerLimitsProperties.limits.free.stamina
-
-		val dayStreak = PlayerDayStreakView(player.dayStreak.toEntity())
 
 		val response = GetActiveTasksResponse.newBuilder()
 			.addAllTasks(activeTasks)
 			.setFirstTime(isFirstTime)
 			.setStamina(protoMapper.map(stamina, staminaConfig))
-			.setDayStreak(protoMapper.map(dayStreak))
 			.build()
 
 		responseObserver.onNext(response)

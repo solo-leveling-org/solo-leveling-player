@@ -66,3 +66,27 @@ AuthUserView {
     #allScalars
   }
 }
+
+unsafe UserAdditionalInfoView {
+  locale
+
+  manualLocale
+
+  photoUrl
+
+  roles {
+    #allScalars
+  }
+
+  player! {
+    dayStreak! {
+      #allScalars
+
+      -createdAt
+
+      -updatedAt
+
+      -version
+    }
+  }
+}

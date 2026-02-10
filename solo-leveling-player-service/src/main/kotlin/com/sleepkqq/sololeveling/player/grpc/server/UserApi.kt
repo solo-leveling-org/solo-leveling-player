@@ -2,26 +2,15 @@ package com.sleepkqq.sololeveling.player.grpc.server
 
 import com.google.protobuf.Empty
 import com.sleepkqq.sololeveling.config.interceptor.UserContextHolder
-import com.sleepkqq.sololeveling.player.model.entity.Fetchers
-import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
-import com.sleepkqq.sololeveling.player.model.entity.Fetchers.USER_ROLE_ITEM_FETCHER
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerDayStreakView
+import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserAdditionalInfoView
+import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.player.service.user.UserService
-import com.sleepkqq.sololeveling.proto.user.AuthUserRequest
-import com.sleepkqq.sololeveling.proto.user.GetUserAdditionalInfoResponse
-import com.sleepkqq.sololeveling.proto.user.GetUserLeaderboardRequest
-import com.sleepkqq.sololeveling.proto.user.GetUserLeaderboardResponse
-import com.sleepkqq.sololeveling.proto.user.GetUserRequest
-import com.sleepkqq.sololeveling.proto.user.GetUserResponse
-import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardRequest
-import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardResponse
-import com.sleepkqq.sololeveling.proto.user.GetUsersStatsResponse
-import com.sleepkqq.sololeveling.proto.user.UpdateUserLocaleRequest
-import com.sleepkqq.sololeveling.proto.user.UserLocale
-import com.sleepkqq.sololeveling.proto.user.UserServiceGrpc
+import com.sleepkqq.sololeveling.proto.user.*
 import io.grpc.stub.StreamObserver
 import org.springframework.grpc.server.service.GrpcService
-import java.util.Locale
+import java.util.*
 
 @GrpcService
 class UserApi(
@@ -58,21 +47,20 @@ class UserApi(
 		request: Empty,
 		responseObserver: StreamObserver<GetUserAdditionalInfoResponse>
 	) {
-		val user = userService.get(
+		val user = userService.getView(
 			UserContextHolder.getUserId()!!,
-			Fetchers.USER_FETCHER
-				.locale()
-				.manualLocale()
-				.roles(USER_ROLE_ITEM_FETCHER.role())
+			UserAdditionalInfoView::class
 		)
 
 		val response = GetUserAdditionalInfoResponse.newBuilder()
+			.setPhotoUrl(user.photoUrl)
+			.setDayStreak(protoMapper.map(PlayerDayStreakView(user.player.dayStreak.toEntity())))
 			.setLocale(
 				UserLocale.newBuilder()
-					.setTag(user.manualLocale() ?: user.locale())
-					.setIsManual(user.manualLocale() != null)
+					.setTag(user.manualLocale ?: user.locale)
+					.setIsManual(user.manualLocale != null)
 			)
-			.addAllRoles(protoMapper.map(user.roles()))
+			.addAllRoles(protoMapper.map(user.roles.map { it.toEntity() }))
 			.build()
 
 		responseObserver.onNext(response)

@@ -79,24 +79,6 @@ unsafe ResetPlayerView {
   }
 }
 
-unsafe ActiveTasksPlayerView {
-  stamina! {
-    #allScalars
-
-    -createdAt
-
-    -version
-  }
-
-  dayStreak! {
-    #allScalars
-
-    -createdAt
-
-    -version
-  }
-}
-
 GenerateTasksPlayerView {
   taskTopics {
     taskTopic
