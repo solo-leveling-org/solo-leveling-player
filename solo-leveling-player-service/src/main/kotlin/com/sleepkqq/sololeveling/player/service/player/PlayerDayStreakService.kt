@@ -13,4 +13,5 @@ interface PlayerDayStreakService {
 	fun initialize(): PlayerDayStreak
 	fun update(dayStreak: PlayerDayStreak): PlayerDayStreak
 	fun processStreak(playerId: Long): PlayerDayStreak
+	fun resetExpiredStreaks(): Long
 }

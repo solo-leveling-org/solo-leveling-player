@@ -5,12 +5,12 @@ import com.sleepkqq.sololeveling.player.model.entity.player.PlayerDayStreak
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerDayStreakRepository
 import com.sleepkqq.sololeveling.player.service.player.PlayerDayStreakService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
-import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
-import java.util.UUID
+import java.util.*
 import kotlin.math.max
 
 @Service
@@ -23,9 +23,8 @@ class PlayerDayStreakServiceImpl(
 		playerDayStreakRepository.findNullable(playerId)
 
 	override fun extend(dayStreak: PlayerDayStreak): PlayerDayStreak {
-		val zoneId = LocaleContextHolder.getTimeZone().toZoneId()
-		val today = LocalDate.now(zoneId)
-		val lastActiveDate = dayStreak.updatedAt().atZone(zoneId).toLocalDate()
+		val today = LocalDate.now(ZoneOffset.UTC)
+		val lastActiveDate = dayStreak.updatedAt().atZone(ZoneOffset.UTC).toLocalDate()
 
 		val daysDifference = ChronoUnit.DAYS.between(lastActiveDate, today)
 
@@ -67,4 +66,7 @@ class PlayerDayStreakServiceImpl(
 		val extendedStreak = extend(dayStreak)
 		return update(extendedStreak)
 	}
+
+	@Transactional
+	override fun resetExpiredStreaks(): Long = playerDayStreakRepository.resetExpiredStreaks()
 }
