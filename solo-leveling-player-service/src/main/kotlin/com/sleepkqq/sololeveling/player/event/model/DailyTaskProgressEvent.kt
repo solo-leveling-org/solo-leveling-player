@@ -1,4 +1,4 @@
-package com.sleepkqq.sololeveling.player.event
+package com.sleepkqq.sololeveling.player.event.model
 
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.DailyTaskType
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity

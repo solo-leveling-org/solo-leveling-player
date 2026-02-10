@@ -2,7 +2,9 @@ package com.sleepkqq.sololeveling.player.service.player.impl
 
 import com.sleepkqq.sololeveling.player.config.properties.PlayerLimitsProperties
 import com.sleepkqq.sololeveling.player.config.properties.TasksProperties
-import com.sleepkqq.sololeveling.player.event.TaskCompletedEvent
+import com.sleepkqq.sololeveling.player.event.model.TasksSavedEvent
+import com.sleepkqq.sololeveling.player.event.model.TasksSilentUpdatedEvent
+import com.sleepkqq.sololeveling.player.event.model.TaskCompletedEvent
 import com.sleepkqq.sololeveling.player.exception.AccessDeniedException
 import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
@@ -16,9 +18,6 @@ import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStat
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
-import com.sleepkqq.sololeveling.player.service.notification.NotificationService
-import com.sleepkqq.sololeveling.player.service.notification.NotificationService.NotificationCommand.SaveTasks
-import com.sleepkqq.sololeveling.player.service.notification.NotificationService.NotificationCommand.SilentTasksUpdate
 import com.sleepkqq.sololeveling.player.service.player.*
 import com.sleepkqq.sololeveling.player.service.task.TaskService
 import com.sleepkqq.sololeveling.proto.player.RequestPaging
@@ -44,7 +43,6 @@ class PlayerTaskServiceImpl(
 	private val playerService: PlayerService,
 	private val levelService: LevelService,
 	private val taskService: TaskService,
-	private val notificationService: NotificationService,
 	private val generateTasksProducer: GenerateTasksProducer,
 	private val playerLimitsProperties: PlayerLimitsProperties,
 	private val playerStaminaService: PlayerStaminaService,
@@ -231,9 +229,9 @@ class PlayerTaskServiceImpl(
 		insertAll(playerTasksToInsert)
 
 		if (playerTasksToInsert.all { it.status() == PlayerTaskStatus.IN_PROGRESS }) {
-			notificationService.send(SaveTasks(playerId))
+			eventPublisher.publishEvent(TasksSavedEvent(playerId))
 		} else {
-			notificationService.send(SilentTasksUpdate(playerId))
+			eventPublisher.publishEvent(TasksSilentUpdatedEvent(playerId))
 		}
 
 		val tasksToGenerate = playerTasksToInsert.filter { it.status() == PlayerTaskStatus.PREPARING }

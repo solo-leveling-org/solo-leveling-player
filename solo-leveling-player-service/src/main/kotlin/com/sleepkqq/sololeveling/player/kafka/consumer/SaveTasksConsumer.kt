@@ -5,13 +5,13 @@ import com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics
 import com.sleepkqq.sololeveling.avro.idempotency.IdempotencyService
 import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent
 import com.sleepkqq.sololeveling.player.config.properties.TasksProperties
+import com.sleepkqq.sololeveling.player.event.model.TasksSavedEvent
 import com.sleepkqq.sololeveling.player.mapper.AvroMapper
 import com.sleepkqq.sololeveling.player.model.entity.task.dto.SaveTaskInput
-import com.sleepkqq.sololeveling.player.service.notification.NotificationService
-import com.sleepkqq.sololeveling.player.service.notification.NotificationService.NotificationCommand.SaveTasks
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.task.TaskService
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.annotation.RetryableTopic
 import org.springframework.stereotype.Service
@@ -23,8 +23,8 @@ class SaveTasksConsumer(
 	private val taskService: TaskService,
 	private val playerTaskService: PlayerTaskService,
 	private val avroMapper: AvroMapper,
-	private val notificationService: NotificationService,
 	private val tasksProperties: TasksProperties,
+	private val eventPublisher: ApplicationEventPublisher,
 	idempotencyService: IdempotencyService
 ) : AbstractKafkaConsumer<SaveTasksEvent>(
 	idempotencyService = idempotencyService,
@@ -74,6 +74,6 @@ class SaveTasksConsumer(
 			playerTaskService.inProgressTasks(playerTasks)
 		}
 
-		notificationService.send(SaveTasks(event.playerId, event.txId))
+		eventPublisher.publishEvent(TasksSavedEvent(event.playerId, event.txId))
 	}
 }

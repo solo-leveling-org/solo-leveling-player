@@ -1,6 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.player.impl
 
-import com.sleepkqq.sololeveling.player.event.CurrencySpentEvent
+import com.sleepkqq.sololeveling.player.event.model.CurrencySpentEvent
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalance
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode

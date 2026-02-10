@@ -1,6 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.user.impl
 
 import com.sleepkqq.sololeveling.jimmer.predicate.filter.DateFilter
+import com.sleepkqq.sololeveling.player.event.model.LocaleUpdatedEvent
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser
 import com.sleepkqq.sololeveling.player.model.entity.user.User
@@ -10,8 +11,6 @@ import com.sleepkqq.sololeveling.player.model.entity.user.dto.AuthUserView
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.AuthUserView.TargetOf_roles
 import com.sleepkqq.sololeveling.player.model.entity.user.enums.UserRole
 import com.sleepkqq.sololeveling.player.model.repository.user.UserRepository
-import com.sleepkqq.sololeveling.player.service.notification.NotificationService
-import com.sleepkqq.sololeveling.player.service.notification.NotificationService.NotificationCommand.UpdateLocale
 import com.sleepkqq.sololeveling.player.service.player.PlayerService
 import com.sleepkqq.sololeveling.player.service.user.UserService
 import com.sleepkqq.sololeveling.proto.player.RequestPaging
@@ -19,6 +18,7 @@ import com.sleepkqq.sololeveling.proto.user.LeaderboardType
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -28,7 +28,7 @@ import kotlin.reflect.KClass
 @Service
 class UserServiceImpl(
 	private val userRepository: UserRepository,
-	private val notificationService: NotificationService,
+	private val eventPublisher: ApplicationEventPublisher,
 	private val playerService: PlayerService
 ) : UserService {
 
@@ -68,7 +68,7 @@ class UserServiceImpl(
 	override fun updateLocale(id: Long, locale: Locale) {
 		userRepository.updateLocale(id, locale)
 
-		notificationService.send(UpdateLocale(id))
+		eventPublisher.publishEvent(LocaleUpdatedEvent(id))
 	}
 
 	override fun register(user: User): User = Immutables.createUser(user) {

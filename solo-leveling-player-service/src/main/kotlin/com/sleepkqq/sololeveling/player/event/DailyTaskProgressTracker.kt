@@ -1,5 +1,8 @@
 package com.sleepkqq.sololeveling.player.event
 
+import com.sleepkqq.sololeveling.player.event.model.CurrencySpentEvent
+import com.sleepkqq.sololeveling.player.event.model.DailyTaskProgressEvent
+import com.sleepkqq.sololeveling.player.event.model.TaskCompletedEvent
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerDailyTask
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity
