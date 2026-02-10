@@ -46,6 +46,7 @@ class PlayerDayStreakServiceImpl(
 
 			else -> Immutables.createPlayerDayStreak(dayStreak) {
 				it.setCurrent(1)
+					.setMax(max(1, dayStreak.max()))
 			}
 		}
 	}
