@@ -2,16 +2,25 @@ package com.sleepkqq.sololeveling.player.service.player.impl
 
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerDayStreak
+import com.sleepkqq.sololeveling.player.model.repository.player.PlayerDayStreakRepository
 import com.sleepkqq.sololeveling.player.service.player.PlayerDayStreakService
+import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.math.max
 
 @Service
-class PlayerDayStreakServiceImpl : PlayerDayStreakService {
+class PlayerDayStreakServiceImpl(
+	private val playerDayStreakRepository: PlayerDayStreakRepository
+) : PlayerDayStreakService {
+
+	@Transactional(readOnly = true)
+	override fun find(playerId: Long): PlayerDayStreak? =
+		playerDayStreakRepository.findNullable(playerId)
 
 	override fun extend(dayStreak: PlayerDayStreak): PlayerDayStreak {
 		val zoneId = LocaleContextHolder.getTimeZone().toZoneId()
@@ -46,5 +55,16 @@ class PlayerDayStreakServiceImpl : PlayerDayStreakService {
 		it.setId(UUID.randomUUID())
 			.setCurrent(0)
 			.setMax(0)
+	}
+
+	@Transactional
+	override fun update(dayStreak: PlayerDayStreak): PlayerDayStreak =
+		playerDayStreakRepository.save(dayStreak, SaveMode.UPDATE_ONLY)
+
+	@Transactional
+	override fun processStreak(playerId: Long): PlayerDayStreak {
+		val dayStreak = get(playerId)
+		val extendedStreak = extend(dayStreak)
+		return update(extendedStreak)
 	}
 }

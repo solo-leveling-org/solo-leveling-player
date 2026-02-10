@@ -1,0 +1,33 @@
+package com.sleepkqq.sololeveling.player.model.repository.player;
+
+import static com.sleepkqq.sololeveling.player.model.entity.Tables.PLAYER_DAY_STREAK_TABLE;
+
+import com.sleepkqq.sololeveling.player.model.entity.player.PlayerDayStreak;
+import lombok.RequiredArgsConstructor;
+import org.babyfish.jimmer.sql.JSqlClient;
+import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.stereotype.Repository;
+
+@Repository
+@RequiredArgsConstructor
+public class PlayerDayStreakRepository {
+
+  private final JSqlClient sql;
+
+  @Nullable
+  public PlayerDayStreak findNullable(long playerId) {
+    var pds = PLAYER_DAY_STREAK_TABLE;
+    return sql.createQuery(pds)
+        .where(pds.playerId().eq(playerId))
+        .select(pds)
+        .fetchFirstOrNull();
+  }
+
+  public PlayerDayStreak save(PlayerDayStreak dayStreak, SaveMode saveMode) {
+    return sql.saveCommand(dayStreak)
+        .setMode(saveMode)
+        .execute()
+        .getModifiedEntity();
+  }
+}

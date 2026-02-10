@@ -8,6 +8,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.sealed.CompleteSpeci
 import com.sleepkqq.sololeveling.player.model.entity.player.sealed.DailyTaskSpec
 import com.sleepkqq.sololeveling.player.model.entity.player.sealed.SpendCurrency
 import com.sleepkqq.sololeveling.player.service.player.PlayerDailyTaskService
+import com.sleepkqq.sololeveling.player.service.player.PlayerDayStreakService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.event.TransactionPhase
@@ -16,14 +17,16 @@ import java.math.BigDecimal
 
 @Service
 class DailyTaskProgressTracker(
-	private val playerDailyTaskService: PlayerDailyTaskService
+	private val playerDailyTaskService: PlayerDailyTaskService,
+	private val playerDayStreakService: PlayerDayStreakService
 ) {
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	fun listen(event: DailyTaskProgressEvent) {
-		val dailyTask = playerDailyTaskService.find(event.playerId, event.type)
+		val playerId = event.playerId
+		val dailyTask = playerDailyTaskService.find(playerId, event.type)
 			?: return
 
 		if (dailyTask.completed()) {
@@ -40,13 +43,15 @@ class DailyTaskProgressTracker(
 			playerDailyTaskService.update(updatedDailyTask)
 
 			if (updatedDailyTask.completed()) {
-				log.info("Daily task completed for player {} type {}", event.playerId, event.type)
+				log.info("Daily task completed for player {} type {}", playerId, event.type)
+
+				playerDayStreakService.processStreak(playerId)
 			}
 
 		} catch (e: Exception) {
 			log.error(
 				"Failed to update daily task progress for player {} type {}",
-				event.playerId, event.type, e
+				playerId, event.type, e
 			)
 		}
 	}

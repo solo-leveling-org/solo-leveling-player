@@ -49,7 +49,6 @@ class PlayerTaskServiceImpl(
 	private val playerLimitsProperties: PlayerLimitsProperties,
 	private val playerStaminaService: PlayerStaminaService,
 	private val tasksProperties: TasksProperties,
-	private val playerDayStreakService: PlayerDayStreakService,
 	private val eventPublisher: ApplicationEventPublisher
 ) : PlayerTaskService {
 
@@ -145,8 +144,6 @@ class PlayerTaskServiceImpl(
 			task.experience
 		)
 
-		val updatedDayStreak = playerDayStreakService.extend(player.dayStreak.toEntity())
-
 		val updatedPlayer = playerService.update(
 			Immutables.createPlayer(gainedExperiencePlayer) {
 				it.setAgility(player.agility + task.agility)
@@ -154,7 +151,6 @@ class PlayerTaskServiceImpl(
 					.setIntelligence(player.intelligence + task.intelligence)
 					.setBalance(updatedBalance)
 					.setStamina(updatedStamina)
-					.setDayStreak(updatedDayStreak)
 			}
 		)
 
