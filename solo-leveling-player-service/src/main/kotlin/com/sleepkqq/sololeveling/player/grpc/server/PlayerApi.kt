@@ -48,6 +48,8 @@ class PlayerApi(
 		val isFirstTime = activeTasks.isEmpty()
 
 		val stamina = playerStaminaService.getView(playerId, PlayerStaminaView::class)
+			.let { playerStaminaService.calculateCurrent(it.toEntity()) }
+			.let { PlayerStaminaView(it) }
 		val staminaConfig = playerLimitsProperties.limits.free.stamina
 
 		val response = GetActiveTasksResponse.newBuilder()
