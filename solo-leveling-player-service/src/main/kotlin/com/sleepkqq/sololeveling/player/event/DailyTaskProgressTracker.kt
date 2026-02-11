@@ -11,23 +11,29 @@ import com.sleepkqq.sololeveling.player.model.entity.player.sealed.CompleteSpeci
 import com.sleepkqq.sololeveling.player.model.entity.player.sealed.DailyTaskSpec
 import com.sleepkqq.sololeveling.player.model.entity.player.sealed.SpendCurrency
 import com.sleepkqq.sololeveling.player.service.player.PlayerDailyTaskService
+import com.sleepkqq.sololeveling.player.service.player.PlayerDayActivityService
 import com.sleepkqq.sololeveling.player.service.player.PlayerDayStreakService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.event.TransactionPhase
 import org.springframework.transaction.event.TransactionalEventListener
 import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.util.UUID
 
 @Service
 class DailyTaskProgressTracker(
 	private val playerDailyTaskService: PlayerDailyTaskService,
-	private val playerDayStreakService: PlayerDayStreakService
+	private val playerDayStreakService: PlayerDayStreakService,
+	private val playerDayActivityService: PlayerDayActivityService
 ) {
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	fun listen(event: DailyTaskProgressEvent) {
+		val today = LocalDate.now(ZoneOffset.UTC)
 		val playerId = event.playerId
 		val dailyTask = playerDailyTaskService.find(playerId, event.type)
 			?: return
@@ -48,7 +54,14 @@ class DailyTaskProgressTracker(
 			if (updatedDailyTask.completed()) {
 				log.info("Daily task completed for player {} type {}", playerId, event.type)
 
-				playerDayStreakService.processStreak(playerId)
+				playerDayStreakService.processStreak(playerId, today)
+
+				playerDayActivityService.insertIfAbsent(Immutables.createPlayerDayActivity {
+					it.setId(UUID.randomUUID())
+						.setPlayerId(playerId)
+						.setDailyTaskCompleted(true)
+						.setDay(today)
+				})
 			}
 
 		} catch (e: Exception) {

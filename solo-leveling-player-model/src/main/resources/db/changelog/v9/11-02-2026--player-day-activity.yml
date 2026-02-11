@@ -1,0 +1,61 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-player-day-activities-table
+      author: sleepkqq
+      changes:
+        - createTable:
+            tableName: player_day_activities
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: day
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: daily_task_completed
+                  type: boolean
+                  constraints:
+                    nullable: false
+                  defaultValue: false
+              - column:
+                  name: player_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: player_day_activities
+            baseColumnNames: player_id
+            constraintName: fk_player_day_activities_player
+            referencedTableName: players
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+        - addUniqueConstraint:
+            tableName: player_day_activities
+            columnNames: player_id, day
+            constraintName: uk_player_day_activities_player_day
+
+        - createIndex:
+            tableName: player_day_activities
+            indexName: idx_player_day_activities_player_id
+            columns:
+              - column:
+                  name: player_id
+
+        - createIndex:
+            tableName: player_day_activities
+            indexName: idx_player_day_activities_player_day
+            columns:
+              - column:
+                  name: day
+
+      rollback:
+        - dropTable:
+            tableName: player_day_activities

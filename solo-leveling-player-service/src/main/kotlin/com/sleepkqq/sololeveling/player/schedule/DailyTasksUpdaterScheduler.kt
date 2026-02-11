@@ -1,6 +1,6 @@
 package com.sleepkqq.sololeveling.player.schedule
 
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.ReplacePlayerDailyTaskView
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.DailyTaskType
 import com.sleepkqq.sololeveling.player.service.player.PlayerDailyTaskService
 import com.sleepkqq.sololeveling.player.service.player.PlayerDayStreakService
 import org.slf4j.LoggerFactory
@@ -32,17 +32,11 @@ class DailyTasksUpdaterScheduler(
 		val resetCount = playerDayStreakService.resetExpiredStreaks()
 		log.info("Reset {} expired day streaks", resetCount)
 
-		val tasks = playerDailyTaskService.findView(ReplacePlayerDailyTaskView::class)
-		log.info("Fetched {} daily tasks for update", tasks.size)
-
-		if (tasks.isEmpty()) {
-			log.info("No daily tasks found, exiting scheduler")
-			return
+		DailyTaskType.entries.forEach {
+			val updatedTasksCount = playerDailyTaskService.replace(it)
+			log.info("Updated {} tasks by type={}", updatedTasksCount, it)
 		}
 
-		val updatedTasks = tasks.map { playerDailyTaskService.replace(it.toEntity()) }
-		playerDailyTaskService.updateAll(updatedTasks)
-
-		log.info("Finished daily tasks updater scheduler, updated {} tasks", updatedTasks.size)
+		log.info("Finished daily tasks updater scheduler")
 	}
 }

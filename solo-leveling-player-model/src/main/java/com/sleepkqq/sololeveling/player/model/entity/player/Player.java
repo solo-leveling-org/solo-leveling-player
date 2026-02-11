@@ -55,4 +55,7 @@ public interface Player extends Model {
 
   @OneToMany(mappedBy = "player")
   List<PlayerGearItem> gearItems();
+
+  @OneToMany(mappedBy = "player")
+  List<PlayerDayActivity> dayActivities();
 }

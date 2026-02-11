@@ -36,14 +36,14 @@ public class PlayerDayStreakRepository {
   public long resetExpiredStreaks() {
     var pds = PLAYER_DAY_STREAK_TABLE;
 
-    var startOfToday = LocalDate.now(ZoneOffset.UTC)
+    var startOfYesterday = LocalDate.now(ZoneOffset.UTC)
         .minusDays(1)
         .atStartOfDay(ZoneOffset.UTC)
         .toInstant();
 
     return sql.createUpdate(pds)
         .where(pds.current().gt(0))
-        .where(pds.updatedAt().lt(startOfToday))
+        .where(pds.updatedAt().lt(startOfYesterday))
         .set(pds.current(), 0)
         .execute();
   }

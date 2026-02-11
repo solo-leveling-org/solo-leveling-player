@@ -5,10 +5,11 @@ import static com.sleepkqq.sololeveling.player.model.entity.Tables.PLAYER_TABLE;
 
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerDailyTask;
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.DailyTaskType;
+import com.sleepkqq.sololeveling.player.model.entity.player.sealed.DailyTaskSpec;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.babyfish.jimmer.View;
 import org.babyfish.jimmer.sql.JSqlClient;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
 import org.jetbrains.annotations.Nullable;
@@ -42,13 +43,6 @@ public class PlayerDailyTaskRepository {
         .execute();
   }
 
-  public <V extends View<PlayerDailyTask>> List<V> findView(Class<V> viewType) {
-    var pdt = PLAYER_DAILY_TASK_TABLE;
-    return sql.createQuery(pdt)
-        .select(pdt.fetch(viewType))
-        .execute();
-  }
-
   @Nullable
   public PlayerDailyTask findNullable(long playerId, DailyTaskType type) {
     var pdt = PLAYER_DAILY_TASK_TABLE;
@@ -66,5 +60,15 @@ public class PlayerDailyTaskRepository {
         .setMode(saveMode)
         .execute()
         .getModifiedEntity();
+  }
+
+  public long replace(DailyTaskType type, DailyTaskSpec spec) {
+    var pdt = PLAYER_DAILY_TASK_TABLE;
+    return sql.createUpdate(pdt)
+        .where(pdt.type().eq(type))
+        .set(pdt.completed(), false)
+        .set(pdt.progress(), BigDecimal.ZERO)
+        .set(pdt.spec(), spec)
+        .execute();
   }
 }
