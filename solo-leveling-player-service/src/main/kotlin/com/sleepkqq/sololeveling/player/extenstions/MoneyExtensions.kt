@@ -7,12 +7,11 @@ import java.math.BigInteger
 import java.math.RoundingMode
 
 fun BigDecimal.toMoney(currencyCode: CurrencyCode? = null): Money {
-	require(this.scale() <= 9) { "Scale cannot exceed 9 digits" }
-
-	// Нормализуем к 9 знакам
-	val normalized = this.setScale(9, RoundingMode.UNNECESSARY)
+	// Нормализуем к 2 знакам после запятой
+	val normalized = this.setScale(2, RoundingMode.HALF_UP)
 
 	// Переводим всё в нано-единицы как целое число
+	// Для 2 знаков после запятой: 123.45 → 123450000000 nanos
 	val totalNanos = normalized.movePointRight(9).toBigIntegerExact()
 
 	// Разделяем на units и nanos
