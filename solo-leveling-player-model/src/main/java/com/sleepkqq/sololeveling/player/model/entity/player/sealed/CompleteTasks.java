@@ -10,4 +10,9 @@ public record CompleteTasks() implements DailyTaskSpec {
   public BigDecimal goal() {
     return BigDecimal.TWO;
   }
+
+  @Override
+  public String localizationPath() {
+    return "complete-tasks";
+  }
 }

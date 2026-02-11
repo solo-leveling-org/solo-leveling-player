@@ -10,6 +10,7 @@ import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.AMOUNT_FIELD
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerDailyTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerStaminaView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
@@ -33,7 +34,9 @@ class PlayerApi(
 	private val enumLocalizer: EnumLocalizer,
 	private val playerStaminaService: PlayerStaminaService,
 	private val playerLimitsProperties: PlayerLimitsProperties,
-	private val playerService: PlayerService
+	private val playerService: PlayerService,
+	private val playerDailyTaskService: PlayerDailyTaskService,
+	private val playerDayActivityService: PlayerDayActivityService
 ) : PlayerServiceGrpc.PlayerServiceImplBase() {
 
 	override fun getActiveTasks(
@@ -236,6 +239,44 @@ class PlayerApi(
 		playerService.reset(request.playerId)
 
 		responseObserver.onNext(Empty.newBuilder().build())
+		responseObserver.onCompleted()
+	}
+
+	override fun getDailyTasks(
+		request: Empty,
+		responseObserver: StreamObserver<GetDailyTasksResponse>
+	) {
+		val dailyTasks = playerDailyTaskService.findView(
+			UserContextHolder.getUserId()!!,
+			PlayerDailyTaskView::class
+		)
+
+		val sortedMappedTasks = dailyTasks.sortedBy { it.type.ordinal }
+			.map { protoMapper.map(it) }
+
+		val response = GetDailyTasksResponse.newBuilder()
+			.addAllTasks(sortedMappedTasks)
+			.build()
+
+		responseObserver.onNext(response)
+		responseObserver.onCompleted()
+	}
+
+	override fun getMonthlyActivity(
+		request: GetMonthlyActivityRequest,
+		responseObserver: StreamObserver<GetMonthlyActivityResponse>
+	) {
+		val monthlyActivity = playerDayActivityService.getMonthlyActivity(
+			UserContextHolder.getUserId()!!,
+			year = request.year,
+			month = request.month
+		)
+
+		val response = GetMonthlyActivityResponse.newBuilder()
+			.addAllActiveDays(monthlyActivity)
+			.build()
+
+		responseObserver.onNext(response)
 		responseObserver.onCompleted()
 	}
 }

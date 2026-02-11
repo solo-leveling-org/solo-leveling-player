@@ -10,4 +10,9 @@ public record SpendCurrency() implements DailyTaskSpec {
   public BigDecimal goal() {
     return BigDecimal.valueOf(1_000);
   }
+
+  @Override
+  public String localizationPath() {
+    return "spend-currency";
+  }
 }

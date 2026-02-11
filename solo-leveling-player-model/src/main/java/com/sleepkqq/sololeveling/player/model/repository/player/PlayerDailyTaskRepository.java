@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.babyfish.jimmer.View;
 import org.babyfish.jimmer.sql.JSqlClient;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
 import org.jetbrains.annotations.Nullable;
@@ -40,6 +41,14 @@ public class PlayerDailyTaskRepository {
         )
         .select(p.id())
         .distinct()
+        .execute();
+  }
+
+  public <V extends View<PlayerDailyTask>> List<V> findView(long playerId, Class<V> viewType) {
+    var pdt = PLAYER_DAILY_TASK_TABLE;
+    return sql.createQuery(pdt)
+        .where(pdt.playerId().eq(playerId))
+        .select(pdt.fetch(viewType))
         .execute();
   }
 

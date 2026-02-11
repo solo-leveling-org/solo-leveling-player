@@ -8,11 +8,13 @@ import com.sleepkqq.sololeveling.player.model.entity.player.sealed.DailyTaskSpec
 import com.sleepkqq.sololeveling.player.model.entity.player.sealed.SpendCurrency
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerDailyTaskRepository
 import com.sleepkqq.sololeveling.player.service.player.PlayerDailyTaskService
+import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.util.*
+import kotlin.reflect.KClass
 
 @Service
 class PlayerDailyTaskServiceImpl(
@@ -46,6 +48,10 @@ class PlayerDailyTaskServiceImpl(
 	@Transactional(readOnly = true)
 	override fun findPlayersToInit(type: DailyTaskType): List<Long> =
 		playerDailyTaskRepository.findPlayersToInit(type)
+
+	@Transactional(readOnly = true)
+	override fun <V : View<PlayerDailyTask>> findView(playerId: Long, viewType: KClass<V>): List<V> =
+		playerDailyTaskRepository.findView(playerId, viewType.java)
 
 	@Transactional(readOnly = true)
 	override fun find(playerId: Long, type: DailyTaskType): PlayerDailyTask? =

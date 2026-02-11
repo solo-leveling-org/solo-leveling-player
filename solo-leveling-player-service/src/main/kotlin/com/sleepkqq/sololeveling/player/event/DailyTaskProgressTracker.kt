@@ -5,9 +5,7 @@ import com.sleepkqq.sololeveling.player.event.model.DailyTaskProgressEvent
 import com.sleepkqq.sololeveling.player.event.model.TaskCompletedEvent
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerDailyTask
-import com.sleepkqq.sololeveling.player.model.entity.player.enums.Rarity
 import com.sleepkqq.sololeveling.player.model.entity.player.sealed.CompleteTasks
-import com.sleepkqq.sololeveling.player.model.entity.player.sealed.CompleteSpecifiedRarityTask
 import com.sleepkqq.sololeveling.player.model.entity.player.sealed.DailyTaskSpec
 import com.sleepkqq.sololeveling.player.model.entity.player.sealed.SpendCurrency
 import com.sleepkqq.sololeveling.player.service.player.PlayerDailyTaskService
@@ -76,17 +74,13 @@ class DailyTaskProgressTracker(
 		task: PlayerDailyTask,
 		event: DailyTaskProgressEvent
 	): BigDecimal = when (event) {
-		is TaskCompletedEvent -> calculateTaskCompletionProgress(task.spec(), event.taskRarity)
+		is TaskCompletedEvent -> calculateTaskCompletionProgress(task.spec())
 		is CurrencySpentEvent -> calculateCurrencyProgress(task.spec(), event.amount)
 	}
 
-	private fun calculateTaskCompletionProgress(spec: DailyTaskSpec, taskRarity: Rarity): BigDecimal {
+	private fun calculateTaskCompletionProgress(spec: DailyTaskSpec): BigDecimal {
 		return when (spec) {
 			is CompleteTasks -> BigDecimal.ONE
-			is CompleteSpecifiedRarityTask -> {
-				if (spec.rarity == taskRarity) BigDecimal.ONE else BigDecimal.ZERO
-			}
-
 			else -> BigDecimal.ZERO
 		}
 	}

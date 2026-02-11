@@ -21,7 +21,7 @@ class NotificationListener(
 	fun listen(event: NotificationEvent) {
 		try {
 			val ctx = event.toContext()
-			val message = ctx.localizationCode?.let { i18nService.getMessage(it) }
+			val message = ctx.localizationCode?.let { i18nService.getMessage(it.code) }
 			val notification = Notification(message, ctx.type, ctx.source, ctx.visible)
 			val sendEvent = SendNotificationEvent(ctx.txId, ctx.userId, ctx.priority, notification)
 
