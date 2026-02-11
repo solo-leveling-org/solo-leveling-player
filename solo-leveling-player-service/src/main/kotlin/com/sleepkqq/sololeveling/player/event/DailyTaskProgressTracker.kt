@@ -11,6 +11,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.sealed.SpendCurrency
 import com.sleepkqq.sololeveling.player.service.player.PlayerDailyTaskService
 import com.sleepkqq.sololeveling.player.service.player.PlayerDayActivityService
 import com.sleepkqq.sololeveling.player.service.player.PlayerDayStreakService
+import org.babyfish.jimmer.sql.exception.SaveException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.event.TransactionPhase
@@ -52,14 +53,23 @@ class DailyTaskProgressTracker(
 			if (updatedDailyTask.completed()) {
 				log.info("Daily task completed for player {} type {}", playerId, event.type)
 
-				playerDayStreakService.processStreak(playerId, today)
+				val activityCreated = try {
+					playerDayActivityService.insertIfAbsent(Immutables.createPlayerDayActivity {
+						it.setId(UUID.randomUUID())
+							.setPlayerId(playerId)
+							.setDailyTaskCompleted(true)
+							.setDay(today)
+					})
+					true
 
-				playerDayActivityService.insertIfAbsent(Immutables.createPlayerDayActivity {
-					it.setId(UUID.randomUUID())
-						.setPlayerId(playerId)
-						.setDailyTaskCompleted(true)
-						.setDay(today)
-				})
+				} catch (e: SaveException.NotUnique) {
+					log.debug("Daily task activity already exists for player {}", playerId, e)
+					false
+				}
+
+				if (activityCreated) {
+					playerDayStreakService.processStreak(playerId, today)
+				}
 			}
 
 		} catch (e: Exception) {

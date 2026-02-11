@@ -19,13 +19,15 @@ public interface DailyTaskSpec {
    */
   BigDecimal goal();
 
-  String localizationPath();
-
   default List<Object> localizationArgs() {
-    return List.of();
+    return List.of(goal());
   }
 
   default String fullLocalizationKey() {
-    return LOCALIZATION_PREFIX + localizationPath();
+    var kebabCase = getClass()
+        .getSimpleName()
+        .replaceAll("([a-z])([A-Z])", "$1-$2")
+        .toLowerCase();
+    return LOCALIZATION_PREFIX + kebabCase;
   }
 }
