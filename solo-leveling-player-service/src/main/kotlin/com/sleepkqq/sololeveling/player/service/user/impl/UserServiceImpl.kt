@@ -1,7 +1,7 @@
 package com.sleepkqq.sololeveling.player.service.user.impl
 
 import com.sleepkqq.sololeveling.jimmer.predicate.filter.DateFilter
-import com.sleepkqq.sololeveling.player.event.model.LocaleUpdatedEvent
+import com.sleepkqq.sololeveling.player.kafka.producer.LocaleUpdatedProducer
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser
 import com.sleepkqq.sololeveling.player.model.entity.user.User
@@ -18,7 +18,6 @@ import com.sleepkqq.sololeveling.proto.user.LeaderboardType
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -28,8 +27,8 @@ import kotlin.reflect.KClass
 @Service
 class UserServiceImpl(
 	private val userRepository: UserRepository,
-	private val eventPublisher: ApplicationEventPublisher,
-	private val playerService: PlayerService
+	private val playerService: PlayerService,
+	private val localeUpdatedProducer: LocaleUpdatedProducer
 ) : UserService {
 
 	@Transactional(readOnly = true)
@@ -68,7 +67,7 @@ class UserServiceImpl(
 	override fun updateLocale(id: Long, locale: Locale) {
 		userRepository.updateLocale(id, locale)
 
-		eventPublisher.publishEvent(LocaleUpdatedEvent(id))
+		localeUpdatedProducer.send(userId = id)
 	}
 
 	override fun register(user: User): User = Immutables.createUser(user) {

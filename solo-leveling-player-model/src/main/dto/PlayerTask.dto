@@ -94,3 +94,23 @@ GeneratePlayerTaskView {
 
   order
 }
+
+unsafe PreparingPlayerTaskView {
+  #allScalars
+
+  player! {
+    id
+  }
+
+  task! {
+    id
+
+    version
+
+    rarity
+
+    topics {
+      #allScalars
+    }
+  }
+}

@@ -2,11 +2,10 @@ package com.sleepkqq.sololeveling.player.service.player.impl
 
 import com.sleepkqq.sololeveling.player.config.properties.PlayerLimitsProperties
 import com.sleepkqq.sololeveling.player.config.properties.TasksProperties
-import com.sleepkqq.sololeveling.player.event.model.TasksSavedEvent
-import com.sleepkqq.sololeveling.player.event.model.TasksSilentUpdatedEvent
 import com.sleepkqq.sololeveling.player.event.model.TaskCompletedEvent
 import com.sleepkqq.sololeveling.player.exception.AccessDeniedException
 import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
+import com.sleepkqq.sololeveling.player.kafka.producer.TasksSavedProducer
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerTask
@@ -16,6 +15,7 @@ import com.sleepkqq.sololeveling.player.model.entity.player.dto.*
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerBalanceTransactionCause
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.PlayerTaskStatus
 import com.sleepkqq.sololeveling.player.model.entity.task.Task
+import com.sleepkqq.sololeveling.player.model.entity.task.dto.GenerateTaskView
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
 import com.sleepkqq.sololeveling.player.service.player.*
@@ -47,7 +47,8 @@ class PlayerTaskServiceImpl(
 	private val playerLimitsProperties: PlayerLimitsProperties,
 	private val playerStaminaService: PlayerStaminaService,
 	private val tasksProperties: TasksProperties,
-	private val eventPublisher: ApplicationEventPublisher
+	private val eventPublisher: ApplicationEventPublisher,
+	private val tasksSavedProducer: TasksSavedProducer
 ) : PlayerTaskService {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -78,7 +79,7 @@ class PlayerTaskServiceImpl(
 		playerTaskRepository.findByPlayerIdAndStatusIn(playerId, ACTIVE_TASKS_STATUSES, viewType.java)
 
 	@Transactional(readOnly = true)
-	override fun getPreparingTasksForRetry(): List<PlayerTask> =
+	override fun getPreparingTasksForRetry(): List<PreparingPlayerTaskView> =
 		playerTaskRepository.findPreparingTasksForRetry()
 
 	override fun initialize(playerId: Long, order: Int, task: Task): PlayerTask =
@@ -228,16 +229,14 @@ class PlayerTaskServiceImpl(
 
 		insertAll(playerTasksToInsert)
 
-		if (playerTasksToInsert.all { it.status() == PlayerTaskStatus.IN_PROGRESS }) {
-			eventPublisher.publishEvent(TasksSavedEvent(playerId))
-		} else {
-			eventPublisher.publishEvent(TasksSilentUpdatedEvent(playerId))
-		}
-
 		val tasksToGenerate = playerTasksToInsert.filter { it.status() == PlayerTaskStatus.PREPARING }
-			.map { it.task()!! }
+			.map { GenerateTaskView(it.task()!!) }
 
-		generateTasksProducer.send(playerId, tasksToGenerate)
+		val allTasksInProgress = tasksToGenerate.isEmpty()
+		if (allTasksInProgress) {
+			generateTasksProducer.send(userId = playerId, tasks = tasksToGenerate)
+		}
+		tasksSavedProducer.send(userId = playerId, allTasksInProgress = allTasksInProgress)
 	}
 
 	private fun setStatus(

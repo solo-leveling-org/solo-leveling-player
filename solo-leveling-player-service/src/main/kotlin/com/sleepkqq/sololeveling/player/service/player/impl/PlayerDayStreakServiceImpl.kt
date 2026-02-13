@@ -1,5 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.player.impl
 
+import com.sleepkqq.sololeveling.player.kafka.producer.DayStreakExtendedProducer
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerDayStreak
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerDayStreakRepository
@@ -15,7 +16,8 @@ import kotlin.math.max
 
 @Service
 class PlayerDayStreakServiceImpl(
-	private val playerDayStreakRepository: PlayerDayStreakRepository
+	private val playerDayStreakRepository: PlayerDayStreakRepository,
+	private val dayStreakExtendedProducer: DayStreakExtendedProducer
 ) : PlayerDayStreakService {
 
 	@Transactional(readOnly = true)
@@ -63,6 +65,11 @@ class PlayerDayStreakServiceImpl(
 	override fun processStreak(playerId: Long, today: LocalDate): PlayerDayStreak {
 		val dayStreak = get(playerId)
 		val extendedStreak = extend(dayStreak, today)
+
+		if (extendedStreak.current() > dayStreak.current()) {
+			dayStreakExtendedProducer.send(userId = playerId)
+		}
+
 		return update(extendedStreak)
 	}
 
