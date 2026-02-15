@@ -73,6 +73,6 @@ class SaveTasksConsumer(
 			playerTaskService.inProgressTasks(playerTasks)
 		}
 
-		tasksSavedProducer.send(UUID.fromString(event.txId), event.userId, false)
+		tasksSavedProducer.send(UUID.fromString(event.txId), event.userId, event.operation)
 	}
 }

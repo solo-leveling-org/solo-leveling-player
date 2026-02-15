@@ -1,5 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.player
 
+import com.sleepkqq.sololeveling.avro.task.SaveTasksOperation
 import com.sleepkqq.sololeveling.player.exception.ModelNotFoundException
 import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
@@ -39,7 +40,13 @@ interface PlayerTaskService {
 	fun skipTask(playerId: Long, id: UUID)
 	fun completeTask(playerId: Long, id: UUID): Pair<PlayerView, PlayerView>
 	fun inProgressTasks(tasks: Collection<PlayerTask>)
-	fun generateTasks(playerId: Long, player: Player? = null, replaceOrders: Set<Int> = setOf())
+	fun generateTasks(
+		playerId: Long,
+		player: Player? = null,
+		replaceOrders: Set<Int> = setOf(),
+		operation: SaveTasksOperation
+	)
+
 	fun <V : View<PlayerTask>> searchView(
 		playerId: Long,
 		options: RequestQueryOptions,

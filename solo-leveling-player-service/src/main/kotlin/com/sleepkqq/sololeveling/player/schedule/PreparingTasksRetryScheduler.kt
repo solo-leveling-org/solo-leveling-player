@@ -1,5 +1,6 @@
 package com.sleepkqq.sololeveling.player.schedule
 
+import com.sleepkqq.sololeveling.avro.task.SaveTasksOperation
 import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
 import com.sleepkqq.sololeveling.player.model.entity.task.dto.GenerateTaskView
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
@@ -46,7 +47,8 @@ class PreparingTasksRetryScheduler(
 				log.info("Generating tasks for playerId={} with tasks={}", playerId, tasks.map { it.id })
 				generateTasksProducer.send(
 					userId = playerId,
-					tasks = tasks.map { GenerateTaskView(it.toEntity()) }
+					tasks = tasks.map { GenerateTaskView(it.toEntity()) },
+					operation = SaveTasksOperation.COMPLETE
 				)
 			}
 

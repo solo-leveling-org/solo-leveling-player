@@ -1,11 +1,11 @@
 package com.sleepkqq.sololeveling.player.grpc.server
 
 import com.google.protobuf.Empty
+import com.sleepkqq.sololeveling.avro.task.SaveTasksOperation
 import com.sleepkqq.sololeveling.config.interceptor.UserContextHolder
 import com.sleepkqq.sololeveling.jimmer.enums.EnumLocalizer
 import com.sleepkqq.sololeveling.player.config.properties.PlayerLimitsProperties
-import com.sleepkqq.sololeveling.player.lozalization.LocalizationCode.TABLES_PLAYER_BALANCE_TRANSACTIONS
-import com.sleepkqq.sololeveling.player.lozalization.LocalizationCode.TABLES_PLAYER_TASKS
+import com.sleepkqq.sololeveling.player.service.i18n.LocalizationCode
 import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.AMOUNT_FIELD
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
@@ -103,7 +103,10 @@ class PlayerApi(
 		request: Empty,
 		responseObserver: StreamObserver<Empty>
 	) {
-		playerTaskService.generateTasks(UserContextHolder.getUserId()!!)
+		playerTaskService.generateTasks(
+			playerId = UserContextHolder.getUserId()!!,
+			operation = SaveTasksOperation.INITIALIZE
+		)
 
 		responseObserver.onNext(Empty.newBuilder().build())
 		responseObserver.onCompleted()
@@ -170,7 +173,7 @@ class PlayerApi(
 			transactionsPage,
 			request.paging.page,
 			enumLocalizer.localize(
-				TABLES_PLAYER_BALANCE_TRANSACTIONS.code,
+				LocalizationCode.TABLES_PLAYER_BALANCE_TRANSACTIONS,
 				PlayerBalanceTransactionRepository.FIELD_ENUM_TYPES
 			),
 			setOf(AMOUNT_FIELD)
@@ -194,7 +197,7 @@ class PlayerApi(
 			tasksPage,
 			request.paging.page,
 			enumLocalizer.localize(
-				TABLES_PLAYER_TASKS.code,
+				LocalizationCode.TABLES_PLAYER_TASKS,
 				PlayerTaskRepository.FIELD_ENUM_TYPES,
 				PlayerTaskRepository.ENUM_TYPE_PREDICATES
 			)

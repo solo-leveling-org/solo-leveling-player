@@ -1,5 +1,6 @@
 package com.sleepkqq.sololeveling.player.service.player.impl
 
+import com.sleepkqq.sololeveling.avro.task.SaveTasksOperation
 import com.sleepkqq.sololeveling.player.config.properties.PlayerLimitsProperties
 import com.sleepkqq.sololeveling.player.config.properties.TasksProperties
 import com.sleepkqq.sololeveling.player.event.model.TaskCompletedEvent
@@ -109,7 +110,11 @@ class PlayerTaskServiceImpl(
 
 		setStatus(listOf(playerTask.toEntity()), PlayerTaskStatus.SKIPPED)
 
-		generateTasks(playerId, replaceOrders = setOf(playerTask.order))
+		generateTasks(
+			playerId = playerId,
+			replaceOrders = setOf(playerTask.order),
+			operation = SaveTasksOperation.SKIP
+		)
 	}
 
 	@Transactional
@@ -153,7 +158,7 @@ class PlayerTaskServiceImpl(
 			}
 		)
 
-		generateTasks(playerId, updatedPlayer, setOf(playerTask.order))
+		generateTasks(playerId, updatedPlayer, setOf(playerTask.order), SaveTasksOperation.COMPLETE)
 
 		eventPublisher.publishEvent(TaskCompletedEvent(playerId, task.rarity))
 
@@ -183,7 +188,8 @@ class PlayerTaskServiceImpl(
 	override fun generateTasks(
 		playerId: Long,
 		player: Player?,
-		replaceOrders: Set<Int>
+		replaceOrders: Set<Int>,
+		operation: SaveTasksOperation
 	) {
 		val resolvedPlayer = player
 			?: playerService.getView(playerId, GenerateTasksPlayerView::class).toEntity()
@@ -232,11 +238,15 @@ class PlayerTaskServiceImpl(
 		val tasksToGenerate = playerTasksToInsert.filter { it.status() == PlayerTaskStatus.PREPARING }
 			.map { GenerateTaskView(it.task()!!) }
 
-		val allTasksInProgress = tasksToGenerate.isEmpty()
-		if (allTasksInProgress) {
-			generateTasksProducer.send(userId = playerId, tasks = tasksToGenerate)
+		val hasTasksToGenerate = tasksToGenerate.isNotEmpty()
+		if (hasTasksToGenerate) {
+			generateTasksProducer.send(userId = playerId, tasks = tasksToGenerate, operation = operation)
 		}
-		tasksSavedProducer.send(userId = playerId, allTasksInProgress = allTasksInProgress)
+
+		tasksSavedProducer.send(
+			userId = playerId,
+			operation = operation.takeUnless { hasTasksToGenerate }
+		)
 	}
 
 	private fun setStatus(

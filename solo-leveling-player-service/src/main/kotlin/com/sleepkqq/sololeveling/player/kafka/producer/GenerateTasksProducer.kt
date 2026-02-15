@@ -2,6 +2,7 @@ package com.sleepkqq.sololeveling.player.kafka.producer
 
 import com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics
 import com.sleepkqq.sololeveling.avro.task.GenerateTasksEvent
+import com.sleepkqq.sololeveling.avro.task.SaveTasksOperation
 import com.sleepkqq.sololeveling.player.mapper.AvroMapper
 import com.sleepkqq.sololeveling.player.model.entity.task.dto.GenerateTaskView
 import org.slf4j.LoggerFactory
@@ -17,7 +18,12 @@ class GenerateTasksProducer(
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	fun send(txId: UUID = UUID.randomUUID(), userId: Long, tasks: List<GenerateTaskView>) {
+	fun send(
+		txId: UUID = UUID.randomUUID(),
+		userId: Long,
+		tasks: List<GenerateTaskView>,
+		operation: SaveTasksOperation
+	) {
 		if (tasks.isEmpty()) {
 			log.warn("No tasks to generate for userId={}", userId)
 		}
@@ -27,6 +33,7 @@ class GenerateTasksProducer(
 		val event = GenerateTasksEvent.newBuilder()
 			.setTxId(txId.toString())
 			.setUserId(userId)
+			.setOperation(operation)
 			.setTasks(generateTasks)
 			.build()
 
