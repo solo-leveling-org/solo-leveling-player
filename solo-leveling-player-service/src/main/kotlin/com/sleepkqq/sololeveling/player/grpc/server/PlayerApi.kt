@@ -57,7 +57,7 @@ class PlayerApi(
 
 		val response = GetActiveTasksResponse.newBuilder()
 			.addAllTasks(activeTasks)
-			.setFirstTime(isFirstTime)
+			.setIsFirstTime(isFirstTime)
 			.setStamina(protoMapper.map(stamina, staminaConfig))
 			.build()
 

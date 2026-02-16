@@ -6,7 +6,5 @@ PlayerDayStreakView {
 
   -createdAt
 
-  -updatedAt
-
   -version
 }

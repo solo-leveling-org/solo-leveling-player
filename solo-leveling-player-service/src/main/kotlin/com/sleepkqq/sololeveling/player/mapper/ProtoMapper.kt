@@ -37,6 +37,8 @@ import org.springframework.context.i18n.LocaleContextHolder
 import java.math.BigDecimal
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
 import kotlin.math.max
 
 @Mapper(
@@ -163,8 +165,22 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		cfg: StaminaConfig
 	): com.sleepkqq.sololeveling.proto.player.PlayerStaminaView
 
+	@Mapping(
+		target = "isExtendedToday",
+		expression = "java(isExtendedToday(input.getUpdatedAt(), input.getMax()))"
+	)
 	abstract fun map(input: PlayerDayStreakView): com.sleepkqq.sololeveling.proto.player.PlayerDayStreakView
 
+	fun isExtendedToday(updatedAt: Instant, max: Int): Boolean {
+		if (max == 0) {
+			return false
+		}
+		val today = LocalDate.now(ZoneOffset.UTC)
+		val updatedDate = updatedAt.atZone(ZoneOffset.UTC).toLocalDate()
+		return updatedDate.isEqual(today)
+	}
+
+	@Mapping(target = "isCompleted", source = "completed")
 	@Mapping(target = "goal", expression = "java(map(input.getSpec().goal()))")
 	@Mapping(target = "title", expression = "java(map(input.getSpec()))")
 	abstract fun map(input: PlayerDailyTaskView): com.sleepkqq.sololeveling.proto.player.PlayerDailyTaskView

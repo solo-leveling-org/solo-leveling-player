@@ -84,8 +84,6 @@ unsafe UserAdditionalInfoView {
 
       -createdAt
 
-      -updatedAt
-
       -version
     }
   }
