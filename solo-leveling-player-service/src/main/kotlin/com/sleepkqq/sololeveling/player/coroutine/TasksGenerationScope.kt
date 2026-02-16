@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class TaskGenerationScope(loomDispatcher: CoroutineDispatcher) {
+class TasksGenerationScope(loomDispatcher: CoroutineDispatcher) {
 
 	private val log = LoggerFactory.getLogger(javaClass)
 

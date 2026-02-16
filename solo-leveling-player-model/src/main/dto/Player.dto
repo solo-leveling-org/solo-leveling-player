@@ -50,3 +50,43 @@ PlayerView {
     }
   }
 }
+
+unsafe ResetPlayerView {
+  #allScalars
+
+  level! {
+    #allScalars
+  }
+
+  balance! {
+    #allScalars
+  }
+
+  taskTopics {
+    #allScalars
+
+    level! {
+      #allScalars
+    }
+  }
+
+  stamina! {
+    #allScalars
+  }
+
+  dayStreak! {
+    #allScalars
+  }
+}
+
+GenerateTasksPlayerView {
+  taskTopics {
+    taskTopic
+
+    active
+
+    level {
+      level
+    }
+  }
+}

@@ -54,3 +54,37 @@ LeaderboardUserView {
 
   photoUrl
 }
+
+AuthUserView {
+  id
+
+  version
+
+  manualLocale
+
+  roles {
+    #allScalars
+  }
+}
+
+unsafe UserAdditionalInfoView {
+  locale
+
+  manualLocale
+
+  photoUrl
+
+  roles {
+    #allScalars
+  }
+
+  player! {
+    dayStreak! {
+      #allScalars
+
+      -createdAt
+
+      -version
+    }
+  }
+}

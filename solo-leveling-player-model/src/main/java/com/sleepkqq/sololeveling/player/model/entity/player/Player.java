@@ -40,12 +40,22 @@ public interface Player extends Model {
   @OneToOne(mappedBy = "player")
   PlayerStamina stamina();
 
+  @Nullable
+  @OneToOne(mappedBy = "player")
+  PlayerDayStreak dayStreak();
+
   @OneToMany(mappedBy = "player")
   List<PlayerTask> tasks();
+
+  @OneToMany(mappedBy = "player")
+  List<PlayerDailyTask> dailyTasks();
 
   @OneToMany(mappedBy = "player")
   List<PlayerTaskTopic> taskTopics();
 
   @OneToMany(mappedBy = "player")
   List<PlayerGearItem> gearItems();
+
+  @OneToMany(mappedBy = "player")
+  List<PlayerDayActivity> dayActivities();
 }

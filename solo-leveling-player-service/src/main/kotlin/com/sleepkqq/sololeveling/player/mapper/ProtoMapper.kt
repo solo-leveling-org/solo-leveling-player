@@ -10,15 +10,19 @@ import com.sleepkqq.sololeveling.player.model.entity.localization.LocalizationIt
 import com.sleepkqq.sololeveling.player.model.entity.player.TaskTopicItem
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerDailyTaskView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerDayStreakView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerStaminaView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskTopicView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerView
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.CurrencyCode
+import com.sleepkqq.sololeveling.player.model.entity.player.sealed.DailyTaskSpec
 import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser
 import com.sleepkqq.sololeveling.player.model.entity.user.UserRoleItem
 import com.sleepkqq.sololeveling.player.model.entity.user.UsersStats
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
+import com.sleepkqq.sololeveling.player.service.i18n.I18nService
 import com.sleepkqq.sololeveling.proto.player.*
 import com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicInput
 import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardResponse
@@ -28,10 +32,13 @@ import com.sleepkqq.sololeveling.proto.user.UserRole
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
 import org.mapstruct.*
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.i18n.LocaleContextHolder
 import java.math.BigDecimal
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
 import kotlin.math.max
 
 @Mapper(
@@ -43,6 +50,9 @@ import kotlin.math.max
 	nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS
 )
 abstract class ProtoMapper : JimmerProtoMapper() {
+
+	@Autowired
+	protected lateinit var i18nService: I18nService
 
 	fun map(input: TaskTopic): com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic =
 		com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic.valueOf(input.name)
@@ -154,6 +164,29 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		input: PlayerStaminaView,
 		cfg: StaminaConfig
 	): com.sleepkqq.sololeveling.proto.player.PlayerStaminaView
+
+	@Mapping(
+		target = "isExtendedToday",
+		expression = "java(isExtendedToday(input.getUpdatedAt(), input.getMax()))"
+	)
+	abstract fun map(input: PlayerDayStreakView): com.sleepkqq.sololeveling.proto.player.PlayerDayStreakView
+
+	fun isExtendedToday(updatedAt: Instant, max: Int): Boolean {
+		if (max == 0) {
+			return false
+		}
+		val today = LocalDate.now(ZoneOffset.UTC)
+		val updatedDate = updatedAt.atZone(ZoneOffset.UTC).toLocalDate()
+		return updatedDate.isEqual(today)
+	}
+
+	@Mapping(target = "isCompleted", source = "completed")
+	@Mapping(target = "goal", expression = "java(map(input.getSpec().goal()))")
+	@Mapping(target = "title", expression = "java(map(input.getSpec()))")
+	abstract fun map(input: PlayerDailyTaskView): com.sleepkqq.sololeveling.proto.player.PlayerDailyTaskView
+
+	protected fun map(spec: DailyTaskSpec): String =
+		i18nService.getMessage(spec.fullLocalizationKey(), spec.localizationArgs())
 
 	protected fun map(
 		lastRegeneratedAt: Instant,

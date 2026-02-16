@@ -1,7 +1,7 @@
 export com.sleepkqq.sololeveling.player.model.entity.task.Task
   -> package com.sleepkqq.sololeveling.player.model.entity.task.dto
 
-input SaveTaskInput {
+unsafe input SaveTaskInput {
   #allScalars
 
   -createdAt
@@ -10,11 +10,11 @@ input SaveTaskInput {
 
   -deprecated
 
-  title {
+  title! {
     #allScalars
   }
 
-  description {
+  description! {
     #allScalars
   }
 }

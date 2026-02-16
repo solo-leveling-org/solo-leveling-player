@@ -1,30 +1,20 @@
 package com.sleepkqq.sololeveling.player.service.player
 
 import com.sleepkqq.sololeveling.player.exception.ModelNotFoundException
-import com.sleepkqq.sololeveling.player.model.entity.Fetchers
-import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerStamina
-import com.sleepkqq.sololeveling.player.model.entity.player.PlayerStaminaFetcher
-import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerStaminaView
+import org.babyfish.jimmer.View
+import kotlin.reflect.KClass
 
 interface PlayerStaminaService {
 
-	fun find(
-		playerId: Long,
-		fetcher: PlayerStaminaFetcher = Fetchers.PLAYER_STAMINA_FETCHER.allScalarFields()
-	): PlayerStamina?
-
-	fun get(
-		playerId: Long,
-		fetcher: PlayerStaminaFetcher = Fetchers.PLAYER_STAMINA_FETCHER.allScalarFields()
-	): PlayerStamina = find(playerId, fetcher)
-		?: throw ModelNotFoundException(Player::class, playerId)
+	fun <V : View<PlayerStamina>> findView(playerId: Long, viewType: KClass<V>): V?
+	fun <V : View<PlayerStamina>> getView(playerId: Long, viewType: KClass<V>): V =
+		findView(playerId, viewType) ?: throw ModelNotFoundException(PlayerStamina::class, playerId)
 
 	fun update(stamina: PlayerStamina): PlayerStamina
 	fun initialize(): PlayerStamina
-	fun calculateCurrentStamina(stamina: PlayerStamina): PlayerStamina
-	fun getCurrentStamina(playerId: Long): PlayerStaminaView
-	fun consumeStamina(stamina: PlayerStamina, amount: Int): PlayerStamina
-	fun restoreStamina(stamina: PlayerStamina, amount: Int): PlayerStamina
+	fun calculateCurrent(stamina: PlayerStamina): PlayerStamina
+	fun consume(stamina: PlayerStamina, amount: Int): PlayerStamina
+	fun restore(stamina: PlayerStamina, amount: Int): PlayerStamina
 	fun fullRestore(stamina: PlayerStamina): PlayerStamina
 }

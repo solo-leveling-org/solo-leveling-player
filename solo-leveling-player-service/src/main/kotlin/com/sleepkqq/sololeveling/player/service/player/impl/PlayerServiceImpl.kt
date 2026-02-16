@@ -1,17 +1,14 @@
 package com.sleepkqq.sololeveling.player.service.player.impl
 
-import com.sleepkqq.sololeveling.player.model.entity.Fetchers
 import com.sleepkqq.sololeveling.player.model.entity.Immutables
 import com.sleepkqq.sololeveling.player.model.entity.player.Player
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerFetcher
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.ResetPlayerView
+import com.sleepkqq.sololeveling.player.model.entity.player.enums.DailyTaskType
 import com.sleepkqq.sololeveling.player.model.entity.player.enums.LevelType
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerRepository
-import com.sleepkqq.sololeveling.player.service.player.LevelService
-import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
-import com.sleepkqq.sololeveling.player.service.player.PlayerService
-import com.sleepkqq.sololeveling.player.service.player.PlayerStaminaService
-import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
+import com.sleepkqq.sololeveling.player.service.player.*
 import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.AssociatedSaveMode
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
@@ -25,7 +22,9 @@ class PlayerServiceImpl(
 	private val levelService: LevelService,
 	private val playerBalanceService: PlayerBalanceService,
 	private val playerTaskTopicService: PlayerTaskTopicService,
-	private val playerStaminaService: PlayerStaminaService
+	private val playerStaminaService: PlayerStaminaService,
+	private val playerDayStreakService: PlayerDayStreakService,
+	private val playerDailyTaskService: PlayerDailyTaskService
 ) : PlayerService {
 
 	@Transactional(readOnly = true)
@@ -54,54 +53,50 @@ class PlayerServiceImpl(
 				}
 			)
 			.setStamina(playerStaminaService.initialize())
+			.setDayStreak(playerDayStreakService.initialize())
+			.setDailyTasks(
+				DailyTaskType.entries.map { type ->
+					playerDailyTaskService.initialize(userId, type)
+				}
+			)
 	}
 
 	@Transactional
 	override fun reset(id: Long) {
-		val player = get(
-			id,
-			Fetchers.PLAYER_FETCHER.allScalarFields()
-				.level(Fetchers.LEVEL_FETCHER.allScalarFields())
-				.balance(Fetchers.PLAYER_BALANCE_FETCHER.allScalarFields())
-				.taskTopics(
-					Fetchers.PLAYER_TASK_TOPIC_FETCHER.allScalarFields()
-						.level(Fetchers.LEVEL_FETCHER.allScalarFields())
-				)
-				.stamina(Fetchers.PLAYER_STAMINA_FETCHER.allScalarFields())
-		)
+		val player = getView(id, ResetPlayerView::class)
 
-		val resetPlayer = Immutables.createPlayer(player) {
+		val resetPlayer = Immutables.createPlayer(player.toEntity()) {
 			it.setAgility(0)
 				.setStrength(0)
 				.setIntelligence(0)
 				.setLevel(Immutables.createLevel(levelService.initialize(LevelType.PLAYER)) { l ->
-					val level = player.level()!!
-					l.setId(level.id())
-						.setVersion(level.version())
+					val level = player.level
+					l.setId(level.id)
+						.setVersion(level.version)
 				})
 				.setBalance(Immutables.createPlayerBalance(playerBalanceService.initialize()) { b ->
-					val balance = player.balance()!!
-					b.setId(balance.id())
-						.setVersion(balance.version())
+					val balance = player.balance
+					b.setId(balance.id)
+						.setVersion(balance.version)
 						.setTransactions(listOf())
 				})
 				.setTaskTopics(
-					player.taskTopics().map { topic ->
-						Immutables.createPlayerTaskTopic(topic) { t ->
-							val level = t.level()!!
+					player.taskTopics.map { topic ->
+						Immutables.createPlayerTaskTopic(topic.toEntity()) { t ->
+							val level = topic.level
 
 							t.setActive(false)
 								.setLevel(Immutables.createLevel(levelService.initialize(LevelType.TASK_TOPIC)) { l ->
-									l.setId(level.id())
-										.setVersion(level.version())
+									l.setId(level.id)
+										.setVersion(level.version)
 								})
 						}
 					}
 				)
 				.setStamina(Immutables.createPlayerStamina(playerStaminaService.initialize()) { s ->
-					val stamina = player.stamina()!!
-					s.setId(stamina.id())
-						.setVersion(stamina.version())
+					val stamina = player.stamina
+					s.setId(stamina.id)
+						.setVersion(stamina.version)
 				})
 				.setTasks(listOf())
 		}

@@ -1,18 +1,19 @@
 package com.sleepkqq.sololeveling.player.schedule
 
-import com.sleepkqq.sololeveling.player.config.properties.PreparingTasksRetrySchedulerProperties
+import com.sleepkqq.sololeveling.avro.task.SaveTasksOperation
 import com.sleepkqq.sololeveling.player.kafka.producer.GenerateTasksProducer
+import com.sleepkqq.sololeveling.player.model.entity.task.dto.GenerateTaskView
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import org.slf4j.LoggerFactory
-import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@EnableConfigurationProperties(PreparingTasksRetrySchedulerProperties::class)
 class PreparingTasksRetryScheduler(
-	private val preparingTasksRetrySchedulerProperties: PreparingTasksRetrySchedulerProperties,
+	@Value($$"${app.scheduler.preparing-tasks-retry.enabled}")
+	private val enabled: Boolean,
 	private val playerTaskService: PlayerTaskService,
 	private val generateTasksProducer: GenerateTasksProducer
 ) {
@@ -22,7 +23,7 @@ class PreparingTasksRetryScheduler(
 	@Transactional(readOnly = true)
 	@Scheduled(cron = $$"${app.scheduler.preparing-tasks-retry.cron}", zone = "UTC")
 	fun call() {
-		if (!preparingTasksRetrySchedulerProperties.enabled) {
+		if (!enabled) {
 			log.warn("Preparing tasks retry scheduler is disabled")
 			return
 		}
@@ -37,14 +38,14 @@ class PreparingTasksRetryScheduler(
 			return
 		}
 
-		preparingTasks
-			.groupBy(
-				{ it.player()!!.id() },
-				{ it.task()!! }
-			)
+		preparingTasks.groupBy({ it.player.id }, { it.task })
 			.forEach { (playerId, tasks) ->
-				log.info("Generating tasks for playerId={} with tasks={}", playerId, tasks.map { it.id() })
-				generateTasksProducer.send(playerId, tasks)
+				log.info("Generating tasks for playerId={} with tasks={}", playerId, tasks.map { it.id })
+				generateTasksProducer.send(
+					userId = playerId,
+					tasks = tasks.map { GenerateTaskView(it.toEntity()) },
+					operation = SaveTasksOperation.COMPLETE
+				)
 			}
 
 		log.info("Finished preparing tasks retry scheduler")

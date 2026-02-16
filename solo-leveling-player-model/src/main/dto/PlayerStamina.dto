@@ -6,5 +6,7 @@ PlayerStaminaView {
 
   -createdAt
 
+  -updatedAt
+
   -version
 }

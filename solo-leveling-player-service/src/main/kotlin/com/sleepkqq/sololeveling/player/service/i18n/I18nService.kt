@@ -9,9 +9,10 @@ class I18nService(
 	private val messageSource: MessageSource
 ) {
 
-	fun getMessage(key: String, vararg args: Any?): String = messageSource.getMessage(
-		key,
-		if (args.isEmpty()) null else args,
-		LocaleContextHolder.getLocale()
-	)
+	fun getMessage(code: String, args: List<Any> = emptyList()): String =
+		messageSource.getMessage(
+			code,
+			args.toTypedArray().takeIf { it.isNotEmpty() },
+			LocaleContextHolder.getLocale()
+		)
 }

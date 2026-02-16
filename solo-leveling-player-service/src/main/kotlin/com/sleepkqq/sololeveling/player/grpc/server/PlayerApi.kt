@@ -1,30 +1,27 @@
 package com.sleepkqq.sololeveling.player.grpc.server
 
 import com.google.protobuf.Empty
+import com.sleepkqq.sololeveling.avro.task.SaveTasksOperation
 import com.sleepkqq.sololeveling.config.interceptor.UserContextHolder
 import com.sleepkqq.sololeveling.jimmer.enums.EnumLocalizer
 import com.sleepkqq.sololeveling.player.config.properties.PlayerLimitsProperties
-import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_BALANCE_TRANSACTIONS
-import com.sleepkqq.sololeveling.player.lozalization.LocalizationCodes.TABLES_PLAYER_TASKS
+import com.sleepkqq.sololeveling.player.service.i18n.LocalizationCode
 import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.model.entity.player.PlayerBalanceTransaction.AMOUNT_FIELD
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceTransactionView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerBalanceView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerDailyTaskView
+import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerStaminaView
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerTaskView
 import com.sleepkqq.sololeveling.player.model.entity.task.enums.TaskTopic
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerBalanceTransactionRepository
 import com.sleepkqq.sololeveling.player.model.repository.player.PlayerTaskRepository
-import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceService
-import com.sleepkqq.sololeveling.player.service.player.PlayerBalanceTransactionService
-import com.sleepkqq.sololeveling.player.service.player.PlayerService
-import com.sleepkqq.sololeveling.player.service.player.PlayerStaminaService
-import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
-import com.sleepkqq.sololeveling.player.service.player.PlayerTaskTopicService
+import com.sleepkqq.sololeveling.player.service.player.*
 import com.sleepkqq.sololeveling.player.service.task.TaskService
 import com.sleepkqq.sololeveling.proto.player.*
 import io.grpc.stub.StreamObserver
 import org.springframework.grpc.server.service.GrpcService
-import java.util.UUID
+import java.util.*
 
 @GrpcService
 class PlayerApi(
@@ -37,7 +34,9 @@ class PlayerApi(
 	private val enumLocalizer: EnumLocalizer,
 	private val playerStaminaService: PlayerStaminaService,
 	private val playerLimitsProperties: PlayerLimitsProperties,
-	private val playerService: PlayerService
+	private val playerService: PlayerService,
+	private val playerDailyTaskService: PlayerDailyTaskService,
+	private val playerDayActivityService: PlayerDayActivityService
 ) : PlayerServiceGrpc.PlayerServiceImplBase() {
 
 	override fun getActiveTasks(
@@ -46,17 +45,19 @@ class PlayerApi(
 	) {
 		val playerId = UserContextHolder.getUserId()!!
 
-		val activeTasks = playerTaskService.getActiveTasks(playerId)
-			.map { protoMapper.map(it) }
+		val activeTasks = playerTaskService.getActiveTasks(playerId, PlayerTaskView::class)
+			.map(protoMapper::map)
 
 		val isFirstTime = activeTasks.isEmpty()
 
-		val stamina = playerStaminaService.getCurrentStamina(playerId)
+		val stamina = playerStaminaService.getView(playerId, PlayerStaminaView::class)
+			.let { playerStaminaService.calculateCurrent(it.toEntity()) }
+			.let { PlayerStaminaView(it) }
 		val staminaConfig = playerLimitsProperties.limits.free.stamina
 
 		val response = GetActiveTasksResponse.newBuilder()
 			.addAllTasks(activeTasks)
-			.setFirstTime(isFirstTime)
+			.setIsFirstTime(isFirstTime)
 			.setStamina(protoMapper.map(stamina, staminaConfig))
 			.build()
 
@@ -102,7 +103,10 @@ class PlayerApi(
 		request: Empty,
 		responseObserver: StreamObserver<Empty>
 	) {
-		playerTaskService.generateTasks(UserContextHolder.getUserId()!!)
+		playerTaskService.generateTasks(
+			playerId = UserContextHolder.getUserId()!!,
+			operation = SaveTasksOperation.INITIALIZE
+		)
 
 		responseObserver.onNext(Empty.newBuilder().build())
 		responseObserver.onCompleted()
@@ -169,7 +173,7 @@ class PlayerApi(
 			transactionsPage,
 			request.paging.page,
 			enumLocalizer.localize(
-				TABLES_PLAYER_BALANCE_TRANSACTIONS,
+				LocalizationCode.TABLES_PLAYER_BALANCE_TRANSACTIONS,
 				PlayerBalanceTransactionRepository.FIELD_ENUM_TYPES
 			),
 			setOf(AMOUNT_FIELD)
@@ -193,7 +197,7 @@ class PlayerApi(
 			tasksPage,
 			request.paging.page,
 			enumLocalizer.localize(
-				TABLES_PLAYER_TASKS,
+				LocalizationCode.TABLES_PLAYER_TASKS,
 				PlayerTaskRepository.FIELD_ENUM_TYPES,
 				PlayerTaskRepository.ENUM_TYPE_PREDICATES
 			)
@@ -238,6 +242,44 @@ class PlayerApi(
 		playerService.reset(request.playerId)
 
 		responseObserver.onNext(Empty.newBuilder().build())
+		responseObserver.onCompleted()
+	}
+
+	override fun getDailyTasks(
+		request: Empty,
+		responseObserver: StreamObserver<GetDailyTasksResponse>
+	) {
+		val dailyTasks = playerDailyTaskService.findView(
+			UserContextHolder.getUserId()!!,
+			PlayerDailyTaskView::class
+		)
+
+		val sortedMappedTasks = dailyTasks.sortedBy { it.type.ordinal }
+			.map { protoMapper.map(it) }
+
+		val response = GetDailyTasksResponse.newBuilder()
+			.addAllTasks(sortedMappedTasks)
+			.build()
+
+		responseObserver.onNext(response)
+		responseObserver.onCompleted()
+	}
+
+	override fun getMonthlyActivity(
+		request: GetMonthlyActivityRequest,
+		responseObserver: StreamObserver<GetMonthlyActivityResponse>
+	) {
+		val monthlyActivity = playerDayActivityService.getMonthlyActivity(
+			UserContextHolder.getUserId()!!,
+			year = request.year,
+			month = request.month
+		)
+
+		val response = GetMonthlyActivityResponse.newBuilder()
+			.addAllActiveDays(monthlyActivity)
+			.build()
+
+		responseObserver.onNext(response)
 		responseObserver.onCompleted()
 	}
 }

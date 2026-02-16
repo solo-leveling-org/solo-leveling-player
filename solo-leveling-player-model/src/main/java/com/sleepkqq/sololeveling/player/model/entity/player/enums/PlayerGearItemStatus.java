@@ -1,10 +1,8 @@
 package com.sleepkqq.sololeveling.player.model.entity.player.enums;
 
 import com.sleepkqq.sololeveling.jimmer.enums.LocalizableEnum;
-import lombok.Getter;
 import org.babyfish.jimmer.sql.EnumItem;
 
-@Getter
 public enum PlayerGearItemStatus implements LocalizableEnum {
   @EnumItem(ordinal = 0)
   IN_INVENTORY,

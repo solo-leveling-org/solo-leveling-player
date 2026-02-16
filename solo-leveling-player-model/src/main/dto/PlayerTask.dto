@@ -31,38 +31,86 @@ PlayerTaskView {
   }
 }
 
-PlayerCompletionTaskView {
+unsafe CompletePlayerTaskView {
   #allScalars
 
-  task {
+  task! {
     #allScalars
+
+    currencyReward!
+
+    experience!
+
+    agility!
+
+    strength!
+
+    intelligence!
 
     topics {
       #allScalars
     }
   }
 
-  player {
+  player! {
     #allScalars
 
-    level {
+    level! {
       #allScalars
     }
 
-    balance {
+    balance! {
       #allScalars
     }
 
-    stamina {
+    stamina! {
       #allScalars
     }
 
     taskTopics {
       #allScalars
 
-      level {
+      level! {
         #allScalars
       }
+    }
+  }
+}
+
+unsafe SkipPlayerTaskView {
+  #allScalars
+
+  player! {
+    id
+
+    stamina! {
+      #allScalars
+    }
+  }
+}
+
+GeneratePlayerTaskView {
+  id
+
+  order
+}
+
+unsafe PreparingPlayerTaskView {
+  #allScalars
+
+  player! {
+    id
+  }
+
+  task! {
+    id
+
+    version
+
+    rarity
+
+    topics {
+      #allScalars
     }
   }
 }

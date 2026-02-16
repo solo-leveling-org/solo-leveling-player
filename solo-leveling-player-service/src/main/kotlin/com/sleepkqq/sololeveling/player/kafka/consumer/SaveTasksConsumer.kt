@@ -5,10 +5,9 @@ import com.sleepkqq.sololeveling.avro.constants.KafkaTaskTopics
 import com.sleepkqq.sololeveling.avro.idempotency.IdempotencyService
 import com.sleepkqq.sololeveling.avro.task.SaveTasksEvent
 import com.sleepkqq.sololeveling.player.config.properties.TasksProperties
+import com.sleepkqq.sololeveling.player.kafka.producer.TasksSavedProducer
 import com.sleepkqq.sololeveling.player.mapper.AvroMapper
 import com.sleepkqq.sololeveling.player.model.entity.task.dto.SaveTaskInput
-import com.sleepkqq.sololeveling.player.service.notification.NotificationCommand
-import com.sleepkqq.sololeveling.player.service.notification.NotificationService
 import com.sleepkqq.sololeveling.player.service.player.PlayerTaskService
 import com.sleepkqq.sololeveling.player.service.task.TaskService
 import org.slf4j.LoggerFactory
@@ -23,8 +22,8 @@ class SaveTasksConsumer(
 	private val taskService: TaskService,
 	private val playerTaskService: PlayerTaskService,
 	private val avroMapper: AvroMapper,
-	private val notificationService: NotificationService,
 	private val tasksProperties: TasksProperties,
+	private val tasksSavedProducer: TasksSavedProducer,
 	idempotencyService: IdempotencyService
 ) : AbstractKafkaConsumer<SaveTasksEvent>(
 	idempotencyService = idempotencyService,
@@ -46,8 +45,8 @@ class SaveTasksConsumer(
 	override fun processEvent(event: SaveTasksEvent) {
 		val tasks = event.tasks.map(avroMapper::map)
 			.onEach {
-				it.title!!.id = UUID.randomUUID()
-				it.description!!.id = UUID.randomUUID()
+				it.title.id = UUID.randomUUID()
+				it.description.id = UUID.randomUUID()
 
 				if (it.currencyReward == null || it.currencyReward == 0 || it.experience == null || it.experience == 0) {
 					val experience = tasksProperties.getExperience(it.rarity)
@@ -60,20 +59,20 @@ class SaveTasksConsumer(
 			}
 			.map(SaveTaskInput::toEntity)
 
-		log.info("Updating {} tasks for player {}", tasks.size, event.playerId)
+		log.info("Updating {} tasks for player {}", tasks.size, event.userId)
 		taskService.updateAll(tasks)
 
 		val taskIds = tasks.map { it.id() }
-		val playerTasks = playerTaskService.find(event.playerId, taskIds)
+		val playerTasks = playerTaskService.find(event.userId, taskIds)
 
 		if (playerTasks.isNotEmpty()) {
 			log.info(
 				"Setting {} player tasks to IN_PROGRESS for player {}",
-				playerTasks.size, event.playerId
+				playerTasks.size, event.userId
 			)
 			playerTaskService.inProgressTasks(playerTasks)
 		}
 
-		notificationService.send(NotificationCommand.SaveTasks(event.playerId, event.txId))
+		tasksSavedProducer.send(UUID.fromString(event.txId), event.userId, event.operation)
 	}
 }

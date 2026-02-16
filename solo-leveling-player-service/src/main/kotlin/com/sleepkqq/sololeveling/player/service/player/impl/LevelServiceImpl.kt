@@ -42,7 +42,6 @@ class LevelServiceImpl(
 		taskTopics: Collection<TaskTopic>,
 		experience: Int
 	): Player {
-
 		require(taskTopics.isNotEmpty() && taskTopics.size <= MAX_TASK_TOPICS_COUNT) {
 			"taskTopics size=${taskTopics.size} must be greater than 0 and less or equals $MAX_TASK_TOPICS_COUNT"
 		}
@@ -51,14 +50,20 @@ class LevelServiceImpl(
 			.associateBy { it.taskTopic() }
 			.toMutableMap()
 
-		taskTopics.forEach {
-			val playerTaskTopic = playerTaskTopicsMap[it]!!
+		val baseExperience = experience / taskTopics.size
+		val remainder = experience % taskTopics.size
+
+		taskTopics.forEachIndexed { index, topic ->
+			val playerTaskTopic = playerTaskTopicsMap[topic]!!
+			val expToGain = if (index == 0) baseExperience + remainder else baseExperience
+
 			val processedTaskTopicLevel = processExperienceGain(
 				playerTaskTopic.level()!!,
 				LevelType.TASK_TOPIC,
-				experience / taskTopics.size
+				expToGain
 			)
-			playerTaskTopicsMap[it] = Immutables.createPlayerTaskTopic(playerTaskTopic) { p ->
+
+			playerTaskTopicsMap[topic] = Immutables.createPlayerTaskTopic(playerTaskTopic) { p ->
 				p.setLevel(processedTaskTopicLevel)
 			}
 		}
