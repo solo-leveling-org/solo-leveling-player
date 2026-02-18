@@ -21,11 +21,13 @@ import com.sleepkqq.sololeveling.player.model.entity.player.sealed.DailyTaskSpec
 import com.sleepkqq.sololeveling.player.model.entity.user.LeaderboardUser
 import com.sleepkqq.sololeveling.player.model.entity.user.UserRoleItem
 import com.sleepkqq.sololeveling.player.model.entity.user.UsersStats
+import com.sleepkqq.sololeveling.player.model.entity.user.dto.LocaleUserView
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.player.service.i18n.I18nService
 import com.sleepkqq.sololeveling.proto.player.*
 import com.sleepkqq.sololeveling.proto.player.PlayerTaskTopicInput
 import com.sleepkqq.sololeveling.proto.user.GetUsersLeaderboardResponse
+import com.sleepkqq.sololeveling.proto.user.GetUsersResponse
 import com.sleepkqq.sololeveling.proto.user.GetUsersStatsResponse
 import com.sleepkqq.sololeveling.proto.user.UserInput
 import com.sleepkqq.sololeveling.proto.user.UserRole
@@ -141,7 +143,10 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		target = "paging",
 		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage))"
 	)
-	abstract fun map(page: Page<LeaderboardUser>, currentPage: Int): GetUsersLeaderboardResponse
+	abstract fun mapLeaderboardUsers(
+		page: Page<LeaderboardUser>,
+		currentPage: Int
+	): GetUsersLeaderboardResponse
 
 	@Mapping(target = "id", source = "input.user.id")
 	@Mapping(target = "firstName", source = "input.user.firstName")
@@ -239,4 +244,17 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 			.setNanos(fullRegenAt.nano)
 			.build()
 	}
+
+	@Mapping(target = "usersList", source = "page.rows")
+	@Mapping(
+		target = "usersList.locale",
+		expression = "java(mapLocale(localeUserView.getLocale(), localeUserView.getManualLocale()))"
+	)
+	@Mapping(
+		target = "paging",
+		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage))"
+	)
+	abstract fun mapLocaleUsers(page: Page<LocaleUserView>, currentPage: Int): GetUsersResponse
+
+	fun mapLocale(locale: String, manualLocale: String?): String = manualLocale ?: locale
 }

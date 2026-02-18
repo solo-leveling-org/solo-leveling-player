@@ -98,4 +98,8 @@ class UserServiceImpl(
 
 	@Transactional(readOnly = true)
 	override fun getUsersStats(): UsersStats = userRepository.getUsersStats()
+
+	@Transactional(readOnly = true)
+	override fun <V : View<User>> getUsers(paging: RequestPaging, viewType: KClass<V>): Page<V> =
+		userRepository.find(paging, viewType.java)
 }

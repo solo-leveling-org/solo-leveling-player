@@ -50,4 +50,5 @@ interface UserService {
 		?: throw LeaderboardUserNotFoundException()
 
 	fun getUsersStats(): UsersStats
+	fun <V : View<User>> getUsers(paging: RequestPaging, viewType: KClass<V>): Page<V>
 }
