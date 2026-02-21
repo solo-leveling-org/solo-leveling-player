@@ -218,6 +218,14 @@ public class UserRepository {
         .orElseGet(UsersStats::empty);
   }
 
+  public <V extends View<User>> Page<V> find(RequestPaging paging, Class<V> viewType) {
+    var table = USER_TABLE;
+    return sql.createQuery(table)
+        .orderBy(table.createdAt().asc())
+        .select(table.fetch(viewType))
+        .fetchPage(paging.getPage(), paging.getPageSize());
+  }
+
   private PeriodStats getPeriodStats(UserTable u, Instant startTime) {
     var total = sql.createSubQuery(u)
         .where(u.lastLoginAt().ge(startTime))

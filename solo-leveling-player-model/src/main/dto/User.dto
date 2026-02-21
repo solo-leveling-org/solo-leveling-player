@@ -88,3 +88,11 @@ unsafe UserAdditionalInfoView {
     }
   }
 }
+
+LocaleUserView {
+  id
+
+  locale
+
+  manualLocale
+}

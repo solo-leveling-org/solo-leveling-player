@@ -4,6 +4,7 @@ import com.google.protobuf.Empty
 import com.sleepkqq.sololeveling.config.interceptor.UserContextHolder
 import com.sleepkqq.sololeveling.player.mapper.ProtoMapper
 import com.sleepkqq.sololeveling.player.model.entity.player.dto.PlayerDayStreakView
+import com.sleepkqq.sololeveling.player.model.entity.user.dto.LocaleUserView
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserAdditionalInfoView
 import com.sleepkqq.sololeveling.player.model.entity.user.dto.UserView
 import com.sleepkqq.sololeveling.player.service.user.UserService
@@ -89,7 +90,10 @@ class UserApi(
 			protoMapper.map(request.range),
 			request.paging
 		)
-		val response = protoMapper.map(leaderboardPage, request.paging.page)
+		val response = protoMapper.mapLeaderboardUsers(
+			leaderboardPage,
+			request.paging.page
+		)
 
 		responseObserver.onNext(response)
 		responseObserver.onCompleted()
@@ -118,6 +122,17 @@ class UserApi(
 	) {
 		val usersStats = userService.getUsersStats()
 		val response = protoMapper.map(usersStats)
+
+		responseObserver.onNext(response)
+		responseObserver.onCompleted()
+	}
+
+	override fun getUsers(
+		request: GetUsersRequest,
+		responseObserver: StreamObserver<GetUsersResponse>
+	) {
+		val usersPage = userService.getUsers(request.paging, LocaleUserView::class)
+		val response = protoMapper.mapLocaleUsers(usersPage, request.paging.page)
 
 		responseObserver.onNext(response)
 		responseObserver.onCompleted()
