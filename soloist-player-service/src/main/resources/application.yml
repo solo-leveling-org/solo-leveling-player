@@ -15,7 +15,7 @@ spring:
       pool-name: PlayerHikariCP
   liquibase:
     enabled: true
-    default-schema: public
+    default-schema: player
   kafka:
     bootstrap-servers: localhost:29092
     properties:
