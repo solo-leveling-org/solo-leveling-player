@@ -20,7 +20,7 @@ RUN chmod +x ./mvnw && \
 FROM eclipse-temurin:25-jre-alpine
 
 # Копируем собранный JAR
-COPY --from=build /usr/src/app/solo-leveling-player-service/target/*.jar /app/solo-leveling-player.jar
+COPY --from=build /usr/src/app/soloist-player-service/target/*.jar /app/soloist-player.jar
 
 # Безопасность: создаём пользователя
 RUN adduser -D myuser && \
@@ -35,4 +35,4 @@ CMD ["java", \
     "--enable-native-access=ALL-UNNAMED", \
     "--add-opens", "java.base/java.lang=ALL-UNNAMED", \
     "-Dspring.profiles.active=prod", \
-    "-jar", "solo-leveling-player.jar"]
+    "-jar", "soloist-player.jar"]

@@ -1,7 +1,0 @@
-jimmer:
-  show-sql: true
-  pretty-sql: true
-app:
-  scheduler:
-    daily-tasks-updater:
-      init: false

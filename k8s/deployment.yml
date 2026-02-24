@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: solo-leveling-player
+  name: soloist-player
 spec:
   replicas: ${REPLICAS}
   selector:
     matchLabels:
-      app: solo-leveling-player
+      app: soloist-player
   template:
     metadata:
       labels:
-        app: solo-leveling-player
+        app: soloist-player
       annotations:
-        commit.sha: "${DEPLOY_IMAGE}"
+        commit.sha: "${IMAGE_TAG}"
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
         prometheus.io/path: "/actuator/prometheus"

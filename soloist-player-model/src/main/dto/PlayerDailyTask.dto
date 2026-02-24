@@ -1,0 +1,12 @@
+export com.soloist.player.model.entity.player.PlayerDailyTask
+  -> package com.soloist.player.model.entity.player.dto
+
+PlayerDailyTaskView {
+  #allScalars
+
+  -createdAt
+
+  -updatedAt
+
+  -version
+}
