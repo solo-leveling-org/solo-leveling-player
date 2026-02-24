@@ -1,0 +1,10 @@
+export com.soloist.player.model.entity.player.PlayerDayStreak
+  -> package com.soloist.player.model.entity.player.dto
+
+PlayerDayStreakView {
+  #allScalars
+
+  -createdAt
+
+  -version
+}

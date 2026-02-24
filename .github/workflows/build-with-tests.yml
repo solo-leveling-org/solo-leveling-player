@@ -25,7 +25,7 @@ jobs:
           EOF
 
           export GITHUB_USER="${{ secrets.GITHUB_USER }}"
-          export PACKAGES_TOKEN="${{ secrets.PACKAGES_TOKEN }}"
+          export PACKAGES_TOKEN="${{ secrets.GITHUB_TOKEN }}"
 
           envsubst < ./settings-template.xml > ./settings.xml
           rm -f ./settings-template.xml

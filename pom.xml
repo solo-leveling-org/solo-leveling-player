@@ -10,14 +10,14 @@
     <version>4.0.2</version>
   </parent>
 
-  <groupId>com.sleepkqq</groupId>
-  <artifactId>solo-leveling-player</artifactId>
+  <groupId>com.soloist</groupId>
+  <artifactId>soloist-player</artifactId>
   <version>2.0.0</version>
   <packaging>pom</packaging>
 
   <modules>
-    <module>solo-leveling-player-model</module>
-    <module>solo-leveling-player-service</module>
+    <module>soloist-player-model</module>
+    <module>soloist-player-service</module>
   </modules>
 
   <dependencyManagement>
@@ -59,8 +59,8 @@
     <!-- mapstruct -->
     <mapstruct.version>1.6.3</mapstruct.version>
 
-    <!-- solo leveling -->
-    <solo-leveling-lib.version>1.6.7</solo-leveling-lib.version>
+    <!-- soloist -->
+    <soloist-lib.version>2.0.0</soloist-lib.version>
 
     <!-- utils -->
     <streamex.version>0.8.3</streamex.version>

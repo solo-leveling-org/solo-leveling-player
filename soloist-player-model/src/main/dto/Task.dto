@@ -1,0 +1,32 @@
+export com.soloist.player.model.entity.task.Task
+  -> package com.soloist.player.model.entity.task.dto
+
+unsafe input SaveTaskInput {
+  #allScalars
+
+  -createdAt
+
+  -updatedAt
+
+  -deprecated
+
+  title! {
+    #allScalars
+  }
+
+  description! {
+    #allScalars
+  }
+}
+
+GenerateTaskView {
+  id
+
+  version
+
+  rarity
+
+  topics {
+    #allScalars
+  }
+}

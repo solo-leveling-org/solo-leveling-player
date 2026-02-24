@@ -1,0 +1,92 @@
+export com.soloist.player.model.entity.player.Player
+  -> package com.soloist.player.model.entity.player.dto
+
+PlayerView {
+  #allScalars
+
+  -createdAt
+
+  -updatedAt
+
+  -version
+
+  level {
+    #allScalars
+
+    -createdAt
+
+    -updatedAt
+
+    -version
+  }
+
+  balance {
+    #allScalars
+
+    -createdAt
+
+    -updatedAt
+
+    -version
+  }
+
+  taskTopics {
+    #allScalars
+
+    -createdAt
+
+    -updatedAt
+
+    -version
+
+    level {
+      #allScalars
+
+      -createdAt
+
+      -updatedAt
+
+      -version
+    }
+  }
+}
+
+unsafe ResetPlayerView {
+  #allScalars
+
+  level! {
+    #allScalars
+  }
+
+  balance! {
+    #allScalars
+  }
+
+  taskTopics {
+    #allScalars
+
+    level! {
+      #allScalars
+    }
+  }
+
+  stamina! {
+    #allScalars
+  }
+
+  dayStreak! {
+    #allScalars
+  }
+}
+
+GenerateTasksPlayerView {
+  taskTopics {
+    taskTopic
+
+    active
+
+    level {
+      level
+    }
+  }
+}
