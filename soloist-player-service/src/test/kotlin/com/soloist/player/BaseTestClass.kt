@@ -44,7 +44,7 @@ abstract class BaseTestClass {
 	companion object {
 		private val network = Network.newNetwork()
 
-		private val postgresContainer = PostgreSQLContainer("postgres:18.1")
+		private val postgresContainer = PostgreSQLContainer("pgvector/pgvector:pg17")
 			.apply {
 				withDatabaseName("soloist_test")
 				withUsername("test")
