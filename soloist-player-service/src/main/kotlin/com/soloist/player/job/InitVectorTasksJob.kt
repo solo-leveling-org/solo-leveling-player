@@ -20,6 +20,7 @@ class InitVectorTasksJob(
 
 	private companion object {
 		const val PAGE_SIZE = 20
+		const val SLEEP_MILLIS = 500L
 	}
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -43,8 +44,20 @@ class InitVectorTasksJob(
 			do {
 				val tasksPage = taskService.findToVectorize(currentPage, PAGE_SIZE)
 
+				if (tasksPage.rows.isEmpty()) {
+					break
+				}
+
 				taskVectorService.addTasks(tasksPage.rows.map(VectorizeTaskView::toEntity))
 				total += tasksPage.rows.size
+
+				try {
+					Thread.sleep(SLEEP_MILLIS)
+				} catch (ie: InterruptedException) {
+					Thread.currentThread().interrupt()
+					log.warn("Vector tasks init job interrupted during sleep", ie)
+					break
+				}
 
 				currentPage++
 			} while (currentPage < tasksPage.totalPageCount)
