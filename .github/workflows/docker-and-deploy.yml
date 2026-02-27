@@ -83,7 +83,7 @@ jobs:
           echo "DEPLOY_IMAGE=ghcr.io/${{ github.repository_owner }}/soloist-player:${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> $GITHUB_ENV
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> $GITHUB_ENV
-          echo "OPENROUTER_TOKEN"=${{ secrets.OPENROUTER_TOKEN }}" >> $GITHUB_ENV
+          echo "OPENROUTER_TOKEN=${{ secrets.OPENROUTER_TOKEN }}" >> $GITHUB_ENV
           echo "REPLICAS=${{ inputs.replicas }}" >> $GITHUB_ENV
 
       - name: Generate final deployment.yml with env vars
