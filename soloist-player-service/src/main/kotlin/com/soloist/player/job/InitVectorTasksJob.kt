@@ -9,7 +9,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.core.Ordered
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class InitVectorTasksJob(
@@ -27,7 +26,6 @@ class InitVectorTasksJob(
 
 	override fun getOrder(): Int = properties.initVectorTasks.order
 
-	@Transactional
 	@EventListener(ApplicationReadyEvent::class)
 	fun call() {
 		if (!properties.initVectorTasks.enabled) {

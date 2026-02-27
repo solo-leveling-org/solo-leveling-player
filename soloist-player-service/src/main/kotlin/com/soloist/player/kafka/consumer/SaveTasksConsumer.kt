@@ -84,7 +84,7 @@ class SaveTasksConsumer(
 		return this
 	}
 
-	fun map(task: Task, topics: List<TaskTopic>): Task =
+	private fun map(task: Task, topics: List<TaskTopic>): Task =
 		Immutables.createTask(task) { task ->
 			task.setTopics(topics.map { topic ->
 				Immutables.createTaskTopicItem { it.setTopic(topic) }
