@@ -5,27 +5,30 @@ import com.soloist.player.model.entity.player.PlayerTask
 import com.soloist.player.model.entity.player.PlayerTaskTopic
 import com.soloist.player.model.entity.player.enums.PlayerTaskStatus
 import com.soloist.player.model.entity.task.Task
+import com.soloist.player.model.entity.task.dto.VectorizeTaskView
 import com.soloist.player.model.entity.task.enums.TaskTopic
 import com.soloist.player.model.repository.task.TaskRepository
+import com.soloist.player.service.ai.TaskVectorService
 import com.soloist.player.service.task.DefineTaskRarityService
 import com.soloist.player.service.task.DefineTaskTopicService
 import com.soloist.player.service.task.TaskService
+import com.soloist.proto.player.RequestPaging
+import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
-import org.babyfish.jimmer.sql.fetcher.Fetcher
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
+import java.util.*
 
 @Service
 class TaskServiceImpl(
 	private val taskRepository: TaskRepository,
 	private val defineTaskTopicService: DefineTaskTopicService,
-	private val defineTaskRarityService: DefineTaskRarityService
+	private val defineTaskRarityService: DefineTaskRarityService,
+	private val taskVectorService: TaskVectorService
 ) : TaskService {
 
-	@Transactional(readOnly = true)
-	override fun find(id: UUID, fetcher: Fetcher<Task>): Task? =
-		taskRepository.findNullable(id, fetcher)
+	private val log = LoggerFactory.getLogger(javaClass)
 
 	@Transactional
 	override fun updateAll(tasks: Collection<Task>) {
@@ -95,8 +98,27 @@ class TaskServiceImpl(
 	}
 
 	@Transactional
-	override fun deprecateAll(): Int = taskRepository.deprecateAll()
+	override fun deprecateAll(): Int {
+		val deletedVectorTasksCount = taskVectorService.deleteAll()
+		val deprecatedTasksCount = taskRepository.deprecateAll()
+
+		log.info(
+			"Deleted vector tasks: {}, deprecated tasks: {}",
+			deletedVectorTasksCount, deprecatedTasksCount
+		)
+
+		return deprecatedTasksCount
+	}
 
 	@Transactional
-	override fun deprecateByTopic(topic: TaskTopic): Int = taskRepository.deprecateByTopic(topic)
+	override fun deprecateByTopic(topic: TaskTopic): Int {
+		taskVectorService.delete(topic)
+		return taskRepository.deprecateByTopic(topic)
+	}
+
+	@Transactional(readOnly = true)
+	override fun findToVectorize(page: Int, pageSize: Int): Page<VectorizeTaskView> =
+		taskRepository.findToVectorize(
+			RequestPaging.newBuilder().setPage(page).setPageSize(pageSize).build()
+		)
 }

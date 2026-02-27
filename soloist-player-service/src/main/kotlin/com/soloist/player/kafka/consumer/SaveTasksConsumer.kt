@@ -8,6 +8,7 @@ import com.soloist.player.config.properties.TasksProperties
 import com.soloist.player.kafka.producer.TasksSavedProducer
 import com.soloist.player.mapper.AvroMapper
 import com.soloist.player.model.entity.task.dto.SaveTaskInput
+import com.soloist.player.service.ai.TaskVectorService
 import com.soloist.player.service.player.PlayerTaskService
 import com.soloist.player.service.task.TaskService
 import org.slf4j.LoggerFactory
@@ -24,6 +25,7 @@ class SaveTasksConsumer(
 	private val avroMapper: AvroMapper,
 	private val tasksProperties: TasksProperties,
 	private val tasksSavedProducer: TasksSavedProducer,
+	private val taskVectorService: TaskVectorService,
 	idempotencyService: IdempotencyService
 ) : AbstractKafkaConsumer<SaveTasksEvent>(
 	idempotencyService = idempotencyService,
@@ -61,6 +63,7 @@ class SaveTasksConsumer(
 
 		log.info("Updating {} tasks for player {}", tasks.size, event.userId)
 		taskService.updateAll(tasks)
+		taskVectorService.addTasks(tasks)
 
 		val taskIds = tasks.map { it.id() }
 		val playerTasks = playerTaskService.find(event.userId, taskIds)

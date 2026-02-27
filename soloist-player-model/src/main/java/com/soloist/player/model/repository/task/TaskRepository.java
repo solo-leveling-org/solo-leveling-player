@@ -1,12 +1,17 @@
 package com.soloist.player.model.repository.task;
 
 import static com.soloist.player.model.entity.Tables.TASK_TABLE;
+import static com.soloist.player.model.entity.Tables.VECTOR_TASK_TABLE;
+import static com.soloist.player.model.entity.task.Task.RARITY_FIELD;
+import static com.soloist.player.model.entity.task.Task.TOPICS_FIELD;
 
 import com.soloist.jimmer.sql.SqlFileLoader;
 import com.soloist.player.model.entity.player.PlayerTask;
 import com.soloist.player.model.entity.player.TaskTopicItem;
 import com.soloist.player.model.entity.task.Task;
+import com.soloist.player.model.entity.task.dto.VectorizeTaskView;
 import com.soloist.player.model.entity.task.enums.TaskTopic;
+import com.soloist.proto.player.RequestPaging;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.Collection;
@@ -14,11 +19,10 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import one.util.streamex.StreamEx;
+import org.babyfish.jimmer.Page;
 import org.babyfish.jimmer.sql.JSqlClient;
 import org.babyfish.jimmer.sql.ast.Predicate;
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
-import org.babyfish.jimmer.sql.fetcher.Fetcher;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -31,15 +35,6 @@ public class TaskRepository {
   private final JSqlClient sql;
   private final JdbcTemplate jdbcTemplate;
   private final SqlFileLoader sqlFileLoader;
-
-  @Nullable
-  public Task findNullable(UUID id, Fetcher<Task> fetcher) {
-    var table = TASK_TABLE;
-    return sql.createQuery(table)
-        .where(table.id().eq(id))
-        .select(table.fetch(fetcher))
-        .fetchFirstOrNull();
-  }
 
   public Task save(Task task, SaveMode saveMode) {
     return sql.saveCommand(task)
@@ -102,8 +97,8 @@ public class TaskRepository {
     var inputJson = StreamEx.of(playerTasks)
         .map(p -> new JsonObject()
             .put("player_task_id", p.id())
-            .put("rarity", p.task().rarity().ordinal())
-            .put("topics", StreamEx.of(p.task().topics())
+            .put(RARITY_FIELD, p.task().rarity().ordinal())
+            .put(TOPICS_FIELD, StreamEx.of(p.task().topics())
                 .map(TaskTopicItem::topic)
                 .map(TaskTopic::ordinal)
                 .sorted()
@@ -134,5 +129,23 @@ public class TaskRepository {
         .where(table.asTableEx().topics().topic().eq(topic))
         .set(table.deprecated(), true)
         .execute();
+  }
+
+  public Page<VectorizeTaskView> findToVectorize(RequestPaging paging) {
+    var t = TASK_TABLE;
+    var vt = VECTOR_TASK_TABLE;
+
+    var nonVector = sql.createSubQuery(vt)
+        .where(vt.id().eq(t.id()))
+        .notExists();
+
+    return sql.createQuery(t)
+        .where(
+            nonVector,
+            t.deprecated().eq(false)
+        )
+        .orderBy(t.createdAt().asc())
+        .select(t.fetch(VectorizeTaskView.class))
+        .fetchPage(paging.getPage(), paging.getPageSize());
   }
 }

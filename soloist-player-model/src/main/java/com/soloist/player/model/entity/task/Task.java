@@ -63,4 +63,5 @@ public interface Task extends Model {
   List<PlayerTask> playerTasks();
 
   String RARITY_FIELD = "rarity";
+  String TOPICS_FIELD = "topics";
 }

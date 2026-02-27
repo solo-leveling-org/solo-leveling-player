@@ -1,20 +1,18 @@
 package com.soloist.player.job
 
-import com.soloist.player.config.properties.JobProperties
+import com.soloist.player.config.properties.JobsProperties
 import com.soloist.player.model.entity.player.enums.DailyTaskType
 import com.soloist.player.service.player.PlayerDailyTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.event.EventListener
 import org.springframework.core.Ordered
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@EnableConfigurationProperties(JobProperties::class)
 class InitDailyTasksJob(
-	private val properties: JobProperties,
+	private val properties: JobsProperties,
 	private val playerDailyTaskService: PlayerDailyTaskService
 ) : Ordered {
 

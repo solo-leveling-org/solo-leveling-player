@@ -1,0 +1,65 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-task-vector-store-table
+      author: sleepkqq
+      changes:
+        - sql:
+            sql: CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+        - sql:
+            sql: CREATE EXTENSION IF NOT EXISTS vector;
+
+        - createTable:
+            tableName: task_vector_store
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: content
+                  type: text
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: metadata
+                  type: jsonb
+                  constraints:
+                    nullable: true
+
+              - column:
+                  name: embedding
+                  type: vector(1536)
+                  constraints:
+                    nullable: true
+
+        - createIndex:
+            tableName: task_vector_store
+            indexName: idx_task_vector_store_metadata
+            columns:
+              - column:
+                  name: metadata
+            # GIN по jsonb
+            # Liquibase не умеет natively задать gin, поэтому через raw SQL:
+        - sql:
+            sql: >
+              CREATE INDEX IF NOT EXISTS idx_task_vector_store_metadata
+              ON task_vector_store
+              USING GIN (metadata);
+
+        - sql:
+            sql: >
+              CREATE INDEX IF NOT EXISTS idx_task_vector_store_embedding
+              ON task_vector_store
+              USING HNSW (embedding vector_cosine_ops);
+
+      rollback:
+        - sql:
+            sql: DROP INDEX IF EXISTS idx_task_vector_store_embedding;
+        - sql:
+            sql: DROP INDEX IF EXISTS idx_task_vector_store_metadata;
+        - dropTable:
+            tableName: task_vector_store
