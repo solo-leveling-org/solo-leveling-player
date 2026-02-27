@@ -45,14 +45,14 @@ spring:
       base-url: https://openrouter.ai/api
       embedding:
         options:
-          model: openai/text-embedding-3-small
+          model: baai/bge-m3
     vectorstore:
       pgvector:
         table-name: task_vector_store
         schema-name: ${spring.liquibase.default-schema}
         index-type: HNSW
         distance-type: COSINE_DISTANCE
-        dimensions: 1536
+        dimensions: 1024
         initialize-schema: false
         schema-validation: true
   profiles:

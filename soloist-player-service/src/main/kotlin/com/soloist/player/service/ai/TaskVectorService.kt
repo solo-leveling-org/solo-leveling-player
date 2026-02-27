@@ -6,6 +6,7 @@ import com.soloist.player.model.entity.task.Task.TOPICS_FIELD
 import com.soloist.player.model.entity.task.enums.TaskTopic
 import com.soloist.player.model.repository.task.VectorTaskRepository
 import org.springframework.ai.document.Document
+import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder
 import org.springframework.ai.vectorstore.pgvector.PgVectorStore
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -40,7 +41,11 @@ class TaskVectorService(
 
 	@Transactional
 	fun delete(taskTopic: TaskTopic) {
-		vectorStore.delete("'${taskTopic.name}' in topics")
+		val expr = FilterExpressionBuilder()
+			.`in`("topics", listOf(taskTopic.name))
+			.build()
+
+		vectorStore.delete(expr)
 	}
 
 	@Transactional

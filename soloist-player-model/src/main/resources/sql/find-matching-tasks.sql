@@ -3,7 +3,7 @@ WITH input_combinations AS (
         combination.player_task_id,
         combination.rarity,
         combination.topics
-    FROM jsonb_to_recordset(?::jsonb) AS combination(
+    FROM jsonb_to_recordset(?::jsonb) AS combination (
         player_task_id uuid,
         rarity int,
         topics int[]
@@ -11,21 +11,21 @@ WITH input_combinations AS (
 ),
 task_topic_agg AS (
     SELECT
-        task_id,
-        array_agg(topic ORDER BY topic) AS sorted_topics
-    FROM task_topic_items
-    GROUP BY task_id
+        tti.task_id,
+        array_agg(tti.topic ORDER BY tti.topic) AS sorted_topics
+    FROM player.task_topic_items tti
+    GROUP BY tti.task_id
 ),
 input_players AS (
     SELECT
-        player_task_id,
-        rarity,
-        topics,
+        ic.player_task_id,
+        ic.rarity,
+        ic.topics,
         ROW_NUMBER() OVER (
-            PARTITION BY rarity, topics
-            ORDER BY player_task_id
+            PARTITION BY ic.rarity, ic.topics
+            ORDER BY ic.player_task_id
         ) AS player_rank
-    FROM input_combinations
+    FROM input_combinations ic
 ),
 matching_tasks AS (
     SELECT
@@ -36,7 +36,7 @@ matching_tasks AS (
             PARTITION BY t.rarity, tta.sorted_topics
             ORDER BY t.id
         ) AS task_rank
-    FROM tasks t
+    FROM player.tasks t
     JOIN task_topic_agg tta ON tta.task_id = t.id
     WHERE t.version <> 0
       AND t.is_deprecated = false
@@ -46,9 +46,9 @@ matching_tasks AS (
         WHERE ip.rarity = t.rarity
           AND ip.topics = tta.sorted_topics
     )
-    AND NOT EXISTS (
+      AND NOT EXISTS (
         SELECT 1
-        FROM player_tasks pt
+        FROM player.player_tasks pt
         WHERE pt.player_id = ?
           AND pt.task_id = t.id
     )

@@ -6,12 +6,7 @@ import com.soloist.player.model.entity.player.TaskTopicItem
 import com.soloist.player.model.entity.task.dto.GenerateTaskView
 import com.soloist.player.model.entity.task.dto.SaveTaskInput
 import org.babyfish.jimmer.View
-import org.mapstruct.CollectionMappingStrategy
-import org.mapstruct.Mapper
-import org.mapstruct.NullValueCheckStrategy
-import org.mapstruct.NullValueMappingStrategy
-import org.mapstruct.NullValuePropertyMappingStrategy
-import org.mapstruct.ReportingPolicy
+import org.mapstruct.*
 
 @Mapper(
 	componentModel = "spring",
@@ -26,7 +21,9 @@ abstract class AvroMapper {
 	fun map(input: View<TaskTopicItem>): TaskTopic =
 		TaskTopic.valueOf(input.toEntity().topic().name)
 
-	abstract fun map(input: Task): SaveTaskInput
-
 	abstract fun map(input: GenerateTaskView): Task
+
+	abstract fun map(input: TaskTopic): com.soloist.player.model.entity.task.enums.TaskTopic
+
+	abstract fun map(input: Task): SaveTaskInput
 }

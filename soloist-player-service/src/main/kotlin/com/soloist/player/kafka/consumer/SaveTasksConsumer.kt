@@ -7,7 +7,10 @@ import com.soloist.avro.task.SaveTasksEvent
 import com.soloist.player.config.properties.TasksProperties
 import com.soloist.player.kafka.producer.TasksSavedProducer
 import com.soloist.player.mapper.AvroMapper
+import com.soloist.player.model.entity.Immutables
+import com.soloist.player.model.entity.task.Task
 import com.soloist.player.model.entity.task.dto.SaveTaskInput
+import com.soloist.player.model.entity.task.enums.TaskTopic
 import com.soloist.player.service.ai.TaskVectorService
 import com.soloist.player.service.player.PlayerTaskService
 import com.soloist.player.service.task.TaskService
@@ -45,29 +48,18 @@ class SaveTasksConsumer(
 	override fun getTxId(event: SaveTasksEvent): String = event.txId
 
 	override fun processEvent(event: SaveTasksEvent) {
-		val tasks = event.tasks.map(avroMapper::map)
-			.onEach {
-				it.title.id = UUID.randomUUID()
-				it.description.id = UUID.randomUUID()
+		val taskPairs = event.tasks.map { avroTask ->
+			avroMapper.map(avroTask).applyDefaults().toEntity() to
+					avroTask.topics.map(avroMapper::map)
+		}
 
-				if (it.currencyReward == null || it.currencyReward == 0 || it.experience == null || it.experience == 0) {
-					val experience = tasksProperties.getExperience(it.rarity)
-					val currency = tasksProperties.calculateCurrencyReward(it.rarity)
-
-					it.experience = experience
-					it.currencyReward = currency
-					log.warn("Applied default rewards for taskId={}", it.id)
-				}
-			}
-			.map(SaveTaskInput::toEntity)
+		val tasks = taskPairs.map { it.first }
 
 		log.info("Updating {} tasks for player {}", tasks.size, event.userId)
 		taskService.updateAll(tasks)
-		taskVectorService.addTasks(tasks)
+		taskVectorService.addTasks(taskPairs.map { (task, topics) -> map(task, topics) })
 
-		val taskIds = tasks.map { it.id() }
-		val playerTasks = playerTaskService.find(event.userId, taskIds)
-
+		val playerTasks = playerTaskService.find(event.userId, tasks.map { it.id() })
 		if (playerTasks.isNotEmpty()) {
 			log.info(
 				"Setting {} player tasks to IN_PROGRESS for player {}",
@@ -78,4 +70,24 @@ class SaveTasksConsumer(
 
 		tasksSavedProducer.send(UUID.fromString(event.txId), event.userId, event.operation)
 	}
+
+	private fun SaveTaskInput.applyDefaults(): SaveTaskInput {
+		title.id = UUID.randomUUID()
+		description.id = UUID.randomUUID()
+
+		if (currencyReward == null || currencyReward == 0 || experience == null || experience == 0) {
+			experience = tasksProperties.getExperience(rarity)
+			currencyReward = tasksProperties.calculateCurrencyReward(rarity)
+			log.warn("Applied default rewards for taskId={}", id)
+		}
+
+		return this
+	}
+
+	fun map(task: Task, topics: List<TaskTopic>): Task =
+		Immutables.createTask(task) { task ->
+			task.setTopics(topics.map { topic ->
+				Immutables.createTaskTopicItem { it.setTopic(topic) }
+			})
+		}
 }

@@ -62,7 +62,7 @@ public class TaskRepository {
             table.version().ne(0),
             table.deprecated().eq(false),
             Predicate.sql(
-                "NOT EXISTS (SELECT 1 FROM player_tasks pt WHERE pt.task_id = %e AND pt.player_id = %v)",
+                "NOT EXISTS (SELECT 1 FROM player.player_tasks pt WHERE pt.task_id = %e AND pt.player_id = %v)",
                 ctx -> {
                   ctx.expression(table.id());
                   ctx.value(playerId);
@@ -72,7 +72,7 @@ public class TaskRepository {
                 """
                     EXISTS (
                         SELECT 1
-                        FROM task_topic_items tt
+                        FROM player.task_topic_items tt
                         WHERE tt.task_id = %e
                         GROUP BY tt.task_id
                         HAVING count(DISTINCT tt.topic) = array_length(%v, 1)
@@ -90,7 +90,6 @@ public class TaskRepository {
         .select(table.id())
         .fetchFirstOrNull();
   }
-
 
   public Map<UUID, UUID> findMatchingTasks(long playerId, Collection<PlayerTask> playerTasks) {
 
@@ -119,6 +118,7 @@ public class TaskRepository {
   public int deprecateAll() {
     var table = TASK_TABLE;
     return sql.createUpdate(table)
+        .where(table.deprecated().eq(false))
         .set(table.deprecated(), true)
         .execute();
   }
@@ -126,6 +126,7 @@ public class TaskRepository {
   public int deprecateByTopic(TaskTopic topic) {
     var table = TASK_TABLE;
     return sql.createUpdate(table)
+        .where(table.deprecated().eq(false))
         .where(table.asTableEx().topics().topic().eq(topic))
         .set(table.deprecated(), true)
         .execute();
@@ -142,7 +143,8 @@ public class TaskRepository {
     return sql.createQuery(t)
         .where(
             nonVector,
-            t.deprecated().eq(false)
+            t.deprecated().eq(false),
+            t.version().gt(0)
         )
         .orderBy(t.createdAt().asc())
         .select(t.fetch(VectorizeTaskView.class))

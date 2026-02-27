@@ -64,7 +64,7 @@
     <spring-grpc.version>1.0.2</spring-grpc.version>
 
     <!-- spring ai -->
-    <spring-ai.version>1.1.0</spring-ai.version>
+    <spring-ai.version>2.0.0-M2</spring-ai.version>
 
     <!-- mapstruct -->
     <mapstruct.version>1.6.3</mapstruct.version>
