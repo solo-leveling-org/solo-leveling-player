@@ -39,6 +39,22 @@ spring:
   grpc:
     server:
       port: 11001
+  ai:
+    openai:
+      api-key: ${OPENROUTER_TOKEN}
+      base-url: https://openrouter.ai/api
+      embedding:
+        options:
+          model: baai/bge-m3
+    vectorstore:
+      pgvector:
+        table-name: task_vector_store
+        schema-name: ${spring.liquibase.default-schema}
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 1024
+        initialize-schema: false
+        schema-validation: true
   profiles:
     include: jimmer
   threads:
@@ -59,8 +75,13 @@ app:
       cron: "0 0 0 * * *"
   job:
     init-daily-tasks:
-      enabled: true
+      enabled: false
       order: 10
+    init-vector-tasks:
+      enabled: false
+      order: 20
+      page-size: 20
+      delay: 500ms
   tasks:
     skip-stamina-cost: 5
     currency-experience-multiplier: 0.5

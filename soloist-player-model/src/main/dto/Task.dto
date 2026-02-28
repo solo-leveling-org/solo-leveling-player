@@ -30,3 +30,21 @@ GenerateTaskView {
     #allScalars
   }
 }
+
+unsafe VectorizeTaskView {
+  id
+
+  title! {
+    #allScalars
+  }
+
+  description! {
+    #allScalars
+  }
+
+  rarity
+
+  topics {
+    #allScalars
+  }
+}

@@ -54,3 +54,9 @@ databaseChangeLog:
       file: db/changelog/v9/09-02-2026--player-daily-tasks.yml
   - include:
       file: db/changelog/v9/11-02-2026--player-day-activity.yml
+
+  # v10
+  - include:
+      file: db/changelog/v10/27-02-2026--task-vector-store.yml
+  - include:
+      file: db/changelog/v10/28-02-2026--vector-column-length.yml

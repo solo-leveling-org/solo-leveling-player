@@ -37,7 +37,6 @@ import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.slf4j.LoggerFactory
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -46,7 +45,6 @@ import java.util.*
 import kotlin.reflect.KClass
 
 @Service
-@EnableConfigurationProperties(PlayerLimitsProperties::class, TasksProperties::class)
 class PlayerTaskServiceImpl(
 	private val playerTaskRepository: PlayerTaskRepository,
 	private val playerBalanceService: PlayerBalanceService,

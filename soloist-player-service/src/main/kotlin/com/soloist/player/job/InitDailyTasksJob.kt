@@ -1,43 +1,26 @@
 package com.soloist.player.job
 
-import com.soloist.player.config.properties.JobProperties
+import com.soloist.player.config.properties.JobsProperties
 import com.soloist.player.model.entity.player.enums.DailyTaskType
 import com.soloist.player.service.player.PlayerDailyTaskService
 import org.slf4j.LoggerFactory
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.context.event.EventListener
-import org.springframework.core.Ordered
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
-@EnableConfigurationProperties(JobProperties::class)
 class InitDailyTasksJob(
-	private val properties: JobProperties,
+	properties: JobsProperties,
 	private val playerDailyTaskService: PlayerDailyTaskService
-) : Ordered {
+) : AbstractStartupJob(
+	jobName = "init-daily-tasks-job",
+	jobProperties = properties.initDailyTasks
+) {
 
-	private val log = LoggerFactory.getLogger(javaClass)
+	override val log = LoggerFactory.getLogger(javaClass)
 
-	override fun getOrder(): Int = properties.initDailyTasks.order
-
-	@Transactional
-	@EventListener(ApplicationReadyEvent::class)
-	fun call() {
-		if (!properties.initDailyTasks.enabled) {
-			log.warn("Daily tasks init job is disabled")
-			return
-		}
-
-		log.info("Starting daily tasks init job")
-
+	override fun runJob() {
 		val tasksToInsert = DailyTaskType.entries.flatMap { type ->
 			val playerIds = playerDailyTaskService.findPlayersToInit(type)
-			log.info(
-				"Found {} players without daily task of type {}",
-				playerIds.size, type
-			)
+			log.info("Found {} players without daily task of type {}", playerIds.size, type)
 
 			playerIds.map { playerId ->
 				playerDailyTaskService.initialize(playerId, type)
@@ -52,9 +35,6 @@ class InitDailyTasksJob(
 		playerDailyTaskService.insertAll(tasksToInsert)
 
 		val distinctPlayers = tasksToInsert.map { it.player().id() }.toSet().size
-		log.info(
-			"Finished daily tasks init job, initialized {} tasks for {} players",
-			tasksToInsert.size, distinctPlayers
-		)
+		log.info("Initialized {} tasks for {} players", tasksToInsert.size, distinctPlayers)
 	}
 }

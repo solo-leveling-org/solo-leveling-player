@@ -30,6 +30,8 @@ spec:
               value: "${POSTGRES_USER}"
             - name: POSTGRES_PASSWORD
               value: "${POSTGRES_PASSWORD}"
+            - name: OPENROUTER_TOKEN
+              value: "${OPENROUTER_TOKEN}"
           livenessProbe:
             httpGet:
               path: /actuator/health

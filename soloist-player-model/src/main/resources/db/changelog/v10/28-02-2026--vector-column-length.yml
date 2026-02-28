@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: alter-task-vector-store-embedding-to-1024
+      author: sleepkqq
+      changes:
+        - sql:
+            sql: >
+              ALTER TABLE task_vector_store
+              ALTER COLUMN embedding
+              TYPE vector(1024);
+      rollback:
+        - sql:
+            sql: >
+              ALTER TABLE task_vector_store
+              ALTER COLUMN embedding
+              TYPE vector(1536);
