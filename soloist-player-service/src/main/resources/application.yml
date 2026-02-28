@@ -78,8 +78,10 @@ app:
       enabled: false
       order: 10
     init-vector-tasks:
-      enabled: true
+      enabled: false
       order: 20
+      page-size: 20
+      delay: 500ms
   tasks:
     skip-stamina-cost: 5
     currency-experience-multiplier: 0.5
