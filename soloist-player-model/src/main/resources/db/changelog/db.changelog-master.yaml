@@ -60,3 +60,5 @@ databaseChangeLog:
       file: db/changelog/v10/27-02-2026--task-vector-store.yml
   - include:
       file: db/changelog/v10/28-02-2026--vector-column-length.yml
+  - include:
+      file: db/changelog/v10/02-03-2026--rename-tables.yml

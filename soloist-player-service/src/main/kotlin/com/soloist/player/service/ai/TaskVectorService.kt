@@ -44,7 +44,7 @@ class TaskVectorService(
 	@Transactional
 	fun delete(taskTopic: TaskTopic) {
 		val expr = FilterExpressionBuilder()
-			.`in`("topics", listOf(taskTopic.name))
+			.`in`(TOPICS_FIELD, listOf(taskTopic.name))
 			.build()
 
 		vectorStore.delete(expr)

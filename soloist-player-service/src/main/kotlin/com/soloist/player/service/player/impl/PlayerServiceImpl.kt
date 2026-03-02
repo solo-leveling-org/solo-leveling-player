@@ -2,19 +2,18 @@ package com.soloist.player.service.player.impl
 
 import com.soloist.player.model.entity.Immutables
 import com.soloist.player.model.entity.player.Player
-import com.soloist.player.model.entity.player.PlayerFetcher
 import com.soloist.player.model.entity.player.dto.ResetPlayerView
-import com.soloist.player.model.entity.player.enums.DailyTaskType
+import com.soloist.player.model.entity.task.enums.DailyTaskType
 import com.soloist.player.model.entity.player.enums.LevelType
 import com.soloist.player.model.entity.task.enums.TaskTopic
 import com.soloist.player.model.repository.player.PlayerRepository
 import com.soloist.player.service.player.LevelService
-import com.soloist.player.service.player.PlayerBalanceService
-import com.soloist.player.service.player.PlayerDailyTaskService
-import com.soloist.player.service.player.PlayerDayStreakService
+import com.soloist.player.service.balance.BalanceService
+import com.soloist.player.service.player.DailyTaskService
+import com.soloist.player.service.player.DayStreakService
 import com.soloist.player.service.player.PlayerService
-import com.soloist.player.service.player.PlayerStaminaService
-import com.soloist.player.service.player.PlayerTaskTopicService
+import com.soloist.player.service.player.StaminaService
+import com.soloist.player.service.task.PlayerTaskTopicService
 import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.AssociatedSaveMode
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
@@ -26,16 +25,12 @@ import kotlin.reflect.KClass
 class PlayerServiceImpl(
 	private val playerRepository: PlayerRepository,
 	private val levelService: LevelService,
-	private val playerBalanceService: PlayerBalanceService,
+	private val balanceService: BalanceService,
 	private val playerTaskTopicService: PlayerTaskTopicService,
-	private val playerStaminaService: PlayerStaminaService,
-	private val playerDayStreakService: PlayerDayStreakService,
-	private val playerDailyTaskService: PlayerDailyTaskService
+	private val staminaService: StaminaService,
+	private val dayStreakService: DayStreakService,
+	private val dailyTaskService: DailyTaskService
 ) : PlayerService {
-
-	@Transactional(readOnly = true)
-	override fun find(id: Long, fetcher: PlayerFetcher): Player? =
-		playerRepository.findNullable(id, fetcher)
 
 	@Transactional(readOnly = true)
 	override fun <V : View<Player>> findView(id: Long, viewType: KClass<V>): V? =
@@ -52,17 +47,17 @@ class PlayerServiceImpl(
 	override fun initialize(userId: Long): Player = Immutables.createPlayer {
 		it.setId(userId)
 			.setLevel(levelService.initialize(LevelType.PLAYER))
-			.setBalance(playerBalanceService.initialize())
+			.setBalance(balanceService.initialize())
 			.setTaskTopics(
 				TaskTopic.entries.map { topic ->
 					playerTaskTopicService.initialize(topic)
 				}
 			)
-			.setStamina(playerStaminaService.initialize())
-			.setDayStreak(playerDayStreakService.initialize())
+			.setStamina(staminaService.initialize())
+			.setDayStreak(dayStreakService.initialize())
 			.setDailyTasks(
 				DailyTaskType.entries.map { type ->
-					playerDailyTaskService.initialize(userId, type)
+					dailyTaskService.initialize(userId, type)
 				}
 			)
 	}
@@ -80,7 +75,7 @@ class PlayerServiceImpl(
 					l.setId(level.id)
 						.setVersion(level.version)
 				})
-				.setBalance(Immutables.createPlayerBalance(playerBalanceService.initialize()) { b ->
+				.setBalance(Immutables.createBalance(balanceService.initialize()) { b ->
 					val balance = player.balance
 					b.setId(balance.id)
 						.setVersion(balance.version)
@@ -99,7 +94,7 @@ class PlayerServiceImpl(
 						}
 					}
 				)
-				.setStamina(Immutables.createPlayerStamina(playerStaminaService.initialize()) { s ->
+				.setStamina(Immutables.createStamina(staminaService.initialize()) { s ->
 					val stamina = player.stamina
 					s.setId(stamina.id)
 						.setVersion(stamina.version)

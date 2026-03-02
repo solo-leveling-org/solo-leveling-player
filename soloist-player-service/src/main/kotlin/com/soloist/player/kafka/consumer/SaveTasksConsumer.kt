@@ -12,7 +12,7 @@ import com.soloist.player.model.entity.task.Task
 import com.soloist.player.model.entity.task.dto.SaveTaskInput
 import com.soloist.player.model.entity.task.enums.TaskTopic
 import com.soloist.player.service.ai.TaskVectorService
-import com.soloist.player.service.player.PlayerTaskService
+import com.soloist.player.service.task.PlayerTaskService
 import com.soloist.player.service.task.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener

@@ -9,6 +9,16 @@ PlayerView {
   -updatedAt
 
   -version
+}
+
+CompleteTaskPlayerView {
+  #allScalars
+
+  -createdAt
+
+  -updatedAt
+
+  -version
 
   level {
     #allScalars

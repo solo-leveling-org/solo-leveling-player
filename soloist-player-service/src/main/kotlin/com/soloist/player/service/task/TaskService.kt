@@ -1,7 +1,7 @@
 package com.soloist.player.service.task
 
-import com.soloist.player.model.entity.player.PlayerTask
-import com.soloist.player.model.entity.player.PlayerTaskTopic
+import com.soloist.player.model.entity.task.PlayerTask
+import com.soloist.player.model.entity.task.PlayerTaskTopic
 import com.soloist.player.model.entity.task.Task
 import com.soloist.player.model.entity.task.dto.VectorizeTaskView
 import com.soloist.player.model.entity.task.enums.TaskTopic

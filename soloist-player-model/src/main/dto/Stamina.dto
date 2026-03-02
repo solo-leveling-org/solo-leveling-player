@@ -1,0 +1,12 @@
+export com.soloist.player.model.entity.player.Stamina
+  -> package com.soloist.player.model.entity.player.dto
+
+StaminaView {
+  #allScalars
+
+  -createdAt
+
+  -updatedAt
+
+  -version
+}

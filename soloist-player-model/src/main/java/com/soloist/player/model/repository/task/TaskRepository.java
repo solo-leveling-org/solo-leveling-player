@@ -6,12 +6,12 @@ import static com.soloist.player.model.entity.task.Task.RARITY_FIELD;
 import static com.soloist.player.model.entity.task.Task.TOPICS_FIELD;
 
 import com.soloist.jimmer.sql.SqlFileLoader;
-import com.soloist.player.model.entity.player.PlayerTask;
+import com.soloist.player.model.entity.task.PlayerTask;
 import com.soloist.player.model.entity.player.TaskTopicItem;
 import com.soloist.player.model.entity.task.Task;
 import com.soloist.player.model.entity.task.dto.VectorizeTaskView;
 import com.soloist.player.model.entity.task.enums.TaskTopic;
-import com.soloist.proto.player.RequestPaging;
+import com.soloist.proto.common.RequestPaging;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.Collection;

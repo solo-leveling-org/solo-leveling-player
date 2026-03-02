@@ -1,29 +1,29 @@
 package com.soloist.player.job
 
 import com.soloist.player.config.properties.JobsProperties
-import com.soloist.player.model.entity.player.enums.DailyTaskType
-import com.soloist.player.service.player.PlayerDailyTaskService
+import com.soloist.player.model.entity.task.enums.DailyTaskType
+import com.soloist.player.service.player.DailyTaskService
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class InitDailyTasksJob(
 	properties: JobsProperties,
-	private val playerDailyTaskService: PlayerDailyTaskService
+	private val dailyTaskService: DailyTaskService
 ) : AbstractStartupJob(
-	jobName = "init-daily-tasks-job",
 	jobProperties = properties.initDailyTasks
 ) {
 
-	override val log = LoggerFactory.getLogger(javaClass)
+	override val log: Logger = LoggerFactory.getLogger(javaClass)
 
 	override fun runJob() {
 		val tasksToInsert = DailyTaskType.entries.flatMap { type ->
-			val playerIds = playerDailyTaskService.findPlayersToInit(type)
+			val playerIds = dailyTaskService.findPlayersToInit(type)
 			log.info("Found {} players without daily task of type {}", playerIds.size, type)
 
 			playerIds.map { playerId ->
-				playerDailyTaskService.initialize(playerId, type)
+				dailyTaskService.initialize(playerId, type)
 			}
 		}
 
@@ -32,7 +32,7 @@ class InitDailyTasksJob(
 			return
 		}
 
-		playerDailyTaskService.insertAll(tasksToInsert)
+		dailyTaskService.insertAll(tasksToInsert)
 
 		val distinctPlayers = tasksToInsert.map { it.player().id() }.toSet().size
 		log.info("Initialized {} tasks for {} players", tasksToInsert.size, distinctPlayers)

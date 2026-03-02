@@ -1,36 +1,46 @@
 package com.soloist.player.mapper
 
 import com.google.protobuf.Timestamp
+import com.google.type.Decimal
 import com.google.type.Money
 import com.soloist.jimmer.mapper.JimmerProtoMapper
 import com.soloist.player.config.properties.PlayerLimitsProperties.StaminaConfig
+import com.soloist.player.extenstions.toGoogleDecimal
 import com.soloist.player.extenstions.toMoney
 import com.soloist.player.extenstions.toTimestamp
 import com.soloist.player.model.entity.localization.LocalizationItem
 import com.soloist.player.model.entity.player.TaskTopicItem
-import com.soloist.player.model.entity.player.dto.PlayerBalanceTransactionView
-import com.soloist.player.model.entity.player.dto.PlayerBalanceView
-import com.soloist.player.model.entity.player.dto.PlayerDailyTaskView
-import com.soloist.player.model.entity.player.dto.PlayerDayStreakView
-import com.soloist.player.model.entity.player.dto.PlayerStaminaView
-import com.soloist.player.model.entity.player.dto.PlayerTaskTopicView
-import com.soloist.player.model.entity.player.dto.PlayerTaskView
+import com.soloist.player.model.entity.balance.dto.BalanceTransactionView
+import com.soloist.player.model.entity.balance.dto.BalanceView
+import com.soloist.player.model.entity.player.dto.CompleteTaskPlayerView
+import com.soloist.player.model.entity.task.dto.DailyTaskView
+import com.soloist.player.model.entity.player.dto.DayStreakView
+import com.soloist.player.model.entity.player.dto.LevelView
+import com.soloist.player.model.entity.task.dto.PlayerTaskTopicView
+import com.soloist.player.model.entity.task.dto.PlayerTaskView
 import com.soloist.player.model.entity.player.dto.PlayerView
+import com.soloist.player.model.entity.player.dto.StaminaView
 import com.soloist.player.model.entity.player.enums.CurrencyCode
 import com.soloist.player.model.entity.player.sealed.DailyTaskSpec
 import com.soloist.player.model.entity.user.LeaderboardUser
 import com.soloist.player.model.entity.user.UserRoleItem
 import com.soloist.player.model.entity.user.UsersStats
 import com.soloist.player.model.entity.user.dto.LocaleUserView
+import com.soloist.player.model.entity.user.dto.UserInput
 import com.soloist.player.model.entity.user.dto.UserView
 import com.soloist.player.service.i18n.I18nService
-import com.soloist.proto.player.*
+import com.soloist.proto.balance.SearchBalanceTransactionsResponse
+import com.soloist.proto.common.LocalizedField
+import com.soloist.proto.common.ResponsePaging
+import com.soloist.proto.common.ResponseQueryOptions
+import com.soloist.proto.common.TaskTopic
+import com.soloist.proto.common.UserRole
 import com.soloist.proto.player.PlayerTaskTopicInput
+import com.soloist.proto.task.SearchClosedTasksResponse
 import com.soloist.proto.user.GetUsersLeaderboardResponse
 import com.soloist.proto.user.GetUsersResponse
 import com.soloist.proto.user.GetUsersStatsResponse
-import com.soloist.proto.user.UserInput
-import com.soloist.proto.user.UserRole
+import com.soloist.proto.user.UserLocale
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
 import org.mapstruct.*
@@ -59,9 +69,7 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 	fun map(input: TaskTopic): com.soloist.player.model.entity.task.enums.TaskTopic =
 		com.soloist.player.model.entity.task.enums.TaskTopic.valueOf(input.name)
 
-	fun map(input: UserRoleItem): UserRole = UserRole.valueOf(input.role().name)
-
-	abstract fun map(input: Collection<UserRoleItem>): List<UserRole>
+	fun map(input: View<UserRoleItem>): UserRole = UserRole.valueOf(input.toEntity().role().name)
 
 	fun map(input: View<TaskTopicItem>): TaskTopic = TaskTopic.valueOf(input.toEntity().topic().name)
 
@@ -75,36 +83,47 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 	abstract fun map(input: PlayerTaskTopicView): com.soloist.proto.player.PlayerTaskTopicView
 
 	@Mapping(target = "task.topicsList", source = "input.task.topics")
-	abstract fun map(input: PlayerTaskView): com.soloist.proto.player.PlayerTaskView
+	abstract fun map(input: PlayerTaskView): com.soloist.proto.task.PlayerTaskView
 
 	fun map(balance: BigDecimal, currencyCode: CurrencyCode): Money = balance.toMoney(currencyCode)
 
-	fun map(input: Number): Money = input.toMoney()
+	fun map(input: Number): Decimal = input.toGoogleDecimal()
 
+	fun map(input: BigDecimal): Decimal = input.toGoogleDecimal()
+
+	@Mapping(target = "rolesList", source = "roles")
+	@Mapping(target = "locale", expression = "java(map(input.getLocale(), input.getManualLocale()))")
 	abstract fun map(input: UserView): com.soloist.proto.user.UserView
 
-	@Mapping(
-		target = "balance",
-		expression = "java(map(input.getBalance(), input.getCurrencyCode()))"
-	)
-	abstract fun map(input: PlayerBalanceView): com.soloist.proto.player.PlayerBalanceView
+	protected fun map(locale: String, manualLocale: String?): UserLocale = UserLocale.newBuilder()
+		.setTag(manualLocale ?: locale)
+		.setIsManual(manualLocale != null)
+		.build()
 
 	@Mapping(
-		target = "balance.balance",
-		expression = "java(map(targetOf_balance.getBalance(), targetOf_balance.getCurrencyCode()))"
+		target = "amount",
+		expression = "java(map(input.getAmount(), input.getCurrencyCode()))"
+	)
+	abstract fun map(input: BalanceView): com.soloist.proto.balance.BalanceView
+
+	@Mapping(
+		target = "balance.amount",
+		expression = "java(map(targetOf_balance.getAmount(), targetOf_balance.getCurrencyCode()))"
 	)
 	@Mapping(target = "taskTopicsList", source = "taskTopics")
+	abstract fun map(input: CompleteTaskPlayerView): com.soloist.proto.player.CompleteTaskPlayerView
+
 	abstract fun map(input: PlayerView): com.soloist.proto.player.PlayerView
 
-	abstract fun map(input: UserInput): com.soloist.player.model.entity.user.dto.UserInput
+	abstract fun map(input: com.soloist.proto.user.UserInput): UserInput
 
 	@Mapping(target = "active", source = "isActive")
-	abstract fun map(input: PlayerTaskTopicInput): com.soloist.player.model.entity.player.dto.PlayerTaskTopicInput
+	abstract fun map(input: PlayerTaskTopicInput): com.soloist.player.model.entity.task.dto.PlayerTaskTopicInput
 
 	@Mapping(target = "transactionsList", source = "page.rows")
 	@Mapping(
 		target = "transactionsList.amount",
-		expression = "java(map(playerBalanceTransactionView.getAmount(), playerBalanceTransactionView.getCurrencyCode()))"
+		expression = "java(map(balanceTransactionView.getAmount(), balanceTransactionView.getCurrencyCode()))"
 	)
 	@Mapping(target = "options", expression = "java(map(filters, sorts))")
 	@Mapping(
@@ -112,11 +131,11 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage))"
 	)
 	abstract fun mapTransactions(
-		page: Page<PlayerBalanceTransactionView>,
+		page: Page<BalanceTransactionView>,
 		currentPage: Int,
 		filters: List<LocalizedField>,
 		sorts: Set<String>
-	): SearchPlayerBalanceTransactionsResponse
+	): SearchBalanceTransactionsResponse
 
 	@Mapping(target = "tasksList", source = "page.rows")
 	@Mapping(target = "options", expression = "java(map(filters, sorts))")
@@ -129,7 +148,7 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		currentPage: Int,
 		filters: List<LocalizedField>,
 		sorts: Set<String> = setOf()
-	): SearchPlayerTasksResponse
+	): SearchClosedTasksResponse
 
 	@Mapping(target = "filtersList", source = "filters")
 	@Mapping(target = "sortsList", source = "sorts")
@@ -165,16 +184,13 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		target = "fullRegenAt",
 		expression = "java(map(input.getCurrent(), input.getLastRegeneratedAt(), input.isRegenerating(), cfg.getMax(), cfg.getRegenRate(), cfg.getRegenIntervalSeconds()))"
 	)
-	abstract fun map(
-		input: PlayerStaminaView,
-		cfg: StaminaConfig
-	): com.soloist.proto.player.PlayerStaminaView
+	abstract fun map(input: StaminaView, cfg: StaminaConfig): com.soloist.proto.player.StaminaView
 
 	@Mapping(
 		target = "isExtendedToday",
 		expression = "java(isExtendedToday(input.getUpdatedAt(), input.getMax()))"
 	)
-	abstract fun map(input: PlayerDayStreakView): com.soloist.proto.player.PlayerDayStreakView
+	abstract fun map(input: DayStreakView): com.soloist.proto.player.DayStreakView
 
 	fun isExtendedToday(updatedAt: Instant, max: Int): Boolean {
 		if (max == 0) {
@@ -188,7 +204,7 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 	@Mapping(target = "isCompleted", source = "completed")
 	@Mapping(target = "goal", expression = "java(map(input.getSpec().goal()))")
 	@Mapping(target = "title", expression = "java(map(input.getSpec()))")
-	abstract fun map(input: PlayerDailyTaskView): com.soloist.proto.player.PlayerDailyTaskView
+	abstract fun map(input: DailyTaskView): com.soloist.proto.task.DailyTaskView
 
 	protected fun map(spec: DailyTaskSpec): String =
 		i18nService.getMessage(spec.fullLocalizationKey(), spec.localizationArgs())
@@ -257,4 +273,6 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 	abstract fun mapLocaleUsers(page: Page<LocaleUserView>, currentPage: Int): GetUsersResponse
 
 	fun mapLocale(locale: String, manualLocale: String?): String = manualLocale ?: locale
+
+	abstract fun map(input: LevelView): com.soloist.proto.player.LevelView
 }

@@ -1,0 +1,6 @@
+export com.soloist.player.model.entity.balance.BalanceTransaction
+  -> package com.soloist.player.model.entity.balance.dto
+
+BalanceTransactionView {
+  #allScalars
+}

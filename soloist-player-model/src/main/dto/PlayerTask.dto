@@ -1,5 +1,5 @@
-export com.soloist.player.model.entity.player.PlayerTask
-  -> package com.soloist.player.model.entity.player.dto
+export com.soloist.player.model.entity.task.PlayerTask
+  -> package com.soloist.player.model.entity.task.dto
 
 PlayerTaskView {
   #allScalars

@@ -1,6 +1,10 @@
 package com.soloist.player.model.entity.player;
 
 import com.soloist.player.model.entity.Model;
+import com.soloist.player.model.entity.balance.Balance;
+import com.soloist.player.model.entity.task.DailyTask;
+import com.soloist.player.model.entity.task.PlayerTask;
+import com.soloist.player.model.entity.task.PlayerTaskTopic;
 import com.soloist.player.model.entity.user.User;
 import java.util.List;
 import org.babyfish.jimmer.sql.Entity;
@@ -8,11 +12,9 @@ import org.babyfish.jimmer.sql.Id;
 import org.babyfish.jimmer.sql.JoinColumn;
 import org.babyfish.jimmer.sql.OneToOne;
 import org.babyfish.jimmer.sql.OneToMany;
-import org.babyfish.jimmer.sql.Table;
 import org.jetbrains.annotations.Nullable;
 
 @Entity
-@Table(name = "players")
 public interface Player extends Model {
 
   @Id
@@ -34,21 +36,21 @@ public interface Player extends Model {
 
   @Nullable
   @OneToOne(mappedBy = "player")
-  PlayerBalance balance();
+  Balance balance();
 
   @Nullable
   @OneToOne(mappedBy = "player")
-  PlayerStamina stamina();
+  Stamina stamina();
 
   @Nullable
   @OneToOne(mappedBy = "player")
-  PlayerDayStreak dayStreak();
+  DayStreak dayStreak();
 
   @OneToMany(mappedBy = "player")
   List<PlayerTask> tasks();
 
   @OneToMany(mappedBy = "player")
-  List<PlayerDailyTask> dailyTasks();
+  List<DailyTask> dailyTasks();
 
   @OneToMany(mappedBy = "player")
   List<PlayerTaskTopic> taskTopics();
@@ -57,5 +59,5 @@ public interface Player extends Model {
   List<PlayerGearItem> gearItems();
 
   @OneToMany(mappedBy = "player")
-  List<PlayerDayActivity> dayActivities();
+  List<DayActivity> dayActivities();
 }

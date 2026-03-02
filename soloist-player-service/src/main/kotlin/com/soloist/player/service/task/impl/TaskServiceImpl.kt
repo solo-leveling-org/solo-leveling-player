@@ -1,9 +1,9 @@
 package com.soloist.player.service.task.impl
 
 import com.soloist.player.model.entity.Immutables
-import com.soloist.player.model.entity.player.PlayerTask
-import com.soloist.player.model.entity.player.PlayerTaskTopic
-import com.soloist.player.model.entity.player.enums.PlayerTaskStatus
+import com.soloist.player.model.entity.task.PlayerTask
+import com.soloist.player.model.entity.task.PlayerTaskTopic
+import com.soloist.player.model.entity.task.enums.PlayerTaskStatus
 import com.soloist.player.model.entity.task.Task
 import com.soloist.player.model.entity.task.dto.VectorizeTaskView
 import com.soloist.player.model.entity.task.enums.TaskTopic
@@ -12,7 +12,7 @@ import com.soloist.player.service.ai.TaskVectorService
 import com.soloist.player.service.task.DefineTaskRarityService
 import com.soloist.player.service.task.DefineTaskTopicService
 import com.soloist.player.service.task.TaskService
-import com.soloist.proto.player.RequestPaging
+import com.soloist.proto.common.RequestPaging
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.slf4j.LoggerFactory

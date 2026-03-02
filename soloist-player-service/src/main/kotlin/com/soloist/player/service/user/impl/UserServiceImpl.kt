@@ -13,8 +13,9 @@ import com.soloist.player.model.entity.user.enums.UserRole
 import com.soloist.player.model.repository.user.UserRepository
 import com.soloist.player.service.player.PlayerService
 import com.soloist.player.service.user.UserService
-import com.soloist.proto.player.RequestPaging
-import com.soloist.proto.user.LeaderboardType
+import com.soloist.proto.common.LeaderboardType
+import com.soloist.proto.common.RequestPaging
+import com.soloist.proto.user.UserLocale
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
@@ -64,7 +65,7 @@ class UserServiceImpl(
 	}
 
 	@Transactional
-	override fun updateLocale(id: Long, locale: Locale) {
+	override fun updateLocale(id: Long, locale: UserLocale) {
 		userRepository.updateLocale(id, locale)
 
 		localeUpdatedProducer.send(userId = id)

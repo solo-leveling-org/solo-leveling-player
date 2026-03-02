@@ -1,0 +1,77 @@
+databaseChangeLog:
+  - changeSet:
+      id: rename-player-balances-and-balance-column
+      author: sleepkqq
+      changes:
+        - renameTable:
+            oldTableName: player_balances
+            newTableName: balance
+
+        - renameTable:
+            oldTableName: player_balance_transactions
+            newTableName: balance_transaction
+
+        - renameColumn:
+            tableName: balance
+            oldColumnName: balance
+            newColumnName: amount
+
+  - changeSet:
+      id: rename-tables-to-singular
+      author: sleepkqq
+      changes:
+        - renameTable:
+            oldTableName: players
+            newTableName: player
+
+        - renameTable:
+            oldTableName: levels
+            newTableName: level
+
+        - renameTable:
+            oldTableName: player_daily_tasks
+            newTableName: daily_task
+
+        - renameTable:
+            oldTableName: player_tasks
+            newTableName: player_task
+
+        - renameTable:
+            oldTableName: tasks
+            newTableName: task
+
+        - renameTable:
+            oldTableName: player_day_activities
+            newTableName: day_activity
+
+        - renameTable:
+            oldTableName: player_gear_items
+            newTableName: player_gear_item
+
+        - renameTable:
+            oldTableName: player_task_topics
+            newTableName: player_task_topic
+
+        - renameTable:
+            oldTableName: task_topic_items
+            newTableName: task_topic_item
+
+        - renameTable:
+            oldTableName: user_role_items
+            newTableName: user_role_item
+
+        - renameTable:
+            oldTableName: localization_items
+            newTableName: localization_item
+
+        - renameTable:
+            oldTableName: gear_items
+            newTableName: gear_item
+
+        - renameTable:
+            oldTableName: player_stamina
+            newTableName: stamina
+
+        - renameTable:
+            oldTableName: player_day_streak
+            newTableName: day_streak

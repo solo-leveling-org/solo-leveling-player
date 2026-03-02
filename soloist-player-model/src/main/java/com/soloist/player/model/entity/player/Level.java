@@ -2,18 +2,17 @@ package com.soloist.player.model.entity.player;
 
 import com.soloist.player.model.entity.Model;
 import com.soloist.player.model.entity.player.enums.Assessment;
+import com.soloist.player.model.entity.task.PlayerTaskTopic;
 import java.util.UUID;
 import org.babyfish.jimmer.sql.Entity;
 import org.babyfish.jimmer.sql.GeneratedValue;
 import org.babyfish.jimmer.sql.Id;
 import org.babyfish.jimmer.sql.JoinColumn;
 import org.babyfish.jimmer.sql.OneToOne;
-import org.babyfish.jimmer.sql.Table;
 import org.babyfish.jimmer.sql.meta.UUIDIdGenerator;
 import org.jetbrains.annotations.Nullable;
 
 @Entity
-@Table(name = "levels")
 public interface Level extends Model {
 
   @Id

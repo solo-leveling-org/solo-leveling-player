@@ -1,6 +1,6 @@
 package com.soloist.player.event.model
 
-import com.soloist.player.model.entity.player.enums.DailyTaskType
+import com.soloist.player.model.entity.task.enums.DailyTaskType
 import com.soloist.player.model.entity.player.enums.Rarity
 import java.math.BigDecimal
 

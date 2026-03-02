@@ -5,7 +5,7 @@ import static com.soloist.player.model.entity.Tables.PLAYER_TASK_TABLE;
 import static com.soloist.player.model.entity.Tables.USER_TABLE;
 
 import com.soloist.jimmer.predicate.filter.DateFilter.DayRange;
-import com.soloist.player.model.entity.player.enums.PlayerTaskStatus;
+import com.soloist.player.model.entity.task.enums.PlayerTaskStatus;
 import com.soloist.player.model.entity.user.LeaderboardUser;
 import com.soloist.player.model.entity.user.LeaderboardUserMapper;
 import com.soloist.player.model.entity.user.User;
@@ -14,12 +14,12 @@ import com.soloist.player.model.entity.user.UserTable;
 import com.soloist.player.model.entity.user.UsersStats;
 import com.soloist.player.model.entity.user.UsersStatsMapper;
 import com.soloist.player.model.entity.user.dto.LeaderboardUserView;
-import com.soloist.proto.player.RequestPaging;
-import com.soloist.proto.user.LeaderboardType;
+import com.soloist.proto.common.LeaderboardType;
+import com.soloist.proto.common.RequestPaging;
+import com.soloist.proto.user.UserLocale;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Locale;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.babyfish.jimmer.Page;
@@ -64,11 +64,14 @@ public class UserRepository {
         .fetchFirstOrNull();
   }
 
-  public void updateLocale(long id, Locale locale) {
+  public void updateLocale(long id, UserLocale locale) {
     var table = USER_TABLE;
+    String manualLocale = locale.getIsManual()
+        ? locale.getTag()
+        : null;
     sql.createUpdate(table)
         .where(table.id().eq(id))
-        .set(table.manualLocale(), locale.getLanguage())
+        .set(table.manualLocale(), manualLocale)
         .execute();
   }
 
@@ -100,7 +103,7 @@ public class UserRepository {
       }
 
       case BALANCE -> {
-        var balance = p.balance().balance();
+        var balance = p.balance().amount();
         return new LeaderboardQueryData(balance, balance.gt(BigDecimal.ZERO));
       }
 

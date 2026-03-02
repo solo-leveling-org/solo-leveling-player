@@ -5,10 +5,10 @@ import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.core.Ordered
+import org.springframework.util.StopWatch
 import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class AbstractStartupJob(
-	private val jobName: String,
 	private val jobProperties: JobsProperties.JobProperties
 ) : Ordered {
 
@@ -16,11 +16,9 @@ abstract class AbstractStartupJob(
 
 	protected abstract val log: Logger
 
-	protected open val pageSize: Int
-		get() = jobProperties.pageSize ?: 20
-
-	protected open val delayMillis: Long
-		get() = jobProperties.delay?.toMillis() ?: 500L
+	protected open val jobName: String = this::class.simpleName ?: "StartupJob"
+	protected open val pageSize: Int = jobProperties.pageSize ?: 20
+	protected open val delayMillis: Long = jobProperties.delay?.toMillis() ?: 500L
 
 	override fun getOrder(): Int = jobProperties.order
 
@@ -44,13 +42,23 @@ abstract class AbstractStartupJob(
 	}
 
 	private fun runSafely() {
+		val watch = StopWatch(jobName)
+		watch.start("total")
+
 		try {
 			log.info("{} started", jobName)
 			runJob()
-			log.info("{} finished successfully", jobName)
+			watch.stop()
+			log.info("{} finished successfully, totalTimeMs={}", jobName, watch.totalTimeMillis)
 
 		} catch (e: Exception) {
-			log.error("{} failed with unexpected exception", jobName, e)
+			if (watch.isRunning) {
+				watch.stop()
+			}
+			log.error(
+				"{} failed with unexpected exception, totalTimeMs={}",
+				jobName, watch.totalTimeMillis, e
+			)
 		}
 	}
 

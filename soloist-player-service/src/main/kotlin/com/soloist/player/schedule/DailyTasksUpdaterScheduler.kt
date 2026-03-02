@@ -1,8 +1,8 @@
 package com.soloist.player.schedule
 
-import com.soloist.player.model.entity.player.enums.DailyTaskType
-import com.soloist.player.service.player.PlayerDailyTaskService
-import com.soloist.player.service.player.PlayerDayStreakService
+import com.soloist.player.model.entity.task.enums.DailyTaskType
+import com.soloist.player.service.player.DailyTaskService
+import com.soloist.player.service.player.DayStreakService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional
 class DailyTasksUpdaterScheduler(
 	@Value($$"${app.scheduler.daily-tasks-updater.enabled}")
 	private val enabled: Boolean,
-	private val playerDailyTaskService: PlayerDailyTaskService,
-	private val playerDayStreakService: PlayerDayStreakService
+	private val dailyTaskService: DailyTaskService,
+	private val dayStreakService: DayStreakService
 ) {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -29,11 +29,11 @@ class DailyTasksUpdaterScheduler(
 
 		log.info("Starting daily tasks updater scheduler")
 
-		val resetCount = playerDayStreakService.resetExpiredStreaks()
+		val resetCount = dayStreakService.resetExpiredStreaks()
 		log.info("Reset {} expired day streaks", resetCount)
 
 		DailyTaskType.entries.forEach {
-			val updatedTasksCount = playerDailyTaskService.replace(it)
+			val updatedTasksCount = dailyTaskService.replace(it)
 			log.info("Updated {} tasks by type={}", updatedTasksCount, it)
 		}
 
