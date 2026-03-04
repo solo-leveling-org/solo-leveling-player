@@ -13,9 +13,10 @@ import com.soloist.player.service.player.DayActivityService
 import com.soloist.player.service.player.DayStreakService
 import org.babyfish.jimmer.sql.exception.SaveException
 import org.slf4j.LoggerFactory
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
-import org.springframework.transaction.event.TransactionPhase
-import org.springframework.transaction.event.TransactionalEventListener
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -30,7 +31,8 @@ class DailyTaskProgressTracker(
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+	@Transactional(propagation = Propagation.MANDATORY)
+	@EventListener
 	fun listen(event: DailyTaskProgressEvent) {
 		val today = LocalDate.now(ZoneOffset.UTC)
 		val playerId = event.playerId

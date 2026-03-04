@@ -22,6 +22,7 @@ spring:
       schema.registry.url: http://localhost:8081
     avro:
       group-id: player-group
+      tx-id-prefix: player-tx-
   data:
     redis:
       host: localhost

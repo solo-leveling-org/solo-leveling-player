@@ -27,7 +27,7 @@ class BalanceController(
 		responseObserver: StreamObserver<GetBalanceResponse>
 	) {
 		val playerBalance = balanceService.getView(
-			UserContextHolder.getUserId()!!,
+			request.playerId,
 			BalanceView::class
 		)
 		val response = GetBalanceResponse.newBuilder()
