@@ -70,7 +70,7 @@
     <mapstruct.version>1.6.3</mapstruct.version>
 
     <!-- soloist -->
-    <soloist-lib.version>2.1.1.1</soloist-lib.version>
+    <soloist-lib.version>2.1.2</soloist-lib.version>
 
     <!-- utils -->
     <streamex.version>0.8.3</streamex.version>
