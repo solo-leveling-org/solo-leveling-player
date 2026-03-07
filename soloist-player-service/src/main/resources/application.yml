@@ -130,7 +130,5 @@ server:
   port: 10001
 logging:
   level:
-    org.apache.kafka.clients.consumer.ConsumerConfig: WARN
-    org.apache.kafka.clients.producer.ProducerConfig: WARN
-    io.confluent.kafka.serializers.KafkaAvroDeserializerConfig: WARN
-    io.confluent.kafka.serializers.KafkaAvroSerializerConfig: WARN
+    org.apache.kafka: WARN
+    io.confluent.kafka: WARN

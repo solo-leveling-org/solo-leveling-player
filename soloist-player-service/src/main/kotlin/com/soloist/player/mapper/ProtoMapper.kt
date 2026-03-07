@@ -128,11 +128,12 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 	@Mapping(target = "options", expression = "java(map(filters, sorts))")
 	@Mapping(
 		target = "paging",
-		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage))"
+		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPageSize))"
 	)
 	abstract fun mapTransactions(
 		page: Page<BalanceTransactionView>,
 		currentPage: Int,
+		currentPageSize: Int,
 		filters: List<LocalizedField>,
 		sorts: Set<String>
 	): SearchBalanceTransactionsResponse
@@ -141,11 +142,12 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 	@Mapping(target = "options", expression = "java(map(filters, sorts))")
 	@Mapping(
 		target = "paging",
-		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage))"
+		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPageSize))"
 	)
 	abstract fun mapTasks(
 		page: Page<PlayerTaskView>,
 		currentPage: Int,
+		currentPageSize: Int,
 		filters: List<LocalizedField>,
 		sorts: Set<String> = setOf()
 	): SearchClosedTasksResponse
@@ -154,17 +156,17 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 	@Mapping(target = "sortsList", source = "sorts")
 	abstract fun map(filters: List<LocalizedField>, sorts: Set<String>): ResponseQueryOptions
 
-	@Mapping(target = "hasMore", expression = "java(totalPageCount - 1 != currentPage)")
-	abstract fun map(totalRowCount: Long, totalPageCount: Long, currentPage: Int): ResponsePaging
+	abstract fun map(totalRowCount: Long, totalPageCount: Long, currentPageSize: Int): ResponsePaging
 
 	@Mapping(target = "usersList", source = "page.rows")
 	@Mapping(
 		target = "paging",
-		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage))"
+		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPageSize))"
 	)
 	abstract fun mapLeaderboardUsers(
 		page: Page<LeaderboardUser>,
-		currentPage: Int
+		currentPage: Int,
+		currentPageSize: Int
 	): GetUsersLeaderboardResponse
 
 	@Mapping(target = "id", source = "input.user.id")
@@ -268,9 +270,9 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 	)
 	@Mapping(
 		target = "paging",
-		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPage))"
+		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPageSize))"
 	)
-	abstract fun mapLocaleUsers(page: Page<LocaleUserView>, currentPage: Int): GetUsersResponse
+	abstract fun mapLocaleUsers(page: Page<LocaleUserView>, currentPage: Int, currentPageSize: Int): GetUsersResponse
 
 	fun mapLocale(locale: String, manualLocale: String?): String = manualLocale ?: locale
 

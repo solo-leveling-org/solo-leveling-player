@@ -13,7 +13,7 @@ task_topic_agg AS (
     SELECT
         tti.task_id,
         array_agg(tti.topic ORDER BY tti.topic) AS sorted_topics
-    FROM player.task_topic_items tti
+    FROM player.task_topic_item tti
     GROUP BY tti.task_id
 ),
 input_players AS (

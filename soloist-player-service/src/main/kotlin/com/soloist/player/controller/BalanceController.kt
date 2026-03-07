@@ -51,8 +51,9 @@ class BalanceController(
 		val response = protoMapper.mapTransactions(
 			transactionsPage,
 			request.paging.page,
+			request.paging.pageSize,
 			enumLocalizer.localize(
-				LocalizationCode.TABLES_PLAYER_BALANCE_TRANSACTIONS,
+				LocalizationCode.TABLES_BALANCE_TRANSACTIONS,
 				BalanceTransactionRepository.FIELD_ENUM_TYPES
 			),
 			setOf(AMOUNT_FIELD)

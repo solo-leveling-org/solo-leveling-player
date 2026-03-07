@@ -103,6 +103,7 @@ class TaskController(
 		val response = protoMapper.mapTasks(
 			tasksPage,
 			request.paging.page,
+			request.paging.pageSize,
 			enumLocalizer.localize(
 				LocalizationCode.TABLES_PLAYER_TASKS,
 				PlayerTaskRepository.FIELD_ENUM_TYPES,

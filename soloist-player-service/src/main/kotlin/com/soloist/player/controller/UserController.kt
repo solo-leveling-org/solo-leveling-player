@@ -65,7 +65,8 @@ class UserController(
 		)
 		val response = protoMapper.mapLeaderboardUsers(
 			leaderboardPage,
-			request.paging.page
+			request.paging.page,
+			request.paging.pageSize
 		)
 
 		responseObserver.onNext(response)
@@ -105,7 +106,7 @@ class UserController(
 		responseObserver: StreamObserver<GetUsersResponse>
 	) {
 		val usersPage = userService.getUsers(request.paging, LocaleUserView::class)
-		val response = protoMapper.mapLocaleUsers(usersPage, request.paging.page)
+		val response = protoMapper.mapLocaleUsers(usersPage, request.paging.page, request.paging.pageSize)
 
 		responseObserver.onNext(response)
 		responseObserver.onCompleted()
