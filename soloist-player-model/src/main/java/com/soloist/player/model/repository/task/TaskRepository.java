@@ -62,7 +62,7 @@ public class TaskRepository {
             table.version().ne(0),
             table.deprecated().eq(false),
             Predicate.sql(
-                "NOT EXISTS (SELECT 1 FROM player.player_tasks pt WHERE pt.task_id = %e AND pt.player_id = %v)",
+                "NOT EXISTS (SELECT 1 FROM player.player_task pt WHERE pt.task_id = %e AND pt.player_id = %v)",
                 ctx -> {
                   ctx.expression(table.id());
                   ctx.value(playerId);
@@ -72,7 +72,7 @@ public class TaskRepository {
                 """
                     EXISTS (
                         SELECT 1
-                        FROM player.task_topic_items tt
+                        FROM player.task_topic_item tt
                         WHERE tt.task_id = %e
                         GROUP BY tt.task_id
                         HAVING count(DISTINCT tt.topic) = array_length(%v, 1)

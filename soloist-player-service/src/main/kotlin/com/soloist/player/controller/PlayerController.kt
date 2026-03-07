@@ -8,7 +8,7 @@ import com.soloist.player.model.entity.player.dto.LevelView
 import com.soloist.player.model.entity.player.dto.StaminaView
 import com.soloist.player.model.entity.player.dto.PlayerView
 import com.soloist.player.model.entity.task.dto.PlayerTaskTopicView
-import com.soloist.player.model.entity.task.enums.TaskTopic
+import com.soloist.player.model.entity.task.enums.TaskTopic.DISABLED_TOPICS
 import com.soloist.player.service.player.LevelService
 import com.soloist.player.service.player.DayActivityService
 import com.soloist.player.service.player.DayStreakService
@@ -131,8 +131,7 @@ class PlayerController(
 			.map(protoMapper::map)
 			.map { it.toEntity() }
 
-		val disabledTopics = TaskTopic.getDisabledTopics()
-		if (receivedTopics.any { it.taskTopic() in disabledTopics }) {
+		if (receivedTopics.any { it.taskTopic() in DISABLED_TOPICS }) {
 			throw IllegalArgumentException("Cannot select disabled topics")
 		}
 

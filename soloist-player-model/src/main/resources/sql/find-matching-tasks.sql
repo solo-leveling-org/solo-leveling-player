@@ -36,7 +36,7 @@ matching_tasks AS (
             PARTITION BY t.rarity, tta.sorted_topics
             ORDER BY t.id
         ) AS task_rank
-    FROM player.tasks t
+    FROM player.task t
     JOIN task_topic_agg tta ON tta.task_id = t.id
     WHERE t.version <> 0
       AND t.is_deprecated = false
@@ -48,7 +48,7 @@ matching_tasks AS (
     )
       AND NOT EXISTS (
         SELECT 1
-        FROM player.player_tasks pt
+        FROM player.player_task pt
         WHERE pt.player_id = ?
           AND pt.task_id = t.id
     )
