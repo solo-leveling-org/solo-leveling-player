@@ -2,7 +2,6 @@ package com.soloist.player.model.entity.task;
 
 import com.soloist.player.model.entity.Model;
 import com.soloist.player.model.entity.localization.LocalizationItem;
-import com.soloist.player.model.entity.player.PlayerTask;
 import com.soloist.player.model.entity.player.TaskTopicItem;
 import com.soloist.player.model.entity.player.enums.Rarity;
 import java.util.List;
@@ -14,12 +13,10 @@ import org.babyfish.jimmer.sql.Id;
 import org.babyfish.jimmer.sql.JoinColumn;
 import org.babyfish.jimmer.sql.OneToMany;
 import org.babyfish.jimmer.sql.OneToOne;
-import org.babyfish.jimmer.sql.Table;
 import org.babyfish.jimmer.sql.meta.UUIDIdGenerator;
 import org.jetbrains.annotations.Nullable;
 
 @Entity
-@Table(name = "tasks")
 public interface Task extends Model {
 
   @Id

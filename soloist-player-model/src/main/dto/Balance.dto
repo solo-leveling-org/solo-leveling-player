@@ -1,0 +1,12 @@
+export com.soloist.player.model.entity.balance.Balance
+  -> package com.soloist.player.model.entity.balance.dto
+
+BalanceView {
+  #allScalars
+
+  -updatedAt
+
+  -createdAt
+
+  -version
+}

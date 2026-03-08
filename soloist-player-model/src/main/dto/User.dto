@@ -24,24 +24,8 @@ UserView {
 
   -version
 
-  player {
+  roles {
     #allScalars
-
-    -createdAt
-
-    -updatedAt
-
-    -version
-
-    level {
-      #allScalars
-
-      -createdAt
-
-      -updatedAt
-
-      -version
-    }
   }
 }
 
@@ -64,28 +48,6 @@ AuthUserView {
 
   roles {
     #allScalars
-  }
-}
-
-unsafe UserAdditionalInfoView {
-  locale
-
-  manualLocale
-
-  photoUrl
-
-  roles {
-    #allScalars
-  }
-
-  player! {
-    dayStreak! {
-      #allScalars
-
-      -createdAt
-
-      -version
-    }
   }
 }
 

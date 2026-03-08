@@ -3,7 +3,7 @@ package com.soloist.player.schedule
 import com.soloist.avro.task.SaveTasksOperation
 import com.soloist.player.kafka.producer.GenerateTasksProducer
 import com.soloist.player.model.entity.task.dto.GenerateTaskView
-import com.soloist.player.service.player.PlayerTaskService
+import com.soloist.player.service.task.PlayerTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled

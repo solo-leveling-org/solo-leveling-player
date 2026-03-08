@@ -1,5 +1,5 @@
-export com.soloist.player.model.entity.player.PlayerTaskTopic
-  -> package com.soloist.player.model.entity.player.dto
+export com.soloist.player.model.entity.task.PlayerTaskTopic
+  -> package com.soloist.player.model.entity.task.dto
 
 input PlayerTaskTopicInput {
   #allScalars

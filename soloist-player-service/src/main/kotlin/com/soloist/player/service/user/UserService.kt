@@ -8,11 +8,11 @@ import com.soloist.player.model.entity.user.UserFetcher
 import com.soloist.player.exception.ModelNotFoundException
 import com.soloist.player.model.entity.user.LeaderboardUser
 import com.soloist.player.model.entity.user.UsersStats
-import com.soloist.proto.player.RequestPaging
-import com.soloist.proto.user.LeaderboardType
+import com.soloist.proto.common.LeaderboardType
+import com.soloist.proto.common.RequestPaging
+import com.soloist.proto.user.UserLocale
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
-import java.util.Locale
 import kotlin.reflect.KClass
 
 interface UserService {
@@ -28,7 +28,7 @@ interface UserService {
 	fun insert(user: User): User
 	fun update(user: User): User
 	fun upsert(user: User): User
-	fun updateLocale(id: Long, locale: Locale)
+	fun updateLocale(id: Long, locale: UserLocale)
 	fun register(user: User): User
 	fun getLeaderboardPage(
 		type: LeaderboardType,

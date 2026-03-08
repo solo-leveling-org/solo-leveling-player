@@ -6,14 +6,19 @@ import com.soloist.player.model.entity.player.Player
 import com.soloist.player.model.entity.player.enums.Assessment
 import com.soloist.player.model.entity.player.enums.LevelType
 import com.soloist.player.model.entity.task.enums.TaskTopic
+import com.soloist.player.model.repository.player.LevelRepository
 import com.soloist.player.service.player.CountExperienceService
 import com.soloist.player.service.player.LevelService
 import com.soloist.player.service.task.DefineTaskTopicService.Companion.MAX_TASK_TOPICS_COUNT
+import org.babyfish.jimmer.View
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
+import kotlin.reflect.KClass
 
 @Service
 class LevelServiceImpl(
+	private val levelRepository: LevelRepository,
 	private val countExperienceService: CountExperienceService
 ) : LevelService {
 
@@ -21,6 +26,10 @@ class LevelServiceImpl(
 		const val INITIAL_LEVEL = 1
 		const val INITIAL_EXPERIENCE = 0
 	}
+
+	@Transactional(readOnly = true)
+	override fun <V : View<Level>> findView(playerId: Long, viewType: KClass<V>): V? =
+		levelRepository.findView(playerId, viewType.java)
 
 	override fun initialize(levelType: LevelType): Level =
 		Immutables.createLevel {

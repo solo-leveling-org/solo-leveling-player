@@ -4,18 +4,19 @@ import com.soloist.player.event.model.CurrencySpentEvent
 import com.soloist.player.event.model.DailyTaskProgressEvent
 import com.soloist.player.event.model.TaskCompletedEvent
 import com.soloist.player.model.entity.Immutables
-import com.soloist.player.model.entity.player.PlayerDailyTask
+import com.soloist.player.model.entity.task.DailyTask
 import com.soloist.player.model.entity.player.sealed.CompleteTasks
 import com.soloist.player.model.entity.player.sealed.DailyTaskSpec
 import com.soloist.player.model.entity.player.sealed.SpendCurrency
-import com.soloist.player.service.player.PlayerDailyTaskService
-import com.soloist.player.service.player.PlayerDayActivityService
-import com.soloist.player.service.player.PlayerDayStreakService
+import com.soloist.player.service.player.DailyTaskService
+import com.soloist.player.service.player.DayActivityService
+import com.soloist.player.service.player.DayStreakService
 import org.babyfish.jimmer.sql.exception.SaveException
 import org.slf4j.LoggerFactory
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
-import org.springframework.transaction.event.TransactionPhase
-import org.springframework.transaction.event.TransactionalEventListener
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -23,18 +24,19 @@ import java.util.UUID
 
 @Service
 class DailyTaskProgressTracker(
-	private val playerDailyTaskService: PlayerDailyTaskService,
-	private val playerDayStreakService: PlayerDayStreakService,
-	private val playerDayActivityService: PlayerDayActivityService
+	private val dailyTaskService: DailyTaskService,
+	private val dayStreakService: DayStreakService,
+	private val dayActivityService: DayActivityService
 ) {
 
 	private val log = LoggerFactory.getLogger(javaClass)
 
-	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+	@Transactional(propagation = Propagation.MANDATORY)
+	@EventListener
 	fun listen(event: DailyTaskProgressEvent) {
 		val today = LocalDate.now(ZoneOffset.UTC)
 		val playerId = event.playerId
-		val dailyTask = playerDailyTaskService.find(playerId, event.type)
+		val dailyTask = dailyTaskService.find(playerId, event.type)
 			?: return
 
 		if (dailyTask.completed()) {
@@ -48,13 +50,13 @@ class DailyTaskProgressTracker(
 
 		try {
 			val updatedDailyTask = incrementProgress(dailyTask, amount)
-			playerDailyTaskService.update(updatedDailyTask)
+			dailyTaskService.update(updatedDailyTask)
 
 			if (updatedDailyTask.completed()) {
 				log.info("Daily task completed for player {} type {}", playerId, event.type)
 
 				val activityCreated = try {
-					playerDayActivityService.insertIfAbsent(Immutables.createPlayerDayActivity {
+					dayActivityService.insertIfAbsent(Immutables.createDayActivity {
 						it.setId(UUID.randomUUID())
 							.setPlayerId(playerId)
 							.setDailyTaskCompleted(true)
@@ -68,7 +70,7 @@ class DailyTaskProgressTracker(
 				}
 
 				if (activityCreated) {
-					playerDayStreakService.processStreak(playerId, today)
+					dayStreakService.processStreak(playerId, today)
 				}
 			}
 
@@ -81,7 +83,7 @@ class DailyTaskProgressTracker(
 	}
 
 	private fun calculateProgressAmount(
-		task: PlayerDailyTask,
+		task: DailyTask,
 		event: DailyTaskProgressEvent
 	): BigDecimal = when (event) {
 		is TaskCompletedEvent -> calculateTaskCompletionProgress(task.spec())
@@ -102,12 +104,12 @@ class DailyTaskProgressTracker(
 		}
 	}
 
-	private fun incrementProgress(task: PlayerDailyTask, amount: BigDecimal): PlayerDailyTask {
+	private fun incrementProgress(task: DailyTask, amount: BigDecimal): DailyTask {
 		val newProgress = task.progress() + amount
 		val goal = task.spec().goal()
 		val isCompleted = newProgress >= goal
 
-		return Immutables.createPlayerDailyTask(task) {
+		return Immutables.createDailyTask(task) {
 			it.setProgress(if (isCompleted) goal else newProgress)
 				.setCompleted(isCompleted)
 		}

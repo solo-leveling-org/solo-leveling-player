@@ -1,6 +1,6 @@
 package com.soloist.player.service.task
 
-import com.soloist.player.model.entity.player.PlayerTaskTopic
+import com.soloist.player.model.entity.task.PlayerTaskTopic
 import com.soloist.player.model.entity.player.enums.Rarity
 import org.springframework.stereotype.Service
 import java.util.Random

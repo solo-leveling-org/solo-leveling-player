@@ -1,14 +1,13 @@
 package com.soloist.player.service.task
 
 import com.soloist.player.BaseTestClass
-import com.soloist.player.model.entity.player.dto.PlayerTaskView
 import com.soloist.player.model.entity.player.enums.Rarity
+import com.soloist.player.model.entity.task.dto.PlayerTaskView
 import com.soloist.player.model.entity.task.enums.TaskTopic
-import com.soloist.player.service.player.PlayerTaskService
-import com.soloist.proto.player.EnumFilter
-import com.soloist.proto.player.Filter
-import com.soloist.proto.player.RequestPaging
-import com.soloist.proto.player.RequestQueryOptions
+import com.soloist.proto.common.EnumFilter
+import com.soloist.proto.common.Filter
+import com.soloist.proto.common.RequestPaging
+import com.soloist.proto.common.RequestQueryOptions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

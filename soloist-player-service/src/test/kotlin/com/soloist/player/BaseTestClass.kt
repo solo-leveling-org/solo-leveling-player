@@ -2,17 +2,17 @@ package com.soloist.player
 
 import com.soloist.player.model.entity.Immutables
 import com.soloist.player.model.entity.localization.LocalizationItem
-import com.soloist.player.model.entity.player.PlayerTask
+import com.soloist.player.model.entity.task.PlayerTask
 import com.soloist.player.model.entity.player.TaskTopicItem
-import com.soloist.player.model.entity.player.enums.PlayerBalanceTransactionCause
-import com.soloist.player.model.entity.player.enums.PlayerBalanceTransactionType
-import com.soloist.player.model.entity.player.enums.PlayerTaskStatus
+import com.soloist.player.model.entity.balance.enums.BalanceTransactionCause
+import com.soloist.player.model.entity.balance.enums.BalanceTransactionType
+import com.soloist.player.model.entity.task.enums.PlayerTaskStatus
 import com.soloist.player.model.entity.player.enums.Rarity
 import com.soloist.player.model.entity.task.Task
 import com.soloist.player.model.entity.task.enums.TaskTopic
 import com.soloist.player.model.entity.user.User
 import com.soloist.player.model.entity.user.enums.UserRole
-import com.soloist.player.service.player.PlayerBalanceTransactionService
+import com.soloist.player.service.balance.BalanceTransactionService
 import com.soloist.player.service.user.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -39,7 +39,7 @@ abstract class BaseTestClass {
 	protected lateinit var userService: UserService
 
 	@Autowired
-	protected lateinit var playerBalanceTransactionService: PlayerBalanceTransactionService
+	protected lateinit var balanceTransactionService: BalanceTransactionService
 
 	companion object {
 		private val network = Network.newNetwork()
@@ -125,11 +125,11 @@ abstract class BaseTestClass {
 	protected fun createPlayerBalanceTransaction(
 		balanceId: UUID,
 		amount: BigDecimal = BigDecimal.TEN,
-		type: PlayerBalanceTransactionType = PlayerBalanceTransactionType.IN,
-		cause: PlayerBalanceTransactionCause = PlayerBalanceTransactionCause.DAILY_CHECK_IN
+		type: BalanceTransactionType = BalanceTransactionType.IN,
+		cause: BalanceTransactionCause = BalanceTransactionCause.DAILY_CHECK_IN
 	) {
-		playerBalanceTransactionService.insert(
-			Immutables.createPlayerBalanceTransaction {
+		balanceTransactionService.insert(
+			Immutables.createBalanceTransaction {
 				it.setAmount(amount)
 				it.setType(type)
 				it.setCause(cause)

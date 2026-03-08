@@ -65,13 +65,13 @@ public enum TaskTopic implements LocalizableEnum {
       entry(LANGUAGE_LEARNING, Set.of(BRAIN, READING, PRODUCTIVITY, SOCIAL_SKILLS))
   );
 
+  public static final Set<TaskTopic> DISABLED_TOPICS = StreamEx.of(values())
+      .filter(TaskTopic::isDisabled)
+      .toSet();
+
   private final boolean isDisabled;
 
   public Set<TaskTopic> getCompatibleTopics() {
     return COMPATIBLE_TOPICS.getOrDefault(this, Set.of());
-  }
-
-  public static Set<TaskTopic> getDisabledTopics() {
-    return StreamEx.of(values()).filter(TaskTopic::isDisabled).toSet();
   }
 }

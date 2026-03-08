@@ -6,12 +6,12 @@ import static com.soloist.player.model.entity.task.Task.RARITY_FIELD;
 import static com.soloist.player.model.entity.task.Task.TOPICS_FIELD;
 
 import com.soloist.jimmer.sql.SqlFileLoader;
-import com.soloist.player.model.entity.player.PlayerTask;
+import com.soloist.player.model.entity.task.PlayerTask;
 import com.soloist.player.model.entity.player.TaskTopicItem;
 import com.soloist.player.model.entity.task.Task;
 import com.soloist.player.model.entity.task.dto.VectorizeTaskView;
 import com.soloist.player.model.entity.task.enums.TaskTopic;
-import com.soloist.proto.player.RequestPaging;
+import com.soloist.proto.common.RequestPaging;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.Collection;
@@ -62,7 +62,7 @@ public class TaskRepository {
             table.version().ne(0),
             table.deprecated().eq(false),
             Predicate.sql(
-                "NOT EXISTS (SELECT 1 FROM player.player_tasks pt WHERE pt.task_id = %e AND pt.player_id = %v)",
+                "NOT EXISTS (SELECT 1 FROM player.player_task pt WHERE pt.task_id = %e AND pt.player_id = %v)",
                 ctx -> {
                   ctx.expression(table.id());
                   ctx.value(playerId);
@@ -72,7 +72,7 @@ public class TaskRepository {
                 """
                     EXISTS (
                         SELECT 1
-                        FROM player.task_topic_items tt
+                        FROM player.task_topic_item tt
                         WHERE tt.task_id = %e
                         GROUP BY tt.task_id
                         HAVING count(DISTINCT tt.topic) = array_length(%v, 1)

@@ -3,16 +3,16 @@ package com.soloist.player.model.repository.user
 import com.soloist.jimmer.predicate.filter.DateFilter
 import com.soloist.player.BaseTestClass
 import com.soloist.player.model.entity.Immutables
-import com.soloist.player.model.entity.player.enums.PlayerBalanceTransactionCause
-import com.soloist.player.model.entity.player.enums.PlayerTaskStatus
+import com.soloist.player.model.entity.balance.enums.BalanceTransactionCause
+import com.soloist.player.model.entity.task.enums.PlayerTaskStatus
 import com.soloist.player.model.entity.player.enums.Rarity
 import com.soloist.player.model.entity.task.enums.TaskTopic
 import com.soloist.player.model.repository.task.TaskRepository
-import com.soloist.player.service.player.PlayerBalanceService
+import com.soloist.player.service.balance.BalanceService
 import com.soloist.player.service.player.PlayerService
-import com.soloist.player.service.player.PlayerTaskService
-import com.soloist.proto.player.RequestPaging
-import com.soloist.proto.user.LeaderboardType
+import com.soloist.player.service.task.PlayerTaskService
+import com.soloist.proto.common.LeaderboardType
+import com.soloist.proto.common.RequestPaging
 import org.assertj.core.api.Assertions.assertThat
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.junit.jupiter.api.Disabled
@@ -37,7 +37,7 @@ class UserRepositoryTest : BaseTestClass() {
 	private lateinit var playerTaskService: PlayerTaskService
 
 	@Autowired
-	private lateinit var playerBalanceService: PlayerBalanceService
+	private lateinit var balanceService: BalanceService
 
 	@Autowired
 	private lateinit var playerService: PlayerService
@@ -249,26 +249,26 @@ class UserRepositoryTest : BaseTestClass() {
 		val player3 = user3.player()!!
 
 		// rich-player: 1000
-		val updatedBalance1 = playerBalanceService.deposit(
+		val updatedBalance1 = balanceService.deposit(
 			player1.balance()!!,
 			BigDecimal(1000),
-			PlayerBalanceTransactionCause.TASK_COMPLETION
+			BalanceTransactionCause.TASK_COMPLETION
 		)
 		playerService.update(Immutables.createPlayer(player1) { it.setBalance(updatedBalance1) })
 
 		// poor-player: 100
-		val updatedBalance2 = playerBalanceService.deposit(
+		val updatedBalance2 = balanceService.deposit(
 			player2.balance()!!,
 			BigDecimal(100),
-			PlayerBalanceTransactionCause.TASK_COMPLETION
+			BalanceTransactionCause.TASK_COMPLETION
 		)
 		playerService.update(Immutables.createPlayer(player2) { it.setBalance(updatedBalance2) })
 
 		// middle-player: 500
-		val updatedBalance3 = playerBalanceService.deposit(
+		val updatedBalance3 = balanceService.deposit(
 			player3.balance()!!,
 			BigDecimal(500),
-			PlayerBalanceTransactionCause.TASK_COMPLETION
+			BalanceTransactionCause.TASK_COMPLETION
 		)
 		playerService.update(Immutables.createPlayer(player3) { it.setBalance(updatedBalance3) })
 
