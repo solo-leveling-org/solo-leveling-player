@@ -1,0 +1,28 @@
+export com.soloist.player.model.entity.player.PlayerGearItem
+  -> package com.soloist.player.model.entity.player.dto
+
+PlayerGearItemView {
+  #allScalars
+
+  -version
+
+  gearItem {
+    #allScalars
+
+    -createdAt
+
+    -updatedAt
+
+    -version
+
+    title {
+      en
+      ru
+    }
+
+    description {
+      en
+      ru
+    }
+  }
+}

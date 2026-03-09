@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: rename-image-url-to-file-id-gacha-machine
+      author: sleepkqq
+      changes:
+        - renameColumn:
+            tableName: gacha_machine
+            oldColumnName: image_url
+            newColumnName: image_file_id
+            columnDataType: varchar(500)
+      rollback:
+        - renameColumn:
+            tableName: gacha_machine
+            oldColumnName: image_file_id
+            newColumnName: image_url
+            columnDataType: varchar(500)
+
+  - changeSet:
+      id: rename-image-url-to-file-id-gear-item
+      author: sleepkqq
+      changes:
+        - renameColumn:
+            tableName: gear_item
+            oldColumnName: image_url
+            newColumnName: image_file_id
+            columnDataType: varchar(500)
+      rollback:
+        - renameColumn:
+            tableName: gear_item
+            oldColumnName: image_file_id
+            newColumnName: image_url
+            columnDataType: varchar(500)

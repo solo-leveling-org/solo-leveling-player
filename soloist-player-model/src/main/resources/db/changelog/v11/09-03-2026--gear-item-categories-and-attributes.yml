@@ -1,0 +1,87 @@
+databaseChangeLog:
+  - changeSet:
+      id: gear-item-attributes-jsonb
+      author: sleepkqq
+      changes:
+        - addColumn:
+            tableName: gear_item
+            columns:
+              - column:
+                  name: attributes
+                  type: jsonb
+
+        - sql:
+            comment: Migrate weapon items (types 0-4) multipliers into JSONB attributes
+            sql: >
+              UPDATE gear_item SET attributes = jsonb_build_object(
+                'type', 'Weapon',
+                'strengthMultiplier', strength_multiplier,
+                'agilityMultiplier', agility_multiplier,
+                'intelligenceMultiplier', intelligence_multiplier,
+                'damage', 0
+              )
+              WHERE type IN (0, 1, 2, 3, 4)
+
+        - sql:
+            comment: Migrate armor items (types 5-10) multipliers into JSONB attributes
+            sql: >
+              UPDATE gear_item SET attributes = jsonb_build_object(
+                'type', 'Armor',
+                'strengthMultiplier', strength_multiplier,
+                'agilityMultiplier', agility_multiplier,
+                'intelligenceMultiplier', intelligence_multiplier
+              )
+              WHERE type IN (5, 6, 7, 8, 9, 10)
+
+        - sql:
+            comment: Migrate accessory items (types 11-13) multipliers into JSONB attributes
+            sql: >
+              UPDATE gear_item SET attributes = jsonb_build_object(
+                'type', 'Accessory',
+                'strengthMultiplier', strength_multiplier,
+                'agilityMultiplier', agility_multiplier,
+                'intelligenceMultiplier', intelligence_multiplier
+              )
+              WHERE type IN (11, 12, 13)
+
+        - dropColumn:
+            tableName: gear_item
+            columnName: strength_multiplier
+
+        - dropColumn:
+            tableName: gear_item
+            columnName: agility_multiplier
+
+        - dropColumn:
+            tableName: gear_item
+            columnName: intelligence_multiplier
+
+        - dropColumn:
+            tableName: gear_item
+            columnName: category
+
+      rollback:
+        - addColumn:
+            tableName: gear_item
+            columns:
+              - column:
+                  name: category
+                  type: integer
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: strength_multiplier
+                  type: numeric(4,2)
+                  defaultValue: 1.00
+              - column:
+                  name: agility_multiplier
+                  type: numeric(4,2)
+                  defaultValue: 1.00
+              - column:
+                  name: intelligence_multiplier
+                  type: numeric(4,2)
+                  defaultValue: 1.00
+        - dropColumn:
+            tableName: gear_item
+            columnName: attributes

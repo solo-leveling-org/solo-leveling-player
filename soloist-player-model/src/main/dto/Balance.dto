@@ -10,3 +10,17 @@ BalanceView {
 
   -version
 }
+
+BalanceWithPlayerView {
+  #allScalars
+
+  -updatedAt
+
+  -createdAt
+
+  -version
+
+  player {
+    id
+  }
+}

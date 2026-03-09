@@ -62,3 +62,13 @@ databaseChangeLog:
       file: db/changelog/v10/28-02-2026--vector-column-length.yml
   - include:
       file: db/changelog/v10/02-03-2026--rename-tables.yml
+
+  # v11
+  - include:
+      file: db/changelog/v11/08-03-2026--gacha.yml
+  - include:
+      file: db/changelog/v11/09-03-2026--rename-image-url-to-file-id.yml
+  - include:
+      file: db/changelog/v11/09-03-2026--gear-item-multipliers.yml
+  - include:
+      file: db/changelog/v11/09-03-2026--gear-item-categories-and-attributes.yml

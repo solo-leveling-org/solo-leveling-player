@@ -2,50 +2,69 @@ package com.soloist.player.model.entity.gear.enums;
 
 import com.soloist.jimmer.enums.LocalizableEnum;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.babyfish.jimmer.sql.EnumItem;
 
 @Getter
+@RequiredArgsConstructor
 public enum GearItemType implements LocalizableEnum {
 
   @EnumItem(ordinal = 0)
-  SWORD,
+  SWORD(GearItemCategory.WEAPON),
 
   @EnumItem(ordinal = 1)
-  DAGGERS,
+  DAGGERS(GearItemCategory.WEAPON),
 
   @EnumItem(ordinal = 2)
-  STAFF,
+  STAFF(GearItemCategory.WEAPON),
 
   @EnumItem(ordinal = 3)
-  AXE,
+  AXE(GearItemCategory.WEAPON),
 
   @EnumItem(ordinal = 4)
-  BOW,
+  BOW(GearItemCategory.WEAPON),
 
   @EnumItem(ordinal = 5)
-  BOOTS,
+  BOOTS(GearItemCategory.ARMOR),
 
   @EnumItem(ordinal = 6)
-  PANTS,
+  PANTS(GearItemCategory.ARMOR),
 
   @EnumItem(ordinal = 7)
-  CHEST,
+  CHEST(GearItemCategory.ARMOR),
 
   @EnumItem(ordinal = 8)
-  HELMET,
+  HELMET(GearItemCategory.ARMOR),
 
   @EnumItem(ordinal = 9)
-  CLOAK,
+  CLOAK(GearItemCategory.ARMOR),
 
   @EnumItem(ordinal = 10)
-  GLOVES,
+  GLOVES(GearItemCategory.ARMOR),
 
   @EnumItem(ordinal = 11)
-  RING,
+  RING(GearItemCategory.ACCESSORY),
 
   @EnumItem(ordinal = 12)
-  AMULET,
+  AMULET(GearItemCategory.ACCESSORY),
 
   @EnumItem(ordinal = 13)
-  BRACELET
+  BRACELET(GearItemCategory.ACCESSORY),
+
+  @EnumItem(ordinal = 14)
+  HEALTH_POTION(GearItemCategory.CONSUMABLE),
+
+  @EnumItem(ordinal = 15)
+  MANA_POTION(GearItemCategory.CONSUMABLE),
+
+  @EnumItem(ordinal = 16)
+  SCROLL_IDENTIFICATION(GearItemCategory.CONSUMABLE),
+
+  @EnumItem(ordinal = 17)
+  SCROLL_TELEPORT(GearItemCategory.CONSUMABLE),
+
+  @EnumItem(ordinal = 18)
+  ELIXIR_STRENGTH(GearItemCategory.CONSUMABLE);
+
+  private final GearItemCategory category;
 }
