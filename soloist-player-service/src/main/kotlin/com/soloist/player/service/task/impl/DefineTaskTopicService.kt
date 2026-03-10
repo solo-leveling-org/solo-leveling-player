@@ -1,4 +1,4 @@
-package com.soloist.player.service.task
+package com.soloist.player.service.task.impl
 
 import com.soloist.player.model.entity.task.enums.TaskTopic
 import org.springframework.stereotype.Service

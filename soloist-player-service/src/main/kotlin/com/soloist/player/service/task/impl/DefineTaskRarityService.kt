@@ -1,4 +1,4 @@
-package com.soloist.player.service.task
+package com.soloist.player.service.task.impl
 
 import com.soloist.player.model.entity.task.PlayerTaskTopic
 import com.soloist.player.model.entity.player.enums.Rarity

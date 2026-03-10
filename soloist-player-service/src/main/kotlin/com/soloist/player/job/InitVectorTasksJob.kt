@@ -2,7 +2,7 @@ package com.soloist.player.job
 
 import com.soloist.player.config.properties.JobsProperties
 import com.soloist.player.model.entity.task.dto.VectorizeTaskView
-import com.soloist.player.service.ai.TaskVectorService
+import com.soloist.player.service.task.impl.TaskVectorService
 import com.soloist.player.service.task.TaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

@@ -1,4 +1,4 @@
-package com.soloist.player.service.player
+package com.soloist.player.service.player.impl
 
 import com.soloist.player.model.entity.player.enums.LevelType
 import org.springframework.stereotype.Service

@@ -1,8 +1,6 @@
-package com.soloist.player.service.ai
+package com.soloist.player.service.task.impl
 
 import com.soloist.player.model.entity.task.Task
-import com.soloist.player.model.entity.task.Task.RARITY_FIELD
-import com.soloist.player.model.entity.task.Task.TOPICS_FIELD
 import com.soloist.player.model.entity.task.enums.TaskTopic
 import com.soloist.player.model.repository.task.VectorTaskRepository
 import org.springframework.ai.document.Document
@@ -32,8 +30,8 @@ class TaskVectorService(
 				it.id().toString(),
 				content,
 				mapOf(
-					RARITY_FIELD to it.rarity().name,
-					TOPICS_FIELD to it.topics().map { t -> t.topic().name }
+					Task.RARITY_FIELD to it.rarity().name,
+					Task.TOPICS_FIELD to it.topics().map { t -> t.topic().name }
 				)
 			)
 		}
@@ -44,7 +42,7 @@ class TaskVectorService(
 	@Transactional
 	fun delete(taskTopic: TaskTopic) {
 		val expr = FilterExpressionBuilder()
-			.`in`(TOPICS_FIELD, listOf(taskTopic.name))
+			.`in`(Task.TOPICS_FIELD, listOf(taskTopic.name))
 			.build()
 
 		vectorStore.delete(expr)

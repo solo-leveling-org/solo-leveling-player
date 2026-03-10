@@ -8,9 +8,6 @@ import com.soloist.player.model.entity.task.Task
 import com.soloist.player.model.entity.task.dto.VectorizeTaskView
 import com.soloist.player.model.entity.task.enums.TaskTopic
 import com.soloist.player.model.repository.task.TaskRepository
-import com.soloist.player.service.ai.TaskVectorService
-import com.soloist.player.service.task.DefineTaskRarityService
-import com.soloist.player.service.task.DefineTaskTopicService
 import com.soloist.player.service.task.TaskService
 import com.soloist.proto.common.RequestPaging
 import org.babyfish.jimmer.Page

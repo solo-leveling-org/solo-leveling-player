@@ -7,9 +7,8 @@ import com.soloist.player.model.entity.player.enums.Assessment
 import com.soloist.player.model.entity.player.enums.LevelType
 import com.soloist.player.model.entity.task.enums.TaskTopic
 import com.soloist.player.model.repository.player.LevelRepository
-import com.soloist.player.service.player.CountExperienceService
 import com.soloist.player.service.player.LevelService
-import com.soloist.player.service.task.DefineTaskTopicService.Companion.MAX_TASK_TOPICS_COUNT
+import com.soloist.player.service.task.impl.DefineTaskTopicService.Companion.MAX_TASK_TOPICS_COUNT
 import org.babyfish.jimmer.View
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
