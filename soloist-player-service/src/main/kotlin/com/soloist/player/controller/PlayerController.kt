@@ -140,14 +140,4 @@ class PlayerController(
 		responseObserver.onNext(Empty.newBuilder().build())
 		responseObserver.onCompleted()
 	}
-
-	override fun resetPlayer(
-		request: ResetPlayerRequest,
-		responseObserver: StreamObserver<Empty>
-	) {
-		playerService.reset(request.playerId)
-
-		responseObserver.onNext(Empty.newBuilder().build())
-		responseObserver.onCompleted()
-	}
 }

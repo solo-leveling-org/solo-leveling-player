@@ -1,9 +1,6 @@
 package com.soloist.player.mapper
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.protobuf.Struct
 import com.google.protobuf.Timestamp
-import com.google.protobuf.Value
 import com.google.type.Decimal
 import com.google.type.Money
 import com.soloist.jimmer.mapper.JimmerProtoMapper
@@ -14,7 +11,6 @@ import com.soloist.player.extenstions.toTimestamp
 import com.soloist.player.model.entity.gacha.dto.GachaMachineInput
 import com.soloist.player.model.entity.gacha.dto.GachaMachineView
 import com.soloist.player.model.entity.gear.dto.GearItemView
-import com.soloist.player.model.entity.gear.sealed.GearItemAttributes
 import com.soloist.player.model.entity.localization.LocalizationItem
 import com.soloist.player.model.entity.player.TaskTopicItem
 import com.soloist.player.model.entity.balance.dto.BalanceTransactionView
@@ -38,6 +34,7 @@ import com.soloist.player.model.entity.user.dto.UserInput
 import com.soloist.player.model.entity.user.dto.UserView
 import com.soloist.player.service.i18n.I18nService
 import com.soloist.proto.balance.SearchBalanceTransactionsResponse
+import com.soloist.proto.inventory.SearchGearItemsResponse
 import com.soloist.proto.common.LocalizedField
 import com.soloist.proto.common.ResponsePaging
 import com.soloist.proto.common.ResponseQueryOptions
@@ -107,56 +104,22 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 
 	fun map(input: Decimal): BigDecimal = BigDecimal(input.value)
 
-	@Autowired
-	protected lateinit var objectMapper: ObjectMapper
-
-	fun map(input: GearItemAttributes?): Struct {
-		if (input == null) return Struct.getDefaultInstance()
-		val json = objectMapper.writeValueAsString(input)
-		@Suppress("UNCHECKED_CAST")
-		val map = objectMapper.readValue(json, Map::class.java) as Map<String, Any?>
-		val builder = Struct.newBuilder()
-		map.forEach { (key, value) -> builder.putFields(key, toProtoValue(value)) }
-		return builder.build()
-	}
-
-	fun map(input: Struct?): GearItemAttributes? {
-		if (input == null || input.fieldsCount == 0) return null
-		val map = input.fieldsMap.mapValues { fromProtoValue(it.value) }
-		val json = objectMapper.writeValueAsString(map)
-		return objectMapper.readValue(json, GearItemAttributes::class.java)
-	}
-
 	fun map(input: com.soloist.player.model.entity.gear.enums.GearItemType): com.soloist.proto.gacha.GearItemCategory =
 		com.soloist.proto.gacha.GearItemCategory.valueOf(input.category.name)
 
-	private fun toProtoValue(value: Any?): Value = when (value) {
-		null -> Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build()
-		is Number -> Value.newBuilder().setNumberValue(value.toDouble()).build()
-		is String -> Value.newBuilder().setStringValue(value).build()
-		is Boolean -> Value.newBuilder().setBoolValue(value).build()
-		is Map<*, *> -> {
-			val struct = Struct.newBuilder()
-			@Suppress("UNCHECKED_CAST")
-			(value as Map<String, Any?>).forEach { (k, v) -> struct.putFields(k, toProtoValue(v)) }
-			Value.newBuilder().setStructValue(struct).build()
-		}
-		is List<*> -> {
-			val list = com.google.protobuf.ListValue.newBuilder()
-			value.forEach { list.addValues(toProtoValue(it)) }
-			Value.newBuilder().setListValue(list).build()
-		}
-		else -> Value.newBuilder().setStringValue(value.toString()).build()
-	}
+	fun map(input: com.soloist.player.model.entity.gear.enums.Element): com.soloist.proto.gacha.Element =
+		com.soloist.proto.gacha.Element.valueOf(input.name)
 
-	private fun fromProtoValue(value: Value): Any = when (value.kindCase) {
-		Value.KindCase.NUMBER_VALUE -> value.numberValue
-		Value.KindCase.STRING_VALUE -> value.stringValue
-		Value.KindCase.BOOL_VALUE -> value.boolValue
-		Value.KindCase.STRUCT_VALUE -> value.structValue.fieldsMap.mapValues { fromProtoValue(it.value) }
-		Value.KindCase.LIST_VALUE -> value.listValue.valuesList.map { fromProtoValue(it) }
-		else -> ""
-	}
+	fun map(input: com.soloist.proto.gacha.Element): com.soloist.player.model.entity.gear.enums.Element? =
+		if (input == com.soloist.proto.gacha.Element.ELEMENT_NONE) null
+		else com.soloist.player.model.entity.gear.enums.Element.valueOf(input.name)
+
+	fun map(input: com.soloist.player.model.entity.gear.enums.GearItemSet): com.soloist.proto.gacha.GearItemSet =
+		com.soloist.proto.gacha.GearItemSet.valueOf(input.name)
+
+	fun map(input: com.soloist.proto.gacha.GearItemSet): com.soloist.player.model.entity.gear.enums.GearItemSet? =
+		if (input == com.soloist.proto.gacha.GearItemSet.SET_NONE) null
+		else com.soloist.player.model.entity.gear.enums.GearItemSet.valueOf(input.name)
 
 	@Mapping(target = "rolesList", source = "roles")
 	@Mapping(target = "locale", expression = "java(map(input.getLocale(), input.getManualLocale()))")
@@ -218,6 +181,20 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		filters: List<LocalizedField>,
 		sorts: Set<String> = setOf()
 	): SearchClosedTasksResponse
+
+	@Mapping(target = "itemsList", source = "page.rows")
+	@Mapping(target = "options", expression = "java(map(filters, sorts))")
+	@Mapping(
+		target = "paging",
+		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPageSize))"
+	)
+	abstract fun mapGearItems(
+		page: Page<PlayerGearItemView>,
+		currentPage: Int,
+		currentPageSize: Int,
+		filters: List<LocalizedField>,
+		sorts: Set<String> = setOf()
+	): SearchGearItemsResponse
 
 	@Mapping(target = "filtersList", source = "filters")
 	@Mapping(target = "sortsList", source = "sorts")
@@ -339,7 +316,11 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		target = "paging",
 		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPageSize))"
 	)
-	abstract fun mapLocaleUsers(page: Page<LocaleUserView>, currentPage: Int, currentPageSize: Int): GetUsersResponse
+	abstract fun mapLocaleUsers(
+		page: Page<LocaleUserView>,
+		currentPage: Int,
+		currentPageSize: Int
+	): GetUsersResponse
 
 	fun mapLocale(locale: String, manualLocale: String?): String = manualLocale ?: locale
 
@@ -352,6 +333,8 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 
 	abstract fun map(input: GachaMachineView): ProtoGachaMachineView
 
+	abstract fun map(input: com.soloist.player.model.entity.player.PlayerConsumable): com.soloist.proto.gacha.PlayerConsumableView
+
 	// ── Enum mappings ────────────────────────────────────────
 
 	fun map(input: com.soloist.proto.gacha.GearItemType): com.soloist.player.model.entity.gear.enums.GearItemType =
@@ -362,6 +345,9 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 
 	fun map(input: com.soloist.proto.gacha.PlayerGearItemStatus): com.soloist.player.model.entity.player.enums.PlayerGearItemStatus =
 		com.soloist.player.model.entity.player.enums.PlayerGearItemStatus.valueOf(input.name)
+
+	fun map(input: com.soloist.proto.gacha.ConsumableType): com.soloist.player.model.entity.gear.enums.ConsumableType =
+		com.soloist.player.model.entity.gear.enums.ConsumableType.valueOf(input.name)
 
 	// ── Localization mapping ─────────────────────────────────
 
@@ -393,14 +379,22 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 
 	@Mapping(target = "title", expression = "java(map(input.getTitle()))")
 	@Mapping(target = "description", expression = "java(mapToDescription(input.getDescription()))")
-	@Mapping(target = "attributes", expression = "java(map(input.getAttributes()))")
 	abstract fun map(input: ProtoGearItemInput): com.soloist.player.model.entity.gear.dto.GearItemInput
 
 	// ── GachaMachine input mapping ───────────────────────────
 
 	@Mapping(target = "name", expression = "java(mapToMachineName(input.getName()))")
-	@Mapping(target = "description", expression = "java(mapToMachineDescription(input.getDescription()))")
-	@Mapping(target = "costAmount", expression = "java(new java.math.BigDecimal(input.getCostAmount()))")
-	@Mapping(target = "costCurrencyCode", expression = "java(com.soloist.player.model.entity.player.enums.CurrencyCode.values()[input.getCostCurrencyCode()])")
+	@Mapping(
+		target = "description",
+		expression = "java(mapToMachineDescription(input.getDescription()))"
+	)
+	@Mapping(
+		target = "costAmount",
+		expression = "java(new java.math.BigDecimal(input.getCostAmount()))"
+	)
+	@Mapping(
+		target = "costCurrencyCode",
+		expression = "java(com.soloist.player.model.entity.player.enums.CurrencyCode.values()[input.getCostCurrencyCode()])"
+	)
 	abstract fun map(input: ProtoGachaMachineInput): GachaMachineInput
 }

@@ -1,0 +1,279 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-inventory-table
+      author: sleepkqq
+      changes:
+        - createTable:
+            tableName: inventory
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: player_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: gear_item_capacity
+                  type: integer
+                  defaultValue: 50
+                  constraints:
+                    nullable: false
+              - column:
+                  name: consumable_capacity
+                  type: integer
+                  defaultValue: 20
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: integer
+                  defaultValue: 0
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: inventory
+            baseColumnNames: player_id
+            constraintName: fk_inventory_player
+            referencedTableName: players
+            referencedColumnNames: id
+
+      rollback:
+        - dropTable:
+            tableName: inventory
+
+  - changeSet:
+      id: initialize-inventory-for-existing-players
+      author: sleepkqq
+      changes:
+        - sql:
+            sql: >
+              INSERT INTO inventory (id, player_id, version, created_at, updated_at)
+              SELECT gen_random_uuid(), p.id, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+              FROM players p
+              WHERE NOT EXISTS (SELECT 1 FROM inventory i WHERE i.player_id = p.id)
+      rollback:
+        - sql:
+            sql: >
+              DELETE FROM inventory
+              WHERE created_at = updated_at
+
+  - changeSet:
+      id: player-gear-item-inventory-link
+      author: sleepkqq
+      changes:
+        - renameColumn:
+            tableName: player_gear_item
+            oldColumnName: player_id
+            newColumnName: inventory_id
+            columnDataType: bigint
+
+        - modifyDataType:
+            tableName: player_gear_item
+            columnName: inventory_id
+            newDataType: uuid
+
+        - dropNotNullConstraint:
+            tableName: player_gear_item
+            columnName: inventory_id
+            columnDataType: uuid
+
+        - addColumn:
+            tableName: player_gear_item
+            columns:
+              - column:
+                  name: status
+                  type: integer
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: player_gear_item
+            baseColumnNames: inventory_id
+            constraintName: fk_player_gear_item_inventory
+            referencedTableName: inventory
+            referencedColumnNames: id
+
+      rollback:
+        - dropForeignKeyConstraint:
+            baseTableName: player_gear_item
+            constraintName: fk_player_gear_item_inventory
+        - dropColumn:
+            tableName: player_gear_item
+            columnName: status
+        - addNotNullConstraint:
+            tableName: player_gear_item
+            columnName: inventory_id
+            columnDataType: uuid
+        - modifyDataType:
+            tableName: player_gear_item
+            columnName: inventory_id
+            newDataType: bigint
+        - renameColumn:
+            tableName: player_gear_item
+            oldColumnName: inventory_id
+            newColumnName: player_id
+            columnDataType: bigint
+
+  - changeSet:
+      id: player-consumable-inventory-link
+      author: sleepkqq
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: player_consumable
+            constraintName: fk_player_consumable_player
+
+        - dropUniqueConstraint:
+            tableName: player_consumable
+            constraintName: uq_player_consumable
+
+        - renameColumn:
+            tableName: player_consumable
+            oldColumnName: player_id
+            newColumnName: inventory_id
+            columnDataType: bigint
+
+        - modifyDataType:
+            tableName: player_consumable
+            columnName: inventory_id
+            newDataType: uuid
+
+        - addForeignKeyConstraint:
+            baseTableName: player_consumable
+            baseColumnNames: inventory_id
+            constraintName: fk_player_consumable_inventory
+            referencedTableName: inventory
+            referencedColumnNames: id
+
+        - addUniqueConstraint:
+            tableName: player_consumable
+            columnNames: inventory_id, consumable_type
+            constraintName: uq_player_consumable_inventory
+
+      rollback:
+        - dropUniqueConstraint:
+            tableName: player_consumable
+            constraintName: uq_player_consumable_inventory
+        - dropForeignKeyConstraint:
+            baseTableName: player_consumable
+            constraintName: fk_player_consumable_inventory
+        - modifyDataType:
+            tableName: player_consumable
+            columnName: inventory_id
+            newDataType: bigint
+        - renameColumn:
+            tableName: player_consumable
+            oldColumnName: inventory_id
+            newColumnName: player_id
+            columnDataType: bigint
+        - addForeignKeyConstraint:
+            baseTableName: player_consumable
+            baseColumnNames: player_id
+            constraintName: fk_player_consumable_player
+            referencedTableName: players
+            referencedColumnNames: id
+        - addUniqueConstraint:
+            tableName: player_consumable
+            columnNames: player_id, consumable_type
+            constraintName: uq_player_consumable
+
+  - changeSet:
+      id: create-gear-item-transaction-table
+      author: sleepkqq
+      changes:
+        - createTable:
+            tableName: gear_item_transaction
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: player_gear_item_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: from_player_id
+                  type: bigint
+              - column:
+                  name: to_player_id
+                  type: bigint
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: gear_item_transaction
+            baseColumnNames: player_gear_item_id
+            constraintName: fk_gear_item_transaction_player_gear_item
+            referencedTableName: player_gear_item
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: gear_item_transaction
+            baseColumnNames: from_player_id
+            constraintName: fk_gear_item_transaction_from_player
+            referencedTableName: players
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: gear_item_transaction
+            baseColumnNames: to_player_id
+            constraintName: fk_gear_item_transaction_to_player
+            referencedTableName: players
+            referencedColumnNames: id
+
+        - createIndex:
+            tableName: gear_item_transaction
+            indexName: idx_gear_item_transaction_player_gear_item
+            columns:
+              - column:
+                  name: player_gear_item_id
+
+        - createIndex:
+            tableName: gear_item_transaction
+            indexName: idx_gear_item_transaction_from_player
+            columns:
+              - column:
+                  name: from_player_id
+
+        - createIndex:
+            tableName: gear_item_transaction
+            indexName: idx_gear_item_transaction_to_player
+            columns:
+              - column:
+                  name: to_player_id
+
+      rollback:
+        - dropTable:
+            tableName: gear_item_transaction

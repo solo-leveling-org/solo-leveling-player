@@ -11,7 +11,6 @@ import com.soloist.player.model.repository.task.PlayerTaskRepository
 import com.soloist.player.service.i18n.LocalizationCode
 import com.soloist.player.service.player.DailyTaskService
 import com.soloist.player.service.task.PlayerTaskService
-import com.soloist.player.service.task.TaskService
 import com.soloist.proto.task.*
 import io.grpc.stub.StreamObserver
 import org.springframework.grpc.server.service.GrpcService
@@ -21,7 +20,6 @@ import java.util.*
 class TaskController(
 	private val playerTaskService: PlayerTaskService,
 	private val protoMapper: ProtoMapper,
-	private val taskService: TaskService,
 	private val enumLocalizer: EnumLocalizer,
 	private val dailyTaskService: DailyTaskService
 ) : TaskServiceGrpc.TaskServiceImplBase() {
@@ -110,34 +108,6 @@ class TaskController(
 				PlayerTaskRepository.ENUM_TYPE_PREDICATES
 			)
 		)
-
-		responseObserver.onNext(response)
-		responseObserver.onCompleted()
-	}
-
-	override fun deprecateTasksByTopic(
-		request: DeprecateTasksByTopicRequest,
-		responseObserver: StreamObserver<DeprecateTasksByTopicResponse>
-	) {
-		val affectedRows = taskService.deprecateByTopic(protoMapper.map(request.taskTopic))
-
-		val response = DeprecateTasksByTopicResponse.newBuilder()
-			.setAffectedRows(affectedRows)
-			.build()
-
-		responseObserver.onNext(response)
-		responseObserver.onCompleted()
-	}
-
-	override fun deprecateAllTasks(
-		request: Empty,
-		responseObserver: StreamObserver<DeprecateAllTasksResponse>
-	) {
-		val affectedRows = taskService.deprecateAll()
-
-		val response = DeprecateAllTasksResponse.newBuilder()
-			.setAffectedRows(affectedRows)
-			.build()
 
 		responseObserver.onNext(response)
 		responseObserver.onCompleted()

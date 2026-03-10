@@ -1,20 +1,21 @@
 package com.soloist.player.service.gacha.impl
 
-import com.soloist.player.model.entity.Immutables
 import com.soloist.player.model.entity.balance.dto.BalanceWithPlayerView
+import com.soloist.player.model.entity.balance.enums.BalanceTransactionCause
 import com.soloist.player.model.entity.gacha.GachaMachine
 import com.soloist.player.model.entity.gacha.dto.GachaMachineView
 import com.soloist.player.model.entity.gacha.dto.GachaMachineWithItemsView
-import com.soloist.player.model.entity.player.dto.PlayerGearItemView
-import com.soloist.player.model.entity.player.enums.PlayerGearItemStatus
+import com.soloist.player.model.entity.gear.enums.GearItemTransactionType
+import com.soloist.player.model.entity.player.dto.InventoryView
 import com.soloist.player.model.repository.gacha.GachaMachineRepository
 import com.soloist.player.model.repository.player.PlayerGearItemRepository
 import com.soloist.player.exception.ModelNotFoundException
-import com.soloist.player.model.entity.balance.enums.BalanceTransactionCause
 import com.soloist.player.service.balance.BalanceService
 import com.soloist.player.service.gacha.GachaItemDropService
 import com.soloist.player.service.gacha.GachaResult
 import com.soloist.player.service.gacha.GachaService
+import com.soloist.player.service.gear.InventoryService
+import com.soloist.player.service.gear.PlayerGearItemService
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -26,7 +27,9 @@ class GachaServiceImpl(
 	private val gachaMachineRepository: GachaMachineRepository,
 	private val playerGearItemRepository: PlayerGearItemRepository,
 	private val balanceService: BalanceService,
-	private val gachaItemDropService: GachaItemDropService
+	private val gachaItemDropService: GachaItemDropService,
+	private val inventoryService: InventoryService,
+	private val playerGearItemService: PlayerGearItemService
 ) : GachaService {
 
 	private val log = LoggerFactory.getLogger(javaClass)
@@ -69,12 +72,20 @@ class GachaServiceImpl(
 
 		val droppedGearItems = gachaItemDropService.rollItems(machineItems, count)
 
-		val playerGearItems = droppedGearItems.map { gearItem ->
-			Immutables.createPlayerGearItem {
-				it.setPlayerId(playerId)
-					.setGearItem(gearItem)
-					.setStatus(PlayerGearItemStatus.IN_INVENTORY)
-			}
+		val inventory = inventoryService.getView(playerId, InventoryView::class)
+
+		val currentGearItemCount = playerGearItemRepository.count(playerId)
+		check(currentGearItemCount + count <= inventory.gearItemCapacity) {
+			"Inventory full: $currentGearItemCount/${inventory.gearItemCapacity} gear items, cannot add $count more"
+		}
+
+		val playerGearItems = droppedGearItems.map {
+			playerGearItemService.initialize(
+				inventoryId = inventory.id,
+				gearItem = it,
+				transactionType = GearItemTransactionType.DROPPED,
+				toPlayerId = playerId
+			)
 		}
 
 		val savedItems = playerGearItemRepository.saveAll(playerGearItems, SaveMode.INSERT_ONLY)

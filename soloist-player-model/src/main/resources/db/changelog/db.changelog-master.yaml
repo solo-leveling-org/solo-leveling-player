@@ -72,3 +72,5 @@ databaseChangeLog:
       file: db/changelog/v11/09-03-2026--gear-item-multipliers.yml
   - include:
       file: db/changelog/v11/09-03-2026--gear-item-categories-and-attributes.yml
+  - include:
+      file: db/changelog/v11/10-03-2026--item-instances-and-transactions.yml

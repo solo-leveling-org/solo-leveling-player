@@ -13,6 +13,7 @@ import com.soloist.player.service.player.DailyTaskService
 import com.soloist.player.service.player.DayStreakService
 import com.soloist.player.service.player.PlayerService
 import com.soloist.player.service.player.StaminaService
+import com.soloist.player.service.gear.InventoryService
 import com.soloist.player.service.task.PlayerTaskTopicService
 import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.AssociatedSaveMode
@@ -29,7 +30,8 @@ class PlayerServiceImpl(
 	private val playerTaskTopicService: PlayerTaskTopicService,
 	private val staminaService: StaminaService,
 	private val dayStreakService: DayStreakService,
-	private val dailyTaskService: DailyTaskService
+	private val dailyTaskService: DailyTaskService,
+	private val inventoryService: InventoryService
 ) : PlayerService {
 
 	@Transactional(readOnly = true)
@@ -55,6 +57,7 @@ class PlayerServiceImpl(
 			)
 			.setStamina(staminaService.initialize())
 			.setDayStreak(dayStreakService.initialize())
+			.setInventory(inventoryService.initialize())
 			.setDailyTasks(
 				DailyTaskType.entries.map { type ->
 					dailyTaskService.initialize(userId, type)

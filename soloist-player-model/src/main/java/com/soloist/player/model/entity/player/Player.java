@@ -56,8 +56,9 @@ public interface Player extends Model {
   List<PlayerTaskTopic> taskTopics();
 
   @OneToMany(mappedBy = "player")
-  List<PlayerGearItem> gearItems();
-
-  @OneToMany(mappedBy = "player")
   List<DayActivity> dayActivities();
+
+  @Nullable
+  @OneToOne(mappedBy = "player")
+  Inventory inventory();
 }

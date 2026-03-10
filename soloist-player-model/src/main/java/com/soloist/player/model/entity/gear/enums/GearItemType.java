@@ -49,22 +49,7 @@ public enum GearItemType implements LocalizableEnum {
   AMULET(GearItemCategory.ACCESSORY),
 
   @EnumItem(ordinal = 13)
-  BRACELET(GearItemCategory.ACCESSORY),
-
-  @EnumItem(ordinal = 14)
-  HEALTH_POTION(GearItemCategory.CONSUMABLE),
-
-  @EnumItem(ordinal = 15)
-  MANA_POTION(GearItemCategory.CONSUMABLE),
-
-  @EnumItem(ordinal = 16)
-  SCROLL_IDENTIFICATION(GearItemCategory.CONSUMABLE),
-
-  @EnumItem(ordinal = 17)
-  SCROLL_TELEPORT(GearItemCategory.CONSUMABLE),
-
-  @EnumItem(ordinal = 18)
-  ELIXIR_STRENGTH(GearItemCategory.CONSUMABLE);
+  BRACELET(GearItemCategory.ACCESSORY);
 
   private final GearItemCategory category;
 }

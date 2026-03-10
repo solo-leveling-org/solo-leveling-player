@@ -1,0 +1,6 @@
+export com.soloist.player.model.entity.player.Inventory
+  -> package com.soloist.player.model.entity.player.dto
+
+InventoryView {
+  #allScalars
+}

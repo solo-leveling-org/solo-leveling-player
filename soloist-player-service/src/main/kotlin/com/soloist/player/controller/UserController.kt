@@ -3,7 +3,6 @@ package com.soloist.player.controller
 import com.google.protobuf.Empty
 import com.soloist.config.interceptor.UserContextHolder
 import com.soloist.player.mapper.ProtoMapper
-import com.soloist.player.model.entity.user.dto.LocaleUserView
 import com.soloist.player.model.entity.user.dto.UserView
 import com.soloist.player.service.user.UserService
 import com.soloist.proto.user.*
@@ -85,28 +84,6 @@ class UserController(
 		val response = GetUserLeaderboardResponse.newBuilder()
 			.setUser(protoMapper.map(leaderboardUser))
 			.build()
-
-		responseObserver.onNext(response)
-		responseObserver.onCompleted()
-	}
-
-	override fun getUsersStats(
-		request: Empty,
-		responseObserver: StreamObserver<GetUsersStatsResponse>
-	) {
-		val usersStats = userService.getUsersStats()
-		val response = protoMapper.map(usersStats)
-
-		responseObserver.onNext(response)
-		responseObserver.onCompleted()
-	}
-
-	override fun getUsers(
-		request: GetUsersRequest,
-		responseObserver: StreamObserver<GetUsersResponse>
-	) {
-		val usersPage = userService.getUsers(request.paging, LocaleUserView::class)
-		val response = protoMapper.mapLocaleUsers(usersPage, request.paging.page, request.paging.pageSize)
 
 		responseObserver.onNext(response)
 		responseObserver.onCompleted()
