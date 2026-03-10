@@ -49,8 +49,8 @@ import com.soloist.proto.common.LocalizationInput as ProtoLocalizationInput
 import com.soloist.proto.player.PlayerTaskTopicInput
 import com.soloist.proto.task.SearchClosedTasksResponse
 import com.soloist.proto.user.GetUsersLeaderboardResponse
-import com.soloist.proto.user.GetUsersResponse
-import com.soloist.proto.user.GetUsersStatsResponse
+import com.soloist.proto.admin.GetUsersResponse
+import com.soloist.proto.admin.GetUsersStatsResponse
 import com.soloist.proto.user.UserLocale
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
