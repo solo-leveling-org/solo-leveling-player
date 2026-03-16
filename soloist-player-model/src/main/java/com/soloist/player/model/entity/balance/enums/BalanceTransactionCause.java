@@ -14,8 +14,5 @@ public enum BalanceTransactionCause implements LocalizableEnum {
   DAILY_CHECK_IN,
 
   @EnumItem(ordinal = 3)
-  ITEM_PURCHASE,
-
-  @EnumItem(ordinal = 4)
-  GACHA_PULL
+  ITEM_PURCHASE
 }

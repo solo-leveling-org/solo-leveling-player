@@ -58,7 +58,4 @@ public interface Player extends Model {
   @OneToMany(mappedBy = "player")
   List<DayActivity> dayActivities();
 
-  @Nullable
-  @OneToOne(mappedBy = "player")
-  Inventory inventory();
 }

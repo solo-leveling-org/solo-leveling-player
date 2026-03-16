@@ -1,6 +1,0 @@
-export com.soloist.player.model.entity.gear.GearItemTransaction
-  -> package com.soloist.player.model.entity.gear.dto
-
-GearItemTransactionView {
-  #allScalars
-}

@@ -8,15 +8,11 @@ import com.soloist.player.config.properties.PlayerLimitsProperties.StaminaConfig
 import com.soloist.player.extenstions.toGoogleDecimal
 import com.soloist.player.extenstions.toMoney
 import com.soloist.player.extenstions.toTimestamp
-import com.soloist.player.model.entity.gacha.dto.GachaMachineInput
-import com.soloist.player.model.entity.gacha.dto.GachaMachineView
-import com.soloist.player.model.entity.gear.dto.GearItemView
 import com.soloist.player.model.entity.localization.LocalizationItem
 import com.soloist.player.model.entity.player.TaskTopicItem
 import com.soloist.player.model.entity.balance.dto.BalanceTransactionView
 import com.soloist.player.model.entity.balance.dto.BalanceView
 import com.soloist.player.model.entity.player.dto.CompleteTaskPlayerView
-import com.soloist.player.model.entity.player.dto.PlayerGearItemView
 import com.soloist.player.model.entity.task.dto.DailyTaskView
 import com.soloist.player.model.entity.player.dto.DayStreakView
 import com.soloist.player.model.entity.player.dto.LevelView
@@ -34,18 +30,11 @@ import com.soloist.player.model.entity.user.dto.UserInput
 import com.soloist.player.model.entity.user.dto.UserView
 import com.soloist.player.service.i18n.I18nService
 import com.soloist.proto.balance.SearchBalanceTransactionsResponse
-import com.soloist.proto.inventory.SearchGearItemsResponse
 import com.soloist.proto.common.LocalizedField
 import com.soloist.proto.common.ResponsePaging
 import com.soloist.proto.common.ResponseQueryOptions
 import com.soloist.proto.common.TaskTopic
 import com.soloist.proto.common.UserRole
-import com.soloist.proto.gacha.GachaMachineInput as ProtoGachaMachineInput
-import com.soloist.proto.gacha.GachaMachineView as ProtoGachaMachineView
-import com.soloist.proto.gacha.GearItemInput as ProtoGearItemInput
-import com.soloist.proto.gacha.GearItemView as ProtoGearItemView
-import com.soloist.proto.gacha.PlayerGearItemView as ProtoPlayerGearItemView
-import com.soloist.proto.common.LocalizationInput as ProtoLocalizationInput
 import com.soloist.proto.player.PlayerTaskTopicInput
 import com.soloist.proto.task.SearchClosedTasksResponse
 import com.soloist.proto.user.GetUsersLeaderboardResponse
@@ -103,23 +92,6 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 	fun map(input: BigDecimal): Decimal = input.toGoogleDecimal()
 
 	fun map(input: Decimal): BigDecimal = BigDecimal(input.value)
-
-	fun map(input: com.soloist.player.model.entity.gear.enums.GearItemType): com.soloist.proto.gacha.GearItemCategory =
-		com.soloist.proto.gacha.GearItemCategory.valueOf(input.category.name)
-
-	fun map(input: com.soloist.player.model.entity.gear.enums.Element): com.soloist.proto.gacha.Element =
-		com.soloist.proto.gacha.Element.valueOf(input.name)
-
-	fun map(input: com.soloist.proto.gacha.Element): com.soloist.player.model.entity.gear.enums.Element? =
-		if (input == com.soloist.proto.gacha.Element.ELEMENT_NONE) null
-		else com.soloist.player.model.entity.gear.enums.Element.valueOf(input.name)
-
-	fun map(input: com.soloist.player.model.entity.gear.enums.GearItemSet): com.soloist.proto.gacha.GearItemSet =
-		com.soloist.proto.gacha.GearItemSet.valueOf(input.name)
-
-	fun map(input: com.soloist.proto.gacha.GearItemSet): com.soloist.player.model.entity.gear.enums.GearItemSet? =
-		if (input == com.soloist.proto.gacha.GearItemSet.SET_NONE) null
-		else com.soloist.player.model.entity.gear.enums.GearItemSet.valueOf(input.name)
 
 	@Mapping(target = "rolesList", source = "roles")
 	@Mapping(target = "locale", expression = "java(map(input.getLocale(), input.getManualLocale()))")
@@ -181,20 +153,6 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		filters: List<LocalizedField>,
 		sorts: Set<String> = setOf()
 	): SearchClosedTasksResponse
-
-	@Mapping(target = "itemsList", source = "page.rows")
-	@Mapping(target = "options", expression = "java(map(filters, sorts))")
-	@Mapping(
-		target = "paging",
-		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPageSize))"
-	)
-	abstract fun mapGearItems(
-		page: Page<PlayerGearItemView>,
-		currentPage: Int,
-		currentPageSize: Int,
-		filters: List<LocalizedField>,
-		sorts: Set<String> = setOf()
-	): SearchGearItemsResponse
 
 	@Mapping(target = "filtersList", source = "filters")
 	@Mapping(target = "sortsList", source = "sorts")
@@ -326,75 +284,11 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 
 	abstract fun map(input: LevelView): com.soloist.proto.player.LevelView
 
-	@Mapping(target = "category", expression = "java(map(input.getType()))")
-	abstract fun map(input: GearItemView): ProtoGearItemView
-
-	abstract fun map(input: PlayerGearItemView): ProtoPlayerGearItemView
-
-	abstract fun map(input: GachaMachineView): ProtoGachaMachineView
-
-	abstract fun map(input: com.soloist.player.model.entity.player.PlayerConsumable): com.soloist.proto.gacha.PlayerConsumableView
-
 	// ── Enum mappings ────────────────────────────────────────
 
-	fun map(input: com.soloist.proto.gacha.GearItemType): com.soloist.player.model.entity.gear.enums.GearItemType =
-		com.soloist.player.model.entity.gear.enums.GearItemType.valueOf(input.name)
+	fun map(input: com.soloist.proto.common.CurrencyCode): CurrencyCode =
+		CurrencyCode.valueOf(input.name)
 
-	fun map(input: com.soloist.proto.common.Rarity): com.soloist.player.model.entity.player.enums.Rarity =
-		com.soloist.player.model.entity.player.enums.Rarity.valueOf(input.name)
-
-	fun map(input: com.soloist.proto.gacha.PlayerGearItemStatus): com.soloist.player.model.entity.player.enums.PlayerGearItemStatus =
-		com.soloist.player.model.entity.player.enums.PlayerGearItemStatus.valueOf(input.name)
-
-	fun map(input: com.soloist.proto.gacha.ConsumableType): com.soloist.player.model.entity.gear.enums.ConsumableType =
-		com.soloist.player.model.entity.gear.enums.ConsumableType.valueOf(input.name)
-
-	// ── Localization mapping ─────────────────────────────────
-
-	fun map(input: ProtoLocalizationInput): com.soloist.player.model.entity.gear.dto.GearItemInput.TargetOf_title =
-		com.soloist.player.model.entity.gear.dto.GearItemInput.TargetOf_title().apply {
-			en = input.en
-			ru = input.ru
-		}
-
-	fun mapToDescription(input: ProtoLocalizationInput): com.soloist.player.model.entity.gear.dto.GearItemInput.TargetOf_description =
-		com.soloist.player.model.entity.gear.dto.GearItemInput.TargetOf_description().apply {
-			en = input.en
-			ru = input.ru
-		}
-
-	fun mapToMachineName(input: ProtoLocalizationInput): GachaMachineInput.TargetOf_name =
-		GachaMachineInput.TargetOf_name().apply {
-			en = input.en
-			ru = input.ru
-		}
-
-	fun mapToMachineDescription(input: ProtoLocalizationInput): GachaMachineInput.TargetOf_description =
-		GachaMachineInput.TargetOf_description().apply {
-			en = input.en
-			ru = input.ru
-		}
-
-	// ── GearItem input mapping ───────────────────────────────
-
-	@Mapping(target = "title", expression = "java(map(input.getTitle()))")
-	@Mapping(target = "description", expression = "java(mapToDescription(input.getDescription()))")
-	abstract fun map(input: ProtoGearItemInput): com.soloist.player.model.entity.gear.dto.GearItemInput
-
-	// ── GachaMachine input mapping ───────────────────────────
-
-	@Mapping(target = "name", expression = "java(mapToMachineName(input.getName()))")
-	@Mapping(
-		target = "description",
-		expression = "java(mapToMachineDescription(input.getDescription()))"
-	)
-	@Mapping(
-		target = "costAmount",
-		expression = "java(new java.math.BigDecimal(input.getCostAmount()))"
-	)
-	@Mapping(
-		target = "costCurrencyCode",
-		expression = "java(com.soloist.player.model.entity.player.enums.CurrencyCode.values()[input.getCostCurrencyCode()])"
-	)
-	abstract fun map(input: ProtoGachaMachineInput): GachaMachineInput
+	fun map(input: CurrencyCode): com.soloist.proto.common.CurrencyCode =
+		com.soloist.proto.common.CurrencyCode.valueOf(input.name)
 }

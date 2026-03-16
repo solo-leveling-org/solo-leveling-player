@@ -104,9 +104,6 @@ app:
       - name: LEGENDARY
         stamina: 50
         experience: 250
-  inventory:
-    default-gear-item-capacity: 50
-    default-consumable-capacity: 20
   player:
     limits:
       free:
