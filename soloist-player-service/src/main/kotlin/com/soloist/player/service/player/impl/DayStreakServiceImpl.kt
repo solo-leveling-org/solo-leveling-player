@@ -1,10 +1,10 @@
 package com.soloist.player.service.player.impl
 
-import com.soloist.player.kafka.producer.DayStreakExtendedProducer
 import com.soloist.player.model.entity.Immutables
 import com.soloist.player.model.entity.player.DayStreak
 import com.soloist.player.model.entity.player.dto.ProcessDayStreakView
 import com.soloist.player.model.repository.player.DayStreakRepository
+import com.soloist.player.service.notification.NotificationPublisher
 import com.soloist.player.service.player.DayStreakService
 import org.babyfish.jimmer.View
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
@@ -13,14 +13,14 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.UUID
 import kotlin.math.max
 import kotlin.reflect.KClass
 
 @Service
 class DayStreakServiceImpl(
 	private val dayStreakRepository: DayStreakRepository,
-	private val dayStreakExtendedProducer: DayStreakExtendedProducer
+	private val notificationPublisher: NotificationPublisher
 ) : DayStreakService {
 
 	@Transactional(readOnly = true)
@@ -67,13 +67,15 @@ class DayStreakServiceImpl(
 	@Transactional
 	override fun processStreak(playerId: Long, today: LocalDate): DayStreak {
 		val dayStreak = getView(playerId, ProcessDayStreakView::class)
+		val previousCurrent = dayStreak.current
 		val extendedStreak = extend(dayStreak.toEntity(), today)
+		val updated = update(extendedStreak)
 
-		if (extendedStreak.current() > dayStreak.current) {
-			dayStreakExtendedProducer.send(userId = playerId)
+		if (updated.current() > previousCurrent) {
+			notificationPublisher.sendDayStreakExtended(playerId)
 		}
 
-		return update(extendedStreak)
+		return updated
 	}
 
 	@Transactional

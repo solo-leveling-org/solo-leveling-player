@@ -1,64 +1,51 @@
 package com.soloist.player.model.entity.task;
 
 import com.soloist.player.model.entity.Model;
-import com.soloist.player.model.entity.localization.LocalizationItem;
-import com.soloist.player.model.entity.player.TaskTopicItem;
-import com.soloist.player.model.entity.player.enums.Rarity;
-import java.util.List;
+import com.soloist.player.model.entity.player.Player;
+import com.soloist.player.model.entity.task.enums.TaskType;
+import com.soloist.player.model.entity.task.enums.ProofType;
+import java.time.LocalDate;
 import java.util.UUID;
 import org.babyfish.jimmer.sql.Column;
+import org.babyfish.jimmer.sql.DissociateAction;
 import org.babyfish.jimmer.sql.Entity;
 import org.babyfish.jimmer.sql.GeneratedValue;
 import org.babyfish.jimmer.sql.Id;
 import org.babyfish.jimmer.sql.JoinColumn;
-import org.babyfish.jimmer.sql.OneToMany;
-import org.babyfish.jimmer.sql.OneToOne;
+import org.babyfish.jimmer.sql.ManyToOne;
+import org.babyfish.jimmer.sql.OnDissociate;
+import org.babyfish.jimmer.sql.Table;
 import org.babyfish.jimmer.sql.meta.UUIDIdGenerator;
 import org.jetbrains.annotations.Nullable;
 
 @Entity
+@Table(name = "task")
 public interface Task extends Model {
 
   @Id
   @GeneratedValue(generatorType = UUIDIdGenerator.class)
   UUID id();
 
-  @Nullable
-  @OneToOne
-  @JoinColumn(name = "localized_title_id")
-  LocalizationItem title();
+  TaskType type();
 
   @Nullable
-  @OneToOne
-  @JoinColumn(name = "localized_description_id")
-  LocalizationItem description();
+  String name();
 
-  @Nullable
-  Integer experience();
+  int goal();
 
-  @Nullable
-  Integer currencyReward();
+  int progress();
 
-  Rarity rarity();
+  int gemReward();
 
-  @Nullable
-  Integer agility();
+  @Column(name = "is_completed")
+  boolean completed();
 
-  @Nullable
-  Integer strength();
+  ProofType proofType();
 
-  @Nullable
-  Integer intelligence();
+  LocalDate day();
 
-  @Column(name = "is_deprecated")
-  boolean deprecated();
-
-  @OneToMany(mappedBy = "task")
-  List<TaskTopicItem> topics();
-
-  @OneToMany(mappedBy = "task")
-  List<PlayerTask> playerTasks();
-
-  String RARITY_FIELD = "rarity";
-  String TOPICS_FIELD = "topics";
+  @ManyToOne
+  @JoinColumn(name = "player_id")
+  @OnDissociate(DissociateAction.DELETE)
+  Player player();
 }

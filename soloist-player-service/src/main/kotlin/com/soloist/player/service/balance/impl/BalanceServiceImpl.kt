@@ -3,13 +3,14 @@ package com.soloist.player.service.balance.impl
 import com.soloist.player.event.model.CurrencySpentEvent
 import com.soloist.player.model.entity.Immutables
 import com.soloist.player.model.entity.balance.Balance
-import com.soloist.player.model.entity.player.enums.CurrencyCode
 import com.soloist.player.model.entity.balance.enums.BalanceTransactionCause
 import com.soloist.player.model.entity.balance.enums.BalanceTransactionType
+import com.soloist.player.model.entity.player.enums.CurrencyCode
 import com.soloist.player.model.repository.balance.BalanceRepository
 import com.soloist.player.service.balance.BalanceService
 import com.soloist.player.service.balance.BalanceTransactionService
 import org.babyfish.jimmer.View
+import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -57,11 +58,11 @@ class BalanceServiceImpl(
 			}
 		)
 
-		val currentBalance = balance.amount()
-
-		return Immutables.createBalance(balance) {
-			it.setAmount(currentBalance.plus(amount))
+		val updated = Immutables.createBalance(balance) {
+			it.setAmount(balance.amount().plus(amount))
 		}
+
+		return balanceRepository.save(updated, SaveMode.UPDATE_ONLY)
 	}
 
 	@Transactional
@@ -94,8 +95,10 @@ class BalanceServiceImpl(
 
 		eventPublisher.publishEvent(CurrencySpentEvent(balance.player().id(), amount))
 
-		return Immutables.createBalance(balance) {
+		val updated = Immutables.createBalance(balance) {
 			it.setAmount(newBalance)
 		}
+
+		return balanceRepository.save(updated, SaveMode.UPDATE_ONLY)
 	}
 }

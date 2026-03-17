@@ -1,0 +1,193 @@
+databaseChangeLog:
+  - changeSet:
+      id: drop-default-task-table
+      author: sleepkqq
+      changes:
+        - dropTable:
+            tableName: default_task
+      rollback:
+        - sql:
+            sql: >
+              SELECT 1
+
+  - changeSet:
+      id: drop-custom-task-table
+      author: sleepkqq
+      changes:
+        - dropTable:
+            tableName: custom_task
+      rollback:
+        - sql:
+            sql: >
+              SELECT 1
+
+  - changeSet:
+      id: create-unified-task-table
+      author: sleepkqq
+      changes:
+        - createTable:
+            tableName: task
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: type
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: goal
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: current_progress
+                  type: integer
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: gem_reward
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_hard_mode
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_completed
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: proof_type
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: secret_word
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: player_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: integer
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: task
+            baseColumnNames: player_id
+            constraintName: fk_task_player
+            referencedTableName: player
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - createIndex:
+            tableName: task
+            indexName: idx_task_player_id
+            columns:
+              - column:
+                  name: player_id
+      rollback:
+        - dropTable:
+            tableName: task
+
+  - changeSet:
+      id: recreate-task-history-table
+      author: sleepkqq
+      changes:
+        - dropTable:
+            tableName: task_history
+        - createTable:
+            tableName: task_history
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: day
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: gem_reward
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_hard_mode
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: player_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: task_history
+            baseColumnNames: player_id
+            constraintName: fk_task_history_player
+            referencedTableName: player
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - addUniqueConstraint:
+            tableName: task_history
+            columnNames: day, name, player_id
+            constraintName: uq_task_history_day_name_player
+        - createIndex:
+            tableName: task_history
+            indexName: idx_task_history_player_id
+            columns:
+              - column:
+                  name: player_id
+      rollback:
+        - dropTable:
+            tableName: task_history

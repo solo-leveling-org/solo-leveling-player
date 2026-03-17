@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-proof-type-to-default-task
+      author: sleepkqq
+      changes:
+        - addColumn:
+            tableName: default_task
+            columns:
+              - column:
+                  name: proof_type
+                  type: integer
+                  defaultValue: 1
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: >
+              UPDATE default_task SET proof_type = 1 WHERE type = 0;
+              UPDATE default_task SET proof_type = 2 WHERE type IN (1, 2);
+      rollback:
+        - dropColumn:
+            tableName: default_task
+            columnName: proof_type
+
+  - changeSet:
+      id: make-secret-word-nullable-default-task
+      author: sleepkqq
+      changes:
+        - dropNotNullConstraint:
+            tableName: default_task
+            columnName: secret_word
+            columnDataType: varchar(255)
+        - sql:
+            sql: >
+              UPDATE default_task SET secret_word = NULL WHERE type = 0;
+      rollback:
+        - addNotNullConstraint:
+            tableName: default_task
+            columnName: secret_word
+            columnDataType: varchar(255)

@@ -4,9 +4,12 @@ import com.google.protobuf.Empty
 import com.soloist.player.mapper.ProtoMapper
 import com.soloist.player.model.entity.user.dto.LocaleUserView
 import com.soloist.player.service.player.PlayerService
-import com.soloist.player.service.task.TaskService
 import com.soloist.player.service.user.UserService
-import com.soloist.proto.admin.*
+import com.soloist.proto.admin.AdminServiceGrpc
+import com.soloist.proto.admin.GetUsersRequest
+import com.soloist.proto.admin.GetUsersResponse
+import com.soloist.proto.admin.GetUsersStatsResponse
+import com.soloist.proto.admin.ResetPlayerRequest
 import io.grpc.stub.StreamObserver
 import org.springframework.grpc.server.service.GrpcService
 
@@ -14,7 +17,6 @@ import org.springframework.grpc.server.service.GrpcService
 class AdminController(
 	private val protoMapper: ProtoMapper,
 	private val playerService: PlayerService,
-	private val taskService: TaskService,
 	private val userService: UserService
 ) : AdminServiceGrpc.AdminServiceImplBase() {
 
@@ -27,36 +29,6 @@ class AdminController(
 		playerService.reset(request.playerId)
 
 		responseObserver.onNext(Empty.getDefaultInstance())
-		responseObserver.onCompleted()
-	}
-
-	// ── Tasks ─────────────────────────────────────────────
-
-	override fun deprecateAllTasks(
-		request: Empty,
-		responseObserver: StreamObserver<DeprecateTasksResponse>
-	) {
-		val affectedRows = taskService.deprecateAll()
-
-		val response = DeprecateTasksResponse.newBuilder()
-			.setAffectedRows(affectedRows)
-			.build()
-
-		responseObserver.onNext(response)
-		responseObserver.onCompleted()
-	}
-
-	override fun deprecateTasksByTopic(
-		request: DeprecateTasksByTopicRequest,
-		responseObserver: StreamObserver<DeprecateTasksResponse>
-	) {
-		val affectedRows = taskService.deprecateByTopic(protoMapper.map(request.taskTopic))
-
-		val response = DeprecateTasksResponse.newBuilder()
-			.setAffectedRows(affectedRows)
-			.build()
-
-		responseObserver.onNext(response)
 		responseObserver.onCompleted()
 	}
 

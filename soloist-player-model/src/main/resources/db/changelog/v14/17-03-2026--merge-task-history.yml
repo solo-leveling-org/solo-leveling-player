@@ -1,0 +1,90 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-day-column-to-task
+      author: sleepkqq
+      changes:
+        - addColumn:
+            tableName: task
+            columns:
+              - column:
+                  name: day
+                  type: date
+                  defaultValueComputed: CURRENT_DATE
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: task
+            indexName: idx_task_player_day
+            columns:
+              - column:
+                  name: player_id
+              - column:
+                  name: day
+      rollback:
+        - dropIndex:
+            indexName: idx_task_player_day
+        - dropColumn:
+            tableName: task
+            columnName: day
+
+  - changeSet:
+      id: drop-hard-mode-column
+      author: sleepkqq
+      changes:
+        - dropColumn:
+            tableName: task
+            columnName: is_hard_mode
+      rollback:
+        - addColumn:
+            tableName: task
+            columns:
+              - column:
+                  name: is_hard_mode
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: rename-current-progress-to-progress
+      author: sleepkqq
+      changes:
+        - renameColumn:
+            tableName: task
+            oldColumnName: current_progress
+            newColumnName: progress
+            columnDataType: integer
+      rollback:
+        - renameColumn:
+            tableName: task
+            oldColumnName: progress
+            newColumnName: current_progress
+            columnDataType: integer
+
+  - changeSet:
+      id: drop-secret-word-column
+      author: sleepkqq
+      changes:
+        - dropColumn:
+            tableName: task
+            columnName: secret_word
+      rollback:
+        - addColumn:
+            tableName: task
+            columns:
+              - column:
+                  name: secret_word
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+
+  - changeSet:
+      id: drop-task-history-table
+      author: sleepkqq
+      changes:
+        - dropTable:
+            tableName: task_history
+      rollback:
+        - sql:
+            sql: >
+              SELECT 1

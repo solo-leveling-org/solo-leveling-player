@@ -63,3 +63,21 @@ databaseChangeLog:
   - include:
       file: db/changelog/v10/02-03-2026--rename-tables.yml
 
+  # v11
+  - include:
+      file: db/changelog/v11/09-03-2026--rename-image-url-to-file-id.yml
+
+  # v12
+  - include:
+      file: db/changelog/v12/16-03-2026--task-system-rework.yml
+
+  # v13
+  - include:
+      file: db/changelog/v13/17-03-2026--default-task-proof-type.yml
+  - include:
+      file: db/changelog/v13/17-03-2026--unified-task-table.yml
+
+  # v14
+  - include:
+      file: db/changelog/v14/17-03-2026--merge-task-history.yml
+

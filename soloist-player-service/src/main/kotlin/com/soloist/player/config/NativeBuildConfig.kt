@@ -1,23 +1,12 @@
 package com.soloist.player.config
 
 import com.soloist.player.model.entity.*
+import com.soloist.player.model.entity.balance.*
 import com.soloist.player.model.entity.player.*
 import com.soloist.player.model.entity.task.*
 import com.soloist.player.model.entity.user.*
 import com.soloist.player.model.entity.user.dto.UserInput
 import com.soloist.player.model.entity.user.dto.UserView
-import io.confluent.kafka.schemaregistry.client.rest.entities.Mode
-import io.confluent.kafka.schemaregistry.client.rest.entities.Schema
-import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaString
-import io.confluent.kafka.schemaregistry.client.rest.entities.SubjectVersion
-import io.confluent.kafka.schemaregistry.client.rest.entities.requests.*
-import io.confluent.kafka.serializers.KafkaAvroDeserializer
-import io.confluent.kafka.serializers.KafkaAvroSerializer
-import io.confluent.kafka.serializers.context.NullContextNameStrategy
-import io.confluent.kafka.serializers.context.strategy.ContextNameStrategy
-import io.confluent.kafka.serializers.subject.RecordNameStrategy
-import io.confluent.kafka.serializers.subject.TopicNameStrategy
-import io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
 import liquibase.analytics.AnalyticsFactory
 import liquibase.analytics.configuration.AnalyticsConfigurationFactory
 import liquibase.change.ChangeFactory
@@ -55,64 +44,53 @@ import liquibase.structure.core.Column
 import liquibase.structure.core.Table
 import liquibase.ui.LoggerUIService
 import liquibase.ui.UIServiceFactory
-import org.apache.kafka.common.serialization.ByteArrayDeserializer
-import org.apache.kafka.common.serialization.StringDeserializer
-import org.apache.kafka.common.serialization.StringSerializer
 import org.babyfish.jimmer.sql.dialect.PostgresDialect
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding
 import org.springframework.context.annotation.Configuration
 
 @RegisterReflectionForBinding(
 	classes = [
-		// Avro
-		KafkaAvroDeserializer::class,
-		KafkaAvroSerializer::class,
-		RecordNameStrategy::class,
-		TopicNameStrategy::class,
-		TopicRecordNameStrategy::class,
-		NullContextNameStrategy::class,
-		ContextNameStrategy::class,
-		StringDeserializer::class,
-		StringSerializer::class,
-		ByteArrayDeserializer::class,
-		Schema::class,
-		SchemaString::class,
-		SubjectVersion::class,
-		RegisterSchemaRequest::class,
-		RegisterSchemaResponse::class,
-		ConfigUpdateRequest::class,
-		ModeUpdateRequest::class,
-		CompatibilityCheckResponse::class,
-		Mode::class,
-
 		// Jimmer
 		PostgresDialect::class,
-		// Jimmer generated
-		LevelDraft::class,
-		LevelFetcher::class,
-		LevelProps::class,
-		LevelTable::class,
-		LevelTableEx::class,
+		// Jimmer generated — player
 		PlayerDraft::class,
 		PlayerFetcher::class,
 		PlayerProps::class,
 		PlayerTable::class,
 		PlayerTableEx::class,
-		PlayerTaskDraft::class,
-		PlayerTaskFetcher::class,
-		PlayerTaskProps::class,
-		PlayerTaskTable::class,
-		PlayerTaskTableEx::class,
-		PlayerTaskTopicDraft::class,
-		PlayerTaskTopicFetcher::class,
-		PlayerTaskTopicProps::class,
-		PlayerTaskTopicTable::class,
-		PlayerTaskTopicTableEx::class,
+		StaminaDraft::class,
+		StaminaFetcher::class,
+		StaminaProps::class,
+		StaminaTable::class,
+		StaminaTableEx::class,
+		DayStreakDraft::class,
+		DayStreakFetcher::class,
+		DayStreakProps::class,
+		DayStreakTable::class,
+		DayStreakTableEx::class,
+		DayActivityDraft::class,
+		DayActivityFetcher::class,
+		DayActivityProps::class,
+		DayActivityTable::class,
+		DayActivityTableEx::class,
+		// Jimmer generated — task
 		TaskDraft::class,
 		TaskFetcher::class,
 		TaskProps::class,
 		TaskTable::class,
 		TaskTableEx::class,
+		// Jimmer generated — balance
+		BalanceDraft::class,
+		BalanceFetcher::class,
+		BalanceProps::class,
+		BalanceTable::class,
+		BalanceTableEx::class,
+		BalanceTransactionDraft::class,
+		BalanceTransactionFetcher::class,
+		BalanceTransactionProps::class,
+		BalanceTransactionTable::class,
+		BalanceTransactionTableEx::class,
+		// Jimmer generated — user
 		UserInput::class,
 		UserView::class,
 		UserDraft::class,
@@ -120,6 +98,7 @@ import org.springframework.context.annotation.Configuration
 		UserProps::class,
 		UserTable::class,
 		UserTableEx::class,
+		// Jimmer root
 		Fetchers::class,
 		Immutables::class,
 		ModelDraft::class,

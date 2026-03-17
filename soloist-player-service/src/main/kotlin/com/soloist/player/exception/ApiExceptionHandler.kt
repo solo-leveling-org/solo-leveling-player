@@ -13,6 +13,11 @@ class ApiExceptionHandler : GrpcExceptionHandler {
 
 	override fun handleException(e: Throwable): StatusException {
 		val status = when (e) {
+			is CustomTaskValidationException -> {
+				log.info("Custom task validation failed: {}", e.rejectionReason)
+				Status.INVALID_ARGUMENT.withDescription(e.rejectionReason)
+			}
+
 			is ModelNotFoundException,
 			is LeaderboardUserNotFoundException -> {
 				log.warn("Not found: {}", e.message)

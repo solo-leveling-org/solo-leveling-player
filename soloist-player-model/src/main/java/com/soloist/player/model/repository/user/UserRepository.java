@@ -1,11 +1,9 @@
 package com.soloist.player.model.repository.user;
 
 import static com.soloist.player.model.entity.Tables.PLAYER_TABLE;
-import static com.soloist.player.model.entity.Tables.PLAYER_TASK_TABLE;
 import static com.soloist.player.model.entity.Tables.USER_TABLE;
 
 import com.soloist.jimmer.predicate.filter.DateFilter.DayRange;
-import com.soloist.player.model.entity.task.enums.PlayerTaskStatus;
 import com.soloist.player.model.entity.user.LeaderboardUser;
 import com.soloist.player.model.entity.user.LeaderboardUserMapper;
 import com.soloist.player.model.entity.user.User;
@@ -82,34 +80,9 @@ public class UserRepository {
     var p = PLAYER_TABLE;
 
     switch (type) {
-      case TASKS -> {
-        var pt = PLAYER_TASK_TABLE;
-
-        var query = sql.createSubQuery(pt)
-            .where(
-                pt.player().eq(p),
-                pt.status().eq(PlayerTaskStatus.COMPLETED)
-            );
-
-        if (!range.isEmpty()) {
-          query = query.where(
-              pt.updatedAt().ge(range.from()),
-              pt.updatedAt().lt(range.to())
-          );
-        }
-
-        var taskCount = query.selectCount();
-        return new LeaderboardQueryData(taskCount, taskCount.gt(0L));
-      }
-
       case BALANCE -> {
         var balance = p.balance().amount();
         return new LeaderboardQueryData(balance, balance.gt(BigDecimal.ZERO));
-      }
-
-      case LEVEL -> {
-        var level = p.level();
-        return new LeaderboardQueryData(level.level(), level.totalExperience().gt(0));
       }
 
       default -> throw new IllegalArgumentException("Unknown leaderboard type: " + type);

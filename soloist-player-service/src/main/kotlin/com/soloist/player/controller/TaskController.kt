@@ -1,132 +1,102 @@
 package com.soloist.player.controller
 
-import com.google.protobuf.Empty
-import com.soloist.avro.task.SaveTasksOperation
 import com.soloist.config.interceptor.UserContextHolder
-import com.soloist.jimmer.enums.EnumLocalizer
 import com.soloist.player.mapper.ProtoMapper
-import com.soloist.player.model.entity.task.dto.DailyTaskView
-import com.soloist.player.model.entity.task.dto.PlayerTaskView
-import com.soloist.player.model.repository.task.PlayerTaskRepository
-import com.soloist.player.service.i18n.LocalizationCode
-import com.soloist.player.service.player.DailyTaskService
-import com.soloist.player.service.task.PlayerTaskService
-import com.soloist.proto.task.*
+import com.soloist.player.model.entity.task.enums.ProofType
+import com.soloist.player.service.task.TaskProofService
+import com.soloist.player.service.task.TaskService
+import com.soloist.proto.task.CreateCustomTaskRequest
+import com.soloist.proto.task.CreateCustomTaskResponse
+import com.soloist.proto.task.GetTaskHistoryRequest
+import com.soloist.proto.task.GetTaskHistoryResponse
+import com.soloist.proto.task.GetTasksRequest
+import com.soloist.proto.task.GetTasksResponse
+import com.soloist.proto.task.SubmitTaskProofRequest
+import com.soloist.proto.task.SubmitTaskProofResponse
+import com.soloist.proto.task.TaskServiceGrpc
 import io.grpc.stub.StreamObserver
 import org.springframework.grpc.server.service.GrpcService
-import java.util.*
+import java.util.UUID
 
 @GrpcService
 class TaskController(
-	private val playerTaskService: PlayerTaskService,
-	private val protoMapper: ProtoMapper,
-	private val enumLocalizer: EnumLocalizer,
-	private val dailyTaskService: DailyTaskService
+	private val taskService: TaskService,
+	private val taskProofService: TaskProofService,
+	private val protoMapper: ProtoMapper
 ) : TaskServiceGrpc.TaskServiceImplBase() {
 
-	override fun getActiveTasks(
-		request: GetActiveTasksRequest,
-		responseObserver: StreamObserver<GetActiveTasksResponse>
+	override fun getTasks(
+		request: GetTasksRequest,
+		responseObserver: StreamObserver<GetTasksResponse>
 	) {
-		val playerId = request.playerId
+		val tasks = taskService.getOrInitializeTasks(request.playerId)
 
-		val activeTasks = playerTaskService.getActiveTasks(playerId, PlayerTaskView::class)
-			.map(protoMapper::map)
-
-		val isFirstTime = activeTasks.isEmpty()
-
-		val response = GetActiveTasksResponse.newBuilder()
-			.addAllTasks(activeTasks)
-			.setIsFirstTime(isFirstTime)
+		val response = GetTasksResponse.newBuilder()
+			.addAllTasks(tasks.map { protoMapper.mapTask(it) })
 			.build()
 
 		responseObserver.onNext(response)
 		responseObserver.onCompleted()
 	}
 
-	override fun generateTasks(
-		request: Empty,
-		responseObserver: StreamObserver<Empty>
+	override fun createCustomTask(
+		request: CreateCustomTaskRequest,
+		responseObserver: StreamObserver<CreateCustomTaskResponse>
 	) {
-		playerTaskService.generateTasks(
-			playerId = UserContextHolder.getUserId()!!,
-			operation = SaveTasksOperation.INITIALIZE
-		)
+		val playerId = UserContextHolder.getUserId()!!
+		val task = taskService.createCustomTask(playerId, request.name)
 
-		responseObserver.onNext(Empty.newBuilder().build())
-		responseObserver.onCompleted()
-	}
-
-	override fun completeTask(
-		request: CompleteTaskRequest,
-		responseObserver: StreamObserver<CompleteTaskResponse>
-	) {
-		val playerStates = playerTaskService.completeTask(
-			UserContextHolder.getUserId()!!,
-			UUID.fromString(request.playerTaskId)
-		)
-
-		val response = CompleteTaskResponse.newBuilder()
-			.setPlayerBefore(protoMapper.map(playerStates.first))
-			.setPlayerAfter(protoMapper.map(playerStates.second))
+		val response = CreateCustomTaskResponse.newBuilder()
+			.setIsValid(true)
+			.setTask(protoMapper.mapTask(task))
 			.build()
 
 		responseObserver.onNext(response)
 		responseObserver.onCompleted()
 	}
 
-	override fun skipTask(
-		request: SkipTaskRequest,
-		responseObserver: StreamObserver<Empty>
+	override fun submitTaskProof(
+		request: SubmitTaskProofRequest,
+		responseObserver: StreamObserver<SubmitTaskProofResponse>
 	) {
-		playerTaskService.skipTask(
-			UserContextHolder.getUserId()!!,
-			UUID.fromString(request.playerTaskId)
+		val taskId = UUID.fromString(request.taskId)
+		val proofType = ProofType.valueOf(request.proofType.name)
+
+		val result = taskProofService.submitProof(
+			taskId = taskId,
+			proofType = proofType,
+			text = request.text.takeIf { it.isNotBlank() },
+			telegramFileId = request.telegramFileId.takeIf { it.isNotBlank() },
+			secretWord = request.secretWord.takeIf { it.isNotBlank() }
 		)
 
-		responseObserver.onNext(Empty.newBuilder().build())
-		responseObserver.onCompleted()
-	}
-
-	override fun searchClosedTasks(
-		request: SearchClosedTasksRequest,
-		responseObserver: StreamObserver<SearchClosedTasksResponse>
-	) {
-		val tasksPage = playerTaskService.searchView(
-			UserContextHolder.getUserId()!!,
-			request.options,
-			request.paging,
-			PlayerTaskView::class
-		)
-		val response = protoMapper.mapTasks(
-			tasksPage,
-			request.paging.page,
-			request.paging.pageSize,
-			enumLocalizer.localize(
-				LocalizationCode.TABLES_PLAYER_TASKS,
-				PlayerTaskRepository.FIELD_ENUM_TYPES,
-				PlayerTaskRepository.ENUM_TYPE_PREDICATES
-			)
-		)
+		val response = SubmitTaskProofResponse.newBuilder()
+			.setIsApproved(result.isApproved)
+			.setGemReward(result.gemReward)
+			.setProgress(result.progress)
+			.setGoal(result.goal)
+			.setProgressIncrement(result.progressIncrement)
+			.also { builder -> result.rejectionReason?.let { builder.setRejectionReason(it) } }
+			.build()
 
 		responseObserver.onNext(response)
 		responseObserver.onCompleted()
 	}
 
-	override fun getDailyTasks(
-		request: GetDailyTasksRequest,
-		responseObserver: StreamObserver<GetDailyTasksResponse>
+	override fun getTaskHistory(
+		request: GetTaskHistoryRequest,
+		responseObserver: StreamObserver<GetTaskHistoryResponse>
 	) {
-		val dailyTasks = dailyTaskService.findView(
-			request.playerId,
-			DailyTaskView::class
+		val paging = request.paging
+		val historyPage = taskService.getHistory(
+			playerId = request.playerId,
+			page = paging.page,
+			pageSize = paging.pageSize
 		)
 
-		val sortedMappedTasks = dailyTasks.sortedBy { it.type.ordinal }
-			.map { protoMapper.map(it) }
-
-		val response = GetDailyTasksResponse.newBuilder()
-			.addAllTasks(sortedMappedTasks)
+		val response = GetTaskHistoryResponse.newBuilder()
+			.addAllTasks(historyPage.rows.map { protoMapper.mapTask(it) })
+			.setPaging(protoMapper.map(historyPage.totalRowCount, historyPage.totalPageCount, paging.pageSize))
 			.build()
 
 		responseObserver.onNext(response)

@@ -8,42 +8,42 @@ import com.soloist.player.config.properties.PlayerLimitsProperties.StaminaConfig
 import com.soloist.player.extenstions.toGoogleDecimal
 import com.soloist.player.extenstions.toMoney
 import com.soloist.player.extenstions.toTimestamp
-import com.soloist.player.model.entity.localization.LocalizationItem
-import com.soloist.player.model.entity.player.TaskTopicItem
 import com.soloist.player.model.entity.balance.dto.BalanceTransactionView
 import com.soloist.player.model.entity.balance.dto.BalanceView
-import com.soloist.player.model.entity.player.dto.CompleteTaskPlayerView
-import com.soloist.player.model.entity.task.dto.DailyTaskView
 import com.soloist.player.model.entity.player.dto.DayStreakView
-import com.soloist.player.model.entity.player.dto.LevelView
-import com.soloist.player.model.entity.task.dto.PlayerTaskTopicView
-import com.soloist.player.model.entity.task.dto.PlayerTaskView
 import com.soloist.player.model.entity.player.dto.PlayerView
 import com.soloist.player.model.entity.player.dto.StaminaView
 import com.soloist.player.model.entity.player.enums.CurrencyCode
-import com.soloist.player.model.entity.player.sealed.DailyTaskSpec
+import com.soloist.player.model.entity.task.Task
+import com.soloist.player.model.entity.task.enums.TaskType
+import com.soloist.player.model.entity.task.enums.ProofType
 import com.soloist.player.model.entity.user.LeaderboardUser
 import com.soloist.player.model.entity.user.UserRoleItem
 import com.soloist.player.model.entity.user.UsersStats
 import com.soloist.player.model.entity.user.dto.LocaleUserView
 import com.soloist.player.model.entity.user.dto.UserInput
 import com.soloist.player.model.entity.user.dto.UserView
-import com.soloist.player.service.i18n.I18nService
+import com.soloist.proto.admin.GetUsersResponse
+import com.soloist.proto.admin.GetUsersStatsResponse
 import com.soloist.proto.balance.SearchBalanceTransactionsResponse
 import com.soloist.proto.common.LocalizedField
 import com.soloist.proto.common.ResponsePaging
 import com.soloist.proto.common.ResponseQueryOptions
-import com.soloist.proto.common.TaskTopic
 import com.soloist.proto.common.UserRole
-import com.soloist.proto.player.PlayerTaskTopicInput
-import com.soloist.proto.task.SearchClosedTasksResponse
+import com.soloist.proto.task.TaskView
 import com.soloist.proto.user.GetUsersLeaderboardResponse
-import com.soloist.proto.admin.GetUsersResponse
-import com.soloist.proto.admin.GetUsersStatsResponse
 import com.soloist.proto.user.UserLocale
+import com.soloist.proto.common.TaskType as ProtoTaskType
+import com.soloist.proto.common.ProofType as ProtoProofType
 import org.babyfish.jimmer.Page
 import org.babyfish.jimmer.View
-import org.mapstruct.*
+import org.mapstruct.CollectionMappingStrategy
+import org.mapstruct.Mapper
+import org.mapstruct.Mapping
+import org.mapstruct.NullValueCheckStrategy
+import org.mapstruct.NullValueMappingStrategy
+import org.mapstruct.NullValuePropertyMappingStrategy
+import org.mapstruct.ReportingPolicy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.i18n.LocaleContextHolder
 import java.math.BigDecimal
@@ -64,26 +64,19 @@ import kotlin.math.max
 abstract class ProtoMapper : JimmerProtoMapper() {
 
 	@Autowired
-	protected lateinit var i18nService: I18nService
-
-	fun map(input: TaskTopic): com.soloist.player.model.entity.task.enums.TaskTopic =
-		com.soloist.player.model.entity.task.enums.TaskTopic.valueOf(input.name)
+	protected lateinit var i18nService: com.soloist.player.service.i18n.I18nService
 
 	fun map(input: View<UserRoleItem>): UserRole = UserRole.valueOf(input.toEntity().role().name)
 
-	fun map(input: View<TaskTopicItem>): TaskTopic = TaskTopic.valueOf(input.toEntity().topic().name)
-
 	fun map(input: Instant): Timestamp = input.toTimestamp()
 
-	fun map(input: View<LocalizationItem>): String = input.toEntity()
-		.let { if (LocaleContextHolder.getLocale().language == "ru") it.ru() else it.en() }
+	fun map(input: View<com.soloist.player.model.entity.localization.LocalizationItem>): String =
+		input.toEntity()
+			.let { if (LocaleContextHolder.getLocale().language == "ru") it.ru() else it.en() }
 
-	@Mapping(target = "isActive", source = "active")
-	@Mapping(target = "isDisabled", expression = "java(input.getTaskTopic().isDisabled())")
-	abstract fun map(input: PlayerTaskTopicView): com.soloist.proto.player.PlayerTaskTopicView
+	abstract fun map(input: PlayerView): com.soloist.proto.player.PlayerView
 
-	@Mapping(target = "task.topicsList", source = "input.task.topics")
-	abstract fun map(input: PlayerTaskView): com.soloist.proto.task.PlayerTaskView
+	abstract fun map(input: com.soloist.proto.user.UserInput): UserInput
 
 	fun map(balance: BigDecimal, currencyCode: CurrencyCode): Money = balance.toMoney(currencyCode)
 
@@ -108,20 +101,6 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 	)
 	abstract fun map(input: BalanceView): com.soloist.proto.balance.BalanceView
 
-	@Mapping(
-		target = "balance.amount",
-		expression = "java(map(targetOf_balance.getAmount(), targetOf_balance.getCurrencyCode()))"
-	)
-	@Mapping(target = "taskTopicsList", source = "taskTopics")
-	abstract fun map(input: CompleteTaskPlayerView): com.soloist.proto.player.CompleteTaskPlayerView
-
-	abstract fun map(input: PlayerView): com.soloist.proto.player.PlayerView
-
-	abstract fun map(input: com.soloist.proto.user.UserInput): UserInput
-
-	@Mapping(target = "active", source = "isActive")
-	abstract fun map(input: PlayerTaskTopicInput): com.soloist.player.model.entity.task.dto.PlayerTaskTopicInput
-
 	@Mapping(target = "transactionsList", source = "page.rows")
 	@Mapping(
 		target = "transactionsList.amount",
@@ -139,20 +118,6 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		filters: List<LocalizedField>,
 		sorts: Set<String>
 	): SearchBalanceTransactionsResponse
-
-	@Mapping(target = "tasksList", source = "page.rows")
-	@Mapping(target = "options", expression = "java(map(filters, sorts))")
-	@Mapping(
-		target = "paging",
-		expression = "java(map(page.getTotalRowCount(), page.getTotalPageCount(), currentPageSize))"
-	)
-	abstract fun mapTasks(
-		page: Page<PlayerTaskView>,
-		currentPage: Int,
-		currentPageSize: Int,
-		filters: List<LocalizedField>,
-		sorts: Set<String> = setOf()
-	): SearchClosedTasksResponse
 
 	@Mapping(target = "filtersList", source = "filters")
 	@Mapping(target = "sortsList", source = "sorts")
@@ -204,14 +169,6 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 		val updatedDate = updatedAt.atZone(ZoneOffset.UTC).toLocalDate()
 		return updatedDate.isEqual(today)
 	}
-
-	@Mapping(target = "isCompleted", source = "completed")
-	@Mapping(target = "goal", expression = "java(map(input.getSpec().goal()))")
-	@Mapping(target = "title", expression = "java(map(input.getSpec()))")
-	abstract fun map(input: DailyTaskView): com.soloist.proto.task.DailyTaskView
-
-	protected fun map(spec: DailyTaskSpec): String =
-		i18nService.getMessage(spec.fullLocalizationKey(), spec.localizationArgs())
 
 	protected fun map(
 		lastRegeneratedAt: Instant,
@@ -282,8 +239,6 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 
 	fun mapLocale(locale: String, manualLocale: String?): String = manualLocale ?: locale
 
-	abstract fun map(input: LevelView): com.soloist.proto.player.LevelView
-
 	// ── Enum mappings ────────────────────────────────────────
 
 	fun map(input: com.soloist.proto.common.CurrencyCode): CurrencyCode =
@@ -291,4 +246,40 @@ abstract class ProtoMapper : JimmerProtoMapper() {
 
 	fun map(input: CurrencyCode): com.soloist.proto.common.CurrencyCode =
 		com.soloist.proto.common.CurrencyCode.valueOf(input.name)
+
+	fun map(input: com.soloist.player.model.entity.balance.enums.BalanceTransactionCause): com.soloist.proto.common.BalanceTransactionCause =
+		when (input) {
+			com.soloist.player.model.entity.balance.enums.BalanceTransactionCause.TASK_COMPLETION ->
+				com.soloist.proto.common.BalanceTransactionCause.TASK_COMPLETION
+			com.soloist.player.model.entity.balance.enums.BalanceTransactionCause.DAILY_CHECK_IN ->
+				com.soloist.proto.common.BalanceTransactionCause.DAILY_CHECK_IN
+			else -> com.soloist.proto.common.BalanceTransactionCause.TASK_COMPLETION
+		}
+
+	// ── Task mappings ─────────────────────────────────────
+
+	fun mapTask(task: Task): TaskView {
+		val dayInstant = task.day().atStartOfDay(ZoneOffset.UTC).toInstant()
+		val builder = TaskView.newBuilder()
+			.setId(task.id().toString())
+			.setType(ProtoTaskType.valueOf(task.type().name))
+			.setGoal(task.goal())
+			.setProgress(task.progress())
+			.setGemReward(task.gemReward())
+			.setIsCompleted(task.completed())
+			.setProofType(ProtoProofType.valueOf(task.proofType().name))
+			.setDay(
+				com.google.protobuf.Timestamp.newBuilder()
+					.setSeconds(dayInstant.epochSecond)
+					.setNanos(dayInstant.nano)
+					.build()
+			)
+			.setCreatedAt(task.createdAt().toTimestamp())
+		task.name()?.let { builder.setName(it) }
+		return builder.build()
+	}
+
+	fun map(input: TaskType): ProtoTaskType = ProtoTaskType.valueOf(input.name)
+
+	fun map(input: ProofType): ProtoProofType = ProtoProofType.valueOf(input.name)
 }

@@ -1,13 +1,11 @@
 spring:
   datasource:
     url: jdbc:postgresql://postgres:5432/soloist
-  kafka:
-    bootstrap-servers: kafka-service:9092
-    properties:
-      schema.registry.url: http://schema-registry-service:8081
   data:
     redis:
       host: redis
+  rabbitmq:
+    host: rabbitmq
   grpc:
     server:
       port: 9090

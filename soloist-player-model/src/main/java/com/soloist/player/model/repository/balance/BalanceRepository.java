@@ -6,6 +6,7 @@ import com.soloist.player.model.entity.balance.Balance;
 import lombok.RequiredArgsConstructor;
 import org.babyfish.jimmer.View;
 import org.babyfish.jimmer.sql.JSqlClient;
+import org.babyfish.jimmer.sql.ast.mutation.SaveMode;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Repository;
 
@@ -22,5 +23,12 @@ public class BalanceRepository {
         .where(table.playerId().eq(playerId))
         .select(table.fetch(viewType))
         .fetchFirstOrNull();
+  }
+
+  public Balance save(Balance balance, SaveMode saveMode) {
+    return sql.saveCommand(balance)
+        .setMode(saveMode)
+        .execute()
+        .getModifiedEntity();
   }
 }

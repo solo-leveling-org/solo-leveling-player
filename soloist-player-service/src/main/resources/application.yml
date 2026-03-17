@@ -1,6 +1,11 @@
 spring:
   application:
     name: soloist-player
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: ${RABBITMQ_DEFAULT_USER:guest}
+    password: ${RABBITMQ_DEFAULT_PASS:guest}
   datasource:
     url: jdbc:postgresql://localhost:5432/soloist
     username: ${POSTGRES_USER}
@@ -16,15 +21,6 @@ spring:
   liquibase:
     enabled: true
     default-schema: player
-  kafka:
-    bootstrap-servers: localhost:29092
-    properties:
-      schema.registry.url: http://localhost:8081
-    avro:
-      group-id: player-group
-      transaction:
-        enabled: true
-        id-prefix: player-tx-
   data:
     redis:
       host: localhost
@@ -42,22 +38,6 @@ spring:
   grpc:
     server:
       port: 11001
-  ai:
-    openai:
-      api-key: ${OPENROUTER_TOKEN}
-      base-url: https://openrouter.ai/api
-      embedding:
-        options:
-          model: baai/bge-m3
-    vectorstore:
-      pgvector:
-        table-name: task_vector_store
-        schema-name: ${spring.liquibase.default-schema}
-        index-type: HNSW
-        distance-type: COSINE_DISTANCE
-        dimensions: 1024
-        initialize-schema: false
-        schema-validation: true
   profiles:
     include: jimmer
   threads:
@@ -69,41 +49,15 @@ spring:
     cache-duration: -1
     fallback-to-system-locale: false
 app:
+  grpc:
+    services:
+      agent:
+        host: localhost
+        port: 11003
   scheduler:
-    preparing-tasks-retry:
-      enabled: true
-      cron: "0 * * * * *"
     daily-tasks-updater:
       enabled: true
       cron: "0 0 0 * * *"
-  job:
-    init-daily-tasks:
-      enabled: false
-      order: 10
-    init-vector-tasks:
-      enabled: false
-      order: 20
-      page-size: 20
-      delay: 500ms
-  tasks:
-    skip-stamina-cost: 5
-    currency-experience-multiplier: 0.5
-    rarities:
-      - name: COMMON
-        stamina: 10
-        experience: 10
-      - name: UNCOMMON
-        stamina: 20
-        experience: 50
-      - name: RARE
-        stamina: 30
-        experience: 100
-      - name: EPIC
-        stamina: 40
-        experience: 150
-      - name: LEGENDARY
-        stamina: 50
-        experience: 250
   player:
     limits:
       free:
@@ -130,7 +84,3 @@ management:
       application: ${spring.application.name}
 server:
   port: 10001
-logging:
-  level:
-    org.apache.kafka: WARN
-    io.confluent.kafka: WARN

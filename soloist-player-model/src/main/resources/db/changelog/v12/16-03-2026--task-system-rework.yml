@@ -1,0 +1,342 @@
+databaseChangeLog:
+  - changeSet:
+      id: drop-player-task-table
+      author: sleepkqq
+      changes:
+        - dropTable:
+            tableName: player_task
+      rollback:
+        - sql:
+            sql: >
+              SELECT 1
+
+  - changeSet:
+      id: drop-task-topic-item-table
+      author: sleepkqq
+      changes:
+        - dropTable:
+            tableName: task_topic_item
+      rollback:
+        - sql:
+            sql: >
+              SELECT 1
+
+  - changeSet:
+      id: drop-task-vector-store-table
+      author: sleepkqq
+      changes:
+        - dropTable:
+            tableName: task_vector_store
+      rollback:
+        - sql:
+            sql: >
+              SELECT 1
+
+  - changeSet:
+      id: drop-level-table
+      author: sleepkqq
+      changes:
+        - dropTable:
+            tableName: level
+      rollback:
+        - sql:
+            sql: >
+              SELECT 1
+
+  - changeSet:
+      id: drop-player-task-topic-table
+      author: sleepkqq
+      changes:
+        - dropTable:
+            tableName: player_task_topic
+      rollback:
+        - sql:
+            sql: >
+              SELECT 1
+
+  - changeSet:
+      id: drop-daily-task-table
+      author: sleepkqq
+      changes:
+        - dropTable:
+            tableName: daily_task
+      rollback:
+        - sql:
+            sql: >
+              SELECT 1
+
+  - changeSet:
+      id: drop-task-table
+      author: sleepkqq
+      changes:
+        - dropTable:
+            tableName: task
+      rollback:
+        - sql:
+            sql: >
+              SELECT 1
+
+  - changeSet:
+      id: drop-player-attributes
+      author: sleepkqq
+      changes:
+        - dropColumn:
+            tableName: player
+            columnName: agility
+        - dropColumn:
+            tableName: player
+            columnName: strength
+        - dropColumn:
+            tableName: player
+            columnName: intelligence
+      rollback:
+        - addColumn:
+            tableName: player
+            columns:
+              - column:
+                  name: agility
+                  type: integer
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: strength
+                  type: integer
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: intelligence
+                  type: integer
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: create-default-task-table
+      author: sleepkqq
+      changes:
+        - createTable:
+            tableName: default_task
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: type
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: goal
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: gem_reward
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_hard_mode
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_completed
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: secret_word
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: player_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: integer
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: default_task
+            baseColumnNames: player_id
+            constraintName: fk_default_task_player
+            referencedTableName: player
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - createIndex:
+            tableName: default_task
+            indexName: idx_default_task_player_id
+            columns:
+              - column:
+                  name: player_id
+      rollback:
+        - dropTable:
+            tableName: default_task
+
+  - changeSet:
+      id: create-custom-task-table
+      author: sleepkqq
+      changes:
+        - createTable:
+            tableName: custom_task
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: gem_reward
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_completed
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: proof_type
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: secret_word
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: player_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: integer
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: custom_task
+            baseColumnNames: player_id
+            constraintName: fk_custom_task_player
+            referencedTableName: player
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - createIndex:
+            tableName: custom_task
+            indexName: idx_custom_task_player_id
+            columns:
+              - column:
+                  name: player_id
+      rollback:
+        - dropTable:
+            tableName: custom_task
+
+  - changeSet:
+      id: create-task-history-table
+      author: sleepkqq
+      changes:
+        - createTable:
+            tableName: task_history
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: gem_reward
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_hard_mode
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: player_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: task_history
+            baseColumnNames: player_id
+            constraintName: fk_task_history_player
+            referencedTableName: player
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - createIndex:
+            tableName: task_history
+            indexName: idx_task_history_player_id
+            columns:
+              - column:
+                  name: player_id
+      rollback:
+        - dropTable:
+            tableName: task_history

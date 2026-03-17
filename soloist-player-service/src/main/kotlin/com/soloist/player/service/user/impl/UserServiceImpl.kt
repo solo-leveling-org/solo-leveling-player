@@ -1,7 +1,6 @@
 package com.soloist.player.service.user.impl
 
 import com.soloist.jimmer.predicate.filter.DateFilter
-import com.soloist.player.kafka.producer.LocaleUpdatedProducer
 import com.soloist.player.model.entity.Immutables
 import com.soloist.player.model.entity.user.LeaderboardUser
 import com.soloist.player.model.entity.user.User
@@ -22,14 +21,13 @@ import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 import kotlin.reflect.KClass
 
 @Service
 class UserServiceImpl(
 	private val userRepository: UserRepository,
-	private val playerService: PlayerService,
-	private val localeUpdatedProducer: LocaleUpdatedProducer
+	private val playerService: PlayerService
 ) : UserService {
 
 	@Transactional(readOnly = true)
@@ -67,8 +65,6 @@ class UserServiceImpl(
 	@Transactional
 	override fun updateLocale(id: Long, locale: UserLocale) {
 		userRepository.updateLocale(id, locale)
-
-		localeUpdatedProducer.send(userId = id)
 	}
 
 	override fun register(user: User): User = Immutables.createUser(user) {
